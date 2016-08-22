@@ -14,7 +14,7 @@ private:
   std::vector<Rect>* obstacleRects;
   int maxSegment;
   int rewireNeighborhood;
-  Node fmtRoot;
+  Node root;
   Coord startPoint;
   Coord endPoint;
   Node endNode;

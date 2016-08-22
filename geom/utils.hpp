@@ -1,16 +1,18 @@
 #pragma once
 
-#include <math>
+#include "Coord.hpp"
+#include <cstdlib>
+#include <cmath>
 
 double angleBetweenCoords(Coord &c1, Coord &c2) {
-  atan2(c2.y-c1.y, c2.x-c1.y)
+  return atan2(c2.y-c1.y, c2.x-c1.y);
 }
 
 double euclideanDistance(Coord &c1, Coord &c2) {
-  dx = c1.x - c2.x
-  dy = c1.y - c2.y
+  double dx = c1.x - c2.x;
+  double dy = c1.y - c2.y;
 
-  return sqrt(dx*dx + dy*dy)
+  return sqrt(dx*dx + dy*dy);
 }
 
 Coord randomPoint(int dx, int dy) {

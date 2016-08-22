@@ -1,5 +1,6 @@
 #include "OnlineFmtStar.hpp"
 #include "geom/utils.hpp"
+#include "geom/Coord.hpp"
 #include <cstdlib>
 #include <ctime>
 #include <limits>
@@ -26,24 +27,24 @@ OnlineFmtStar::OnlineFmtStar(vector<vector<bool>>* obstacleHash, vector<Rect>* o
 
     do {
       this->endPoint = this->randomOpenAreaPoint();
-    } while(euclideanDistance(this->startPoint, this->endPoint) < width/2.0)
+    } while(euclideanDistance(this->startPoint, this->endPoint) < width/2.0);
 
     this->root = Node(this->startPoint, NULL, 0.0);
     this->root.status = Status::Open;
 
     endNode = Node(this->endPoint, NULL, 0.0);
 
-    for n = 0; n < this->nodeAddThreshold; n++ {
-      point = this->randomOpenAreaPoint();
+    for(int n = 0; n < this->nodeAddThreshold; n++) {
+      Coord point = this->randomOpenAreaPoint();
 
-      node = Node(point, NULL, numeric_limits<double>::max());
+      Node node = Node(point, NULL, numeric_limits<double>::max());
     }
 }
 
 Coord OnlineFmtStar::randomOpenAreaPoint() {
   while(true) {
-    point = randomPoint(this->width, this->height)
-    if(!obstacleHash[point.y][point.x]) {
+    Coord point = randomPoint(this->width, this->height);
+    if(!this->obstacleHash->at((int)point.y)[(int)point.x]) {
       return point;
     }
   }
