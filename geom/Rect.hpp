@@ -7,4 +7,5 @@ private:
 public:
   Rect(Coord tl, Coord br);
   bool contains(Coord point);
+  bool intersects(Rect rect);
 };
