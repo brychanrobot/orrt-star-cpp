@@ -1,26 +1,26 @@
 #pragma once
 
-#include "geom/Coord.hpp"
 #include <vector>
+#include "geom/Coord.hpp"
 
-enum Status {
-  Unvisited,
-  Open,
-  Closed
-};
+enum Status { Unvisited, Open, Closed };
 
 class Node {
-private:
+   private:
+	void removeChild(Node* child);
+	void updateCumulativeCost(double newCumulativeCost);
 
-public:
-  Status status = Status::Unvisited;
-  Coord coord;
-  double cumulativeCost;
-  Node* parent;
-  std::vector<Node*> children;
+   public:
+	Status status = Status::Unvisited;
+	Coord coord;
+	double cumulativeCost;
+	Node* parent;
+	std::vector<Node*> children;
 
-  Node(){}
-  Node(Coord coord, Node*parent, double cumulativeCost);
-  bool operator<(const Node* rhs);
-  void addChild(Node* child, double cost);
+	Node() {}
+	Node(Coord coord, Node* parent, double cumulativeCost);
+	bool operator<(const Node* rhs);
+	void addChild(Node* child, double cost);
+	void printChildren();
+	void rewire(Node* newParent, double cost);
 };
