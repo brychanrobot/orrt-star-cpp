@@ -1,8 +1,27 @@
 #include "Rect.hpp"
 
 Rect::Rect(Coord tl, Coord br) {
-  this->topLeft = tl;
-  this->bottomRight = br;
+  double minx, maxx, miny, maxy;
+  if (tl.x() < br.x()) {
+    minx = tl.x();
+    maxx = br.x();
+  }
+  else {
+    minx = br.x();
+    maxx = tl.x();
+  }
+
+  if (tl.y() < br.y()) {
+    miny = tl.y();
+    maxy = br.y();
+  }
+  else {
+    miny = br.y();
+    maxy = tl.y();
+  }
+
+  this->topLeft = Coord(minx, miny);
+  this->bottomRight = Coord(maxx, maxy);
 }
 
 void Rect::inflate(double dx, double dy) {
@@ -20,7 +39,7 @@ bool valueInRange(double value, double min, double max) {
   return (value >= min) && (value <= max);
 }
 
-bool Rect::intersects(Rect rect) {
+bool Rect::intersects(Rect& rect) {
   bool xOverlap = valueInRange(this->topLeft.x(), rect.topLeft.x(), rect.bottomRight.x()) ||
                   valueInRange(rect.topLeft.x(), this->topLeft.x(), this->bottomRight.x());
 
@@ -28,4 +47,12 @@ bool Rect::intersects(Rect rect) {
                   valueInRange(rect.topLeft.y(), this->topLeft.y(), this->bottomRight.y());
 
   return xOverlap && yOverlap;
+}
+
+double Rect::width() {
+  return this->bottomRight.x() - this->topLeft.x();
+}
+
+double Rect::height() {
+  return this->bottomRight.y() - this->topLeft.y();
 }

@@ -20,7 +20,6 @@ class OnlineFmtStar {
 	int height;
 	int mapArea;
 	std::vector<std::vector<bool>> *obstacleHash;
-	std::vector<Rect> *obstacleRects;
 	int maxSegment;
 	int rewireNeighborhood;
 	Node endNode;
@@ -33,6 +32,7 @@ class OnlineFmtStar {
 	void getNeighbors(Coord center, double radius, std::vector<RtreeValue> &results);
 	void findBestOpenNeighbor(Node *node, Node *&bestNeighbor, double &bestCost);
 	void findBestNeighbor(Coord point, Node *&bestNeighbor, std::vector<Node *> &neighbors);
+	bool lineIntersectsObstacle(Coord& p1, Coord& p2);
 
 	void sampleAndAdd();
 	void sampleWithRewire();
@@ -41,7 +41,8 @@ class OnlineFmtStar {
 	Node root;
 	Coord startPoint;
 	Coord endPoint;
-	OnlineFmtStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect> *obstacleRects, double maxSegment, int width, int height);
+	std::vector<Rect*> *obstacleRects;
+	OnlineFmtStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect*> *obstacleRects, double maxSegment, int width, int height);
 
 	void sample();
 };

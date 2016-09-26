@@ -8,7 +8,7 @@
 
 using namespace std;
 
-OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect> *obstacleRects, double maxSegment, int width, int height) {
+OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect*> *obstacleRects, double maxSegment, int width, int height) {
 	srand(time(NULL));  // initialize the random number generator so it happens
 
 	this->width = width;
@@ -47,6 +47,45 @@ OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect> *o
 	}
 }
 
+bool OnlineFmtStar::lineIntersectsObstacle(Coord& p1, Coord& p2) {
+	auto dx = p2.x() - p1.x();
+	auto dy = p2.y() - p1.y();
+
+	auto m = 20000.0; //a big number for vertical slope
+
+	if (dx != 0) {
+		m = dy/dx;
+	}
+
+	//printf("m: %f\n", m);
+
+	auto b = -m * p1.x() + p1.y();
+
+	auto minX = std::min(p1.x(), p2.x());
+	auto maxX = std::max(p1.x(), p2.x());
+
+	for (int ix = minX; ix <= maxX; ix++) {
+		auto y = m*ix + b;
+		if ((*this->obstacleHash)[y][ix]) {
+			//printf("returning true\n");
+			return true;
+		}
+	}
+
+	auto minY = std::min(p1.y(), p2.y());
+	auto maxY = std::max(p1.y(), p2.y());
+
+	for (int iy = minY; iy < maxY; iy++) {
+		auto x = (iy - b) / m;
+		if ((*this->obstacleHash)[iy][x]) {
+			//printf("returning true\n");
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void OnlineFmtStar::sample() {
 	if (!this->open.empty()) {
 		this->sampleAndAdd();
@@ -68,7 +107,7 @@ void OnlineFmtStar::sampleAndAdd() {
 			Node *bestParent = NULL;
 			double bestCost;
 			findBestOpenNeighbor(neighbor, bestParent, bestCost);
-			if (bestParent != NULL) {
+			if (bestParent != NULL && !this->lineIntersectsObstacle(neighbor->coord, bestParent->coord)) {
 				bestParent->addChild(neighbor, bestCost);
 				neighbor->status = Status::Open;
 				this->open.push(neighbor);
@@ -87,9 +126,9 @@ void OnlineFmtStar::sampleWithRewire() {
 	Node *bestNeighbor;
 	this->findBestNeighbor(point, bestNeighbor, neighbors);
 	for (auto neighbor : neighbors) {
-		if (neighbor != bestNeighbor) {
+		if (neighbor->status == Status::Closed && neighbor != bestNeighbor) {
 			auto cost = this->getCost(bestNeighbor, neighbor);
-			if (bestNeighbor->cumulativeCost + cost < neighbor->cumulativeCost) {
+			if (bestNeighbor->cumulativeCost + cost < neighbor->cumulativeCost && !this->lineIntersectsObstacle(neighbor->coord, bestNeighbor->coord)) {
 				neighbor->rewire(bestNeighbor, cost);
 			}
 		}
@@ -139,7 +178,7 @@ void OnlineFmtStar::findBestNeighbor(Coord point, Node *&bestNeighbor, vector<No
 		auto neighbor = neighbor_tuple.second;
 		neighbors.push_back(neighbor);
 		// auto cost = this->getCost(neighbor, node);
-		if (neighbor->cumulativeCost < bestCumulativeCost) {
+		if (neighbor->status == Status::Closed && neighbor->cumulativeCost < bestCumulativeCost) {
 			// bestCost = cost;
 			bestCumulativeCost = neighbor->cumulativeCost;
 			bestNeighbor = neighbor;

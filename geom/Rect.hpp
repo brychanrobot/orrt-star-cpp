@@ -3,11 +3,13 @@
 
 class Rect {
 private:
+public:
   Coord topLeft;
   Coord bottomRight;
-public:
   Rect(Coord tl, Coord br);
   bool contains(Coord point);
-  bool intersects(Rect rect);
+  bool intersects(Rect& rect);
   void inflate(double dx, double dy);
+  double width();
+  double height();
 };

@@ -54,20 +54,50 @@ void drawTree(Node &root) {
 	}
 }
 
-void display(Coord startPoint, Coord endPoint, Node &root) {
-	drawTree(root);
+void drawObstacles(vector<Rect*>* obstacleRects) {
+  glBegin(GL_QUADS);
+  glColor3d(1.0, 0, 1.0);
+  for (auto obstacle : *obstacleRects) {
+    glVertex2d(obstacle->topLeft.x(), obstacle->topLeft.y());
+    glVertex2d(obstacle->bottomRight.x(), obstacle->topLeft.y());
+    glVertex2d(obstacle->bottomRight.x(), obstacle->bottomRight.y());
+    glVertex2d(obstacle->topLeft.x(), obstacle->bottomRight.y());
+  }
+  glEnd();
+}
+
+void display(Coord startPoint, Coord endPoint, Node &root, vector<Rect*>* obstacleRects) {
+  drawObstacles(obstacleRects);
+  drawTree(root);
 
 	drawPoint(startPoint, 20);
 	drawPoint(endPoint, 20);
 }
 
-void generateObstacles(vector<vector<bool>> *obstacleHash, vector<Rect> *obstacleRects, int width, int height) {}
-
 int main(void) {
+
+	int width, height = 700;
+	bool isFullscreen = true;
+	int monitorNum = 0;
+
+
 	GLFWwindow *window;
 	glfwSetErrorCallback(error_callback);
 	if (!glfwInit()) exit(EXIT_FAILURE);
-	window = glfwCreateWindow(700, 700, "Simple example", NULL, NULL);
+
+	GLFWmonitor* monitor;
+	if (isFullscreen) {
+		int count;
+		printf("getting monitors\n");
+		GLFWmonitor** monitors = glfwGetMonitors(&count);
+		printf("got %d monitors\n", count);
+		monitor = monitors[monitorNum];
+		auto vidMode = glfwGetVideoMode(monitor);
+		width = vidMode->width;
+		height = vidMode->height;
+	}
+	
+	window = glfwCreateWindow(width, height, "Simple example", monitor, NULL);
 	if (!window) {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
@@ -76,15 +106,27 @@ int main(void) {
 	glfwSetKeyCallback(window, key_callback);
 
 	float ratio;
-	int width, height;
-	glfwGetFramebufferSize(window, &width, &height);
+	//int width, height;
+	//glfwGetFramebufferSize(window, &width, &height);
 	ratio = width / (float)height;
 	initDisplay(width, height, ratio);
 
-	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
-	generateObstacles(&obstacleHash, NULL, width, height);
+	vector<Rect*> obstacleRects;
+	generateObstacleRects(width, height, 10, obstacleRects);
 
-	auto planner = OnlineFmtStar(&obstacleHash, NULL, 6, width, height);
+	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
+	generateObstacleHash(obstacleRects, obstacleHash);
+
+	/*
+	for (auto row: obstacleHash) {
+		for (auto value: row) {
+			printf("%d", value ? 1 : 0);
+		}
+		printf("\n");
+	}
+	*/
+
+	auto planner = OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height);
 
 	auto lastTime = glfwGetTime();
 	auto interval = 1.0 / 60.0;
@@ -95,7 +137,7 @@ int main(void) {
 			lastTime = currentTime;
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			display(planner.startPoint, planner.endPoint, planner.root);
+			display(planner.startPoint, planner.endPoint, planner.root, planner.obstacleRects);
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
