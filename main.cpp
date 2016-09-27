@@ -6,10 +6,55 @@
 
 using namespace std;
 
-static void error_callback(int error, const char *description) { fputs(description, stderr); }
+struct Moves {
+	double uavX = 0.0;
+	double uavY = 0.0;
+	double endX = 0.0;
+	double endY = 0.0;
+};
 
-static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
+const double MOVERATE = 3;
+
+static void onError(int error, const char* description) { fputs(description, stderr); }
+
+static void onKey(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	Moves* currentMoves = static_cast<Moves*>(glfwGetWindowUserPointer(window));
+
+	switch (key) {
+		case GLFW_KEY_ESCAPE:
+			glfwSetWindowShouldClose(window, GL_TRUE);
+			break;
+		case GLFW_KEY_UP:
+			if (action != GLFW_RELEASE) {
+				currentMoves->uavY = -MOVERATE;
+			} else {
+				currentMoves->uavY = 0;
+			}
+			break;
+		case GLFW_KEY_DOWN:
+			if (action != GLFW_RELEASE) {
+				currentMoves->uavY = MOVERATE;
+			} else {
+				currentMoves->uavY = 0;
+			}
+			break;
+		case GLFW_KEY_LEFT:
+			if (action != GLFW_RELEASE) {
+				currentMoves->uavX = -MOVERATE;
+			} else {
+				currentMoves->uavX = 0;
+			}
+			break;
+		case GLFW_KEY_RIGHT:
+			if (action != GLFW_RELEASE) {
+				currentMoves->uavX = MOVERATE;
+			} else {
+				currentMoves->uavX = 0;
+			}
+			break;
+	}
+
+	// printf("key: %d\n, (%.2f, %.2f)", key, currentMoves->uavX, currentMoves->uavY);
 }
 
 void initDisplay(int width, int height, float ratio) {
@@ -31,15 +76,15 @@ void drawPoint(Coord point, double radius) {
 	glEnable(GL_POINT_SMOOTH);
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	glPointSize(radius);
+	glColor3d(1.0, 1.0, 0);
 
 	glBegin(GL_POINTS);
-	glColor3d(1.0, 1.0, 0);
 	glVertex2d(point.x(), point.y());
 	glEnd();
 }
 
 void drawLine(Coord start, Coord end) {
-	glColor3d(0, 1.0, 1.0);
+	glColor3d(0.5, 0.0, 1.0);
 	glLineWidth(1);
 	glBegin(GL_LINES);
 	glVertex2d(start.x(), start.y());
@@ -47,42 +92,56 @@ void drawLine(Coord start, Coord end) {
 	glEnd();
 }
 
-void drawTree(Node &root) {
-	for (auto child : root.children) {
-		drawLine(root.coord, child->coord);
-		drawTree(*child);
+void drawTree(Node* root) {
+	for (auto child : root->children) {
+		drawLine(root->coord, child->coord);
+		drawTree(child);
 	}
 }
 
-void drawObstacles(vector<Rect*>* obstacleRects) {
-  glBegin(GL_QUADS);
-  glColor3d(1.0, 0, 1.0);
-  for (auto obstacle : *obstacleRects) {
-    glVertex2d(obstacle->topLeft.x(), obstacle->topLeft.y());
-    glVertex2d(obstacle->bottomRight.x(), obstacle->topLeft.y());
-    glVertex2d(obstacle->bottomRight.x(), obstacle->bottomRight.y());
-    glVertex2d(obstacle->topLeft.x(), obstacle->bottomRight.y());
-  }
-  glEnd();
+void drawPath(deque<Coord>& path) {
+	glEnable(GL_LINE_SMOOTH);
+	glLineWidth(3);
+	glColor3d(0.0, 1.0, 0.2);
+
+	glBegin(GL_LINE_STRIP);
+	for (auto point : path) {
+		glVertex2d(point.x(), point.y());
+	}
+	glEnd();
+
+	glDisable(GL_LINE_SMOOTH);
 }
 
-void display(Coord startPoint, Coord endPoint, Node &root, vector<Rect*>* obstacleRects) {
-  drawObstacles(obstacleRects);
-  drawTree(root);
+void drawObstacles(vector<Rect*>* obstacleRects) {
+	glColor3d(0.0, 1.0, 1.0);
+	glBegin(GL_QUADS);
+	for (auto obstacle : *obstacleRects) {
+		glVertex2d(obstacle->topLeft.x(), obstacle->topLeft.y());
+		glVertex2d(obstacle->bottomRight.x(), obstacle->topLeft.y());
+		glVertex2d(obstacle->bottomRight.x(), obstacle->bottomRight.y());
+		glVertex2d(obstacle->topLeft.x(), obstacle->bottomRight.y());
+	}
+	glEnd();
+}
 
-	drawPoint(startPoint, 20);
-	drawPoint(endPoint, 20);
+void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* obstacleRects) {
+	drawObstacles(obstacleRects);
+	drawTree(root);
+
+	drawPath(bestPath);
+
+	drawPoint(root->coord, 20);
+	drawPoint(endNode->coord, 20);
 }
 
 int main(void) {
-
 	int width, height = 700;
 	bool isFullscreen = true;
 	int monitorNum = 0;
 
-
-	GLFWwindow *window;
-	glfwSetErrorCallback(error_callback);
+	GLFWwindow* window;
+	glfwSetErrorCallback(onError);
 	if (!glfwInit()) exit(EXIT_FAILURE);
 
 	GLFWmonitor* monitor;
@@ -96,18 +155,19 @@ int main(void) {
 		width = vidMode->width;
 		height = vidMode->height;
 	}
-	
+
 	window = glfwCreateWindow(width, height, "Simple example", monitor, NULL);
 	if (!window) {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
 	glfwMakeContextCurrent(window);
-	glfwSetKeyCallback(window, key_callback);
+	glfwSetKeyCallback(window, onKey);
+	// glfwSetKeyCallback(window, key_callback);
 
 	float ratio;
-	//int width, height;
-	//glfwGetFramebufferSize(window, &width, &height);
+	// int width, height;
+	// glfwGetFramebufferSize(window, &width, &height);
 	ratio = width / (float)height;
 	initDisplay(width, height, ratio);
 
@@ -119,10 +179,10 @@ int main(void) {
 
 	/*
 	for (auto row: obstacleHash) {
-		for (auto value: row) {
-			printf("%d", value ? 1 : 0);
-		}
-		printf("\n");
+	    for (auto value: row) {
+	        printf("%d", value ? 1 : 0);
+	    }
+	    printf("\n");
 	}
 	*/
 
@@ -131,16 +191,22 @@ int main(void) {
 	auto lastTime = glfwGetTime();
 	auto interval = 1.0 / 60.0;
 
+	Moves currentMoves;
+	glfwSetWindowUserPointer(window, &currentMoves);
+
 	while (!glfwWindowShouldClose(window)) {
 		auto currentTime = glfwGetTime();
 		if (currentTime - lastTime >= interval) {
 			lastTime = currentTime;
+
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			display(planner.startPoint, planner.endPoint, planner.root, planner.obstacleRects);
+			display(planner.root, planner.endNode, planner.bestPath, planner.obstacleRects);
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
+
+			planner.moveStart(currentMoves.uavX, currentMoves.uavY);
 		} else {
 			planner.sample();
 		}

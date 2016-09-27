@@ -24,7 +24,9 @@ void Node::removeChild(Node* child) {
 }
 
 void Node::rewire(Node* newParent, double cost) {
-	this->parent->removeChild(this);
+	if (this->parent != NULL) {
+		this->parent->removeChild(this);
+	}
 	newParent->children.push_back(this);
 	this->parent = newParent;
 	this->updateCumulativeCost(newParent->cumulativeCost + cost);

@@ -8,7 +8,7 @@
 
 using namespace std;
 
-OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect*> *obstacleRects, double maxSegment, int width, int height) {
+OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height) {
 	srand(time(NULL));  // initialize the random number generator so it happens
 
 	this->width = width;
@@ -20,21 +20,22 @@ OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect*> *
 	this->rewireNeighborhood = maxSegment * 6;
 	this->nodeAddThreshold = 0.015 * width * height;
 
-	this->startPoint = this->randomOpenAreaPoint();
+	auto startPoint = this->randomOpenAreaPoint();
+	Coord endPoint;
 
 	do {
-		this->endPoint = this->randomOpenAreaPoint();
-	} while (euclideanDistance(this->startPoint, this->endPoint) < width / 2.0);
+		endPoint = this->randomOpenAreaPoint();
+	} while (euclideanDistance(startPoint, endPoint) < width / 2.0);
 
-	this->root = Node(this->startPoint, NULL, 0.0);
-	this->root.status = Status::Open;
-	this->rtree.insert(RtreeValue(this->startPoint, &(this->root)));
-	this->open.push(&(this->root));
+	this->root = new Node(startPoint, NULL, 0.0);
+	this->root->status = Status::Open;
+	this->rtree.insert(RtreeValue(startPoint, this->root));
+	this->open.push(this->root);
 
 	// printf("root: (%.2f, %.2f), %d\n", this->root.coord.x(), this->root.coord.y(), this->root.status);
 
-	this->endNode = Node(this->endPoint, NULL, 0.0);
-	this->rtree.insert(RtreeValue(this->endPoint, &endNode));
+	this->endNode = new Node(endPoint, NULL, 0.0);
+	this->rtree.insert(RtreeValue(endPoint, endNode));
 
 	// printf("end: (%.2f, %.2f), %d\n", endNode.coord.x(), endNode.coord.y(), endNode.status);
 
@@ -47,17 +48,17 @@ OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect*> *
 	}
 }
 
-bool OnlineFmtStar::lineIntersectsObstacle(Coord& p1, Coord& p2) {
+bool OnlineFmtStar::lineIntersectsObstacle(Coord &p1, Coord &p2) {
 	auto dx = p2.x() - p1.x();
 	auto dy = p2.y() - p1.y();
 
-	auto m = 20000.0; //a big number for vertical slope
+	auto m = 20000.0;  // a big number for vertical slope
 
 	if (dx != 0) {
-		m = dy/dx;
+		m = dy / dx;
 	}
 
-	//printf("m: %f\n", m);
+	// printf("m: %f\n", m);
 
 	auto b = -m * p1.x() + p1.y();
 
@@ -65,9 +66,9 @@ bool OnlineFmtStar::lineIntersectsObstacle(Coord& p1, Coord& p2) {
 	auto maxX = std::max(p1.x(), p2.x());
 
 	for (int ix = minX; ix <= maxX; ix++) {
-		auto y = m*ix + b;
+		auto y = m * ix + b;
 		if ((*this->obstacleHash)[y][ix]) {
-			//printf("returning true\n");
+			// printf("returning true\n");
 			return true;
 		}
 	}
@@ -78,7 +79,7 @@ bool OnlineFmtStar::lineIntersectsObstacle(Coord& p1, Coord& p2) {
 	for (int iy = minY; iy < maxY; iy++) {
 		auto x = (iy - b) / m;
 		if ((*this->obstacleHash)[iy][x]) {
-			//printf("returning true\n");
+			// printf("returning true\n");
 			return true;
 		}
 	}
@@ -92,6 +93,8 @@ void OnlineFmtStar::sample() {
 	} else {
 		this->sampleWithRewire();
 	}
+
+	this->refreshBestPath();
 }
 
 void OnlineFmtStar::sampleAndAdd() {
@@ -128,9 +131,46 @@ void OnlineFmtStar::sampleWithRewire() {
 	for (auto neighbor : neighbors) {
 		if (neighbor->status == Status::Closed && neighbor != bestNeighbor) {
 			auto cost = this->getCost(bestNeighbor, neighbor);
-			if (bestNeighbor->cumulativeCost + cost < neighbor->cumulativeCost && !this->lineIntersectsObstacle(neighbor->coord, bestNeighbor->coord)) {
+			if (bestNeighbor->cumulativeCost + cost < neighbor->cumulativeCost &&
+			    !this->lineIntersectsObstacle(neighbor->coord, bestNeighbor->coord)) {
 				neighbor->rewire(bestNeighbor, cost);
 			}
+		}
+	}
+}
+
+void OnlineFmtStar::moveStart(double dx, double dy) {
+	if (dx != 0 || dy != 0) {
+		auto newRoot = new Node(Coord(this->root->coord.x() + dx, this->root->coord.y() + dy), NULL, 0.0);
+		newRoot->status = Status::Closed;
+		rtree.insert(RtreeValue(newRoot->coord, newRoot));
+
+		auto rtr_cost = this->getCost(newRoot, this->root);
+
+		this->root->rewire(newRoot, rtr_cost);
+		this->root = newRoot;
+
+		/*
+		std::vector<RtreeValue> neighbor_tuples;
+		this->getNeighbors(newRoot.coord, this->rewireNeighborhood, neighbor_tuples);
+		for (auto neighbor_tuple : neighbor_tuples) {
+		    auto neighbor = neighbor_tuple.second;
+		    if (neighbor->status == Status::Closed && !this->lineIntersectsObstacle(newRoot.coord, neighbor->coord)) {
+		        auto cost = this->getCost(&newRoot, neighbor);
+		        neighbor->rewire(&newRoot, cost);
+		    }
+		}
+		*/
+	}
+}
+
+void OnlineFmtStar::refreshBestPath() {
+	if (this->endNode->parent != NULL) {
+		this->bestPath.clear();
+		auto currentNode = this->endNode;
+		while (currentNode != NULL) {
+			this->bestPath.push_front(currentNode->coord);
+			currentNode = currentNode->parent;
 		}
 	}
 }
