@@ -139,28 +139,33 @@ void OnlineFmtStar::sampleWithRewire() {
 	}
 }
 
+double clamp(double val, double lo, double hi) { return std::min(std::max(val, lo), hi); }
+
 void OnlineFmtStar::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
-		auto newRoot = new Node(Coord(this->root->coord.x() + dx, this->root->coord.y() + dy), NULL, 0.0);
-		newRoot->status = Status::Closed;
-		rtree.insert(RtreeValue(newRoot->coord, newRoot));
+		Coord point(clamp(this->root->coord.x() + dx, 0, this->width - 1), clamp(this->root->coord.y() + dy, 0, this->height - 1));
 
-		auto rtr_cost = this->getCost(newRoot, this->root);
+		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
+			auto newRoot = new Node(point, NULL, 0.0);
+			newRoot->status = Status::Closed;
+			rtree.insert(RtreeValue(newRoot->coord, newRoot));
 
-		this->root->rewire(newRoot, rtr_cost);
-		this->root = newRoot;
+			auto rtr_cost = this->getCost(newRoot, this->root);
 
-		/*
-		std::vector<RtreeValue> neighbor_tuples;
-		this->getNeighbors(newRoot.coord, this->rewireNeighborhood, neighbor_tuples);
-		for (auto neighbor_tuple : neighbor_tuples) {
-		    auto neighbor = neighbor_tuple.second;
-		    if (neighbor->status == Status::Closed && !this->lineIntersectsObstacle(newRoot.coord, neighbor->coord)) {
-		        auto cost = this->getCost(&newRoot, neighbor);
-		        neighbor->rewire(&newRoot, cost);
-		    }
+			this->root->rewire(newRoot, rtr_cost);
+			this->root = newRoot;
+
+			// maybe this doesn't really add value
+			std::vector<RtreeValue> neighbor_tuples;
+			this->getNeighbors(newRoot->coord, this->rewireNeighborhood, neighbor_tuples);
+			for (auto neighbor_tuple : neighbor_tuples) {
+				auto neighbor = neighbor_tuple.second;
+				if (neighbor != newRoot && neighbor->status == Status::Closed && !this->lineIntersectsObstacle(newRoot->coord, neighbor->coord)) {
+					auto cost = this->getCost(newRoot, neighbor);
+					neighbor->rewire(newRoot, cost);
+				}
+			}
 		}
-		*/
 	}
 }
 

@@ -1,6 +1,6 @@
 CC=g++
 
-CFLAGS=-c -Wall -O3 -std=c++11
+CFLAGS=-c -Wall -O3 -march=native -std=c++11
 LDFLAGS=-lm -lGL -lGLU -lglfw -lX11 -lXrandr -lXinerama -lXi -lXxf86vm -lXcursor -lpthread -ldl -lboost_system
 
 all: directories orrtstar

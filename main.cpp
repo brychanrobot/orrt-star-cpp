@@ -190,6 +190,9 @@ int main(void) {
 
 	auto lastTime = glfwGetTime();
 	auto interval = 1.0 / 60.0;
+	/*auto iterations = 0;
+	auto frames = 0;
+	double averageIterations = 0;*/
 
 	Moves currentMoves;
 	glfwSetWindowUserPointer(window, &currentMoves);
@@ -198,6 +201,12 @@ int main(void) {
 		auto currentTime = glfwGetTime();
 		if (currentTime - lastTime >= interval) {
 			lastTime = currentTime;
+			/*
+			averageIterations = (averageIterations * frames + iterations) / (frames + 1.0);
+			printf("i: %.2f\n", averageIterations);
+			frames += 1;
+			iterations = 0;
+			*/
 
 			glClear(GL_COLOR_BUFFER_BIT);
 
@@ -208,6 +217,7 @@ int main(void) {
 
 			planner.moveStart(currentMoves.uavX, currentMoves.uavY);
 		} else {
+			// iterations++;
 			planner.sample();
 		}
 	}
