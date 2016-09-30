@@ -1,10 +1,12 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <boost/program_options.hpp>
 #include "OnlineFmtStar.hpp"
 #include "utils.hpp"
 
 using namespace std;
+using namespace boost::program_options;
 
 struct Moves {
 	double uavX = 0.0;
@@ -13,7 +15,7 @@ struct Moves {
 	double endY = 0.0;
 };
 
-const double MOVERATE = 3;
+const double MOVERATE = 0.003;
 
 static void onError(int error, const char* description) { fputs(description, stderr); }
 
@@ -26,14 +28,14 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_UP:
 			if (action != GLFW_RELEASE) {
-				currentMoves->uavY = -MOVERATE;
+				currentMoves->uavY = MOVERATE;
 			} else {
 				currentMoves->uavY = 0;
 			}
 			break;
 		case GLFW_KEY_DOWN:
 			if (action != GLFW_RELEASE) {
-				currentMoves->uavY = MOVERATE;
+				currentMoves->uavY = -MOVERATE;
 			} else {
 				currentMoves->uavY = 0;
 			}
@@ -58,13 +60,13 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 void initDisplay(int width, int height, float ratio) {
-	glViewport(0, 0, width, height);
+	// glViewport(0, 0, 1, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0, width, 0, height, -1.f, 1.f);
-	glScalef(1, -1, 1);
-	glTranslatef(0, -height, 0);
+	glOrtho(0, 1, 0, 1, -1.f, 1.f);
+	// glScalef(1, -1, 1);
+	// glTranslatef(0, -1, 0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
@@ -135,93 +137,104 @@ void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* o
 	drawPoint(endNode->coord, 20);
 }
 
-int main(void) {
-	int width, height = 700;
-	bool isFullscreen = true;
-	int monitorNum = 0;
+int main(int argc, const char* argv[]) {
+	try {
+		options_description desc{"Options"};
+		desc.add_options()("width, w", value<int>()->default_value(700), "Width")("height, h", value<int>()->default_value(700), "Height")(
+		    "full, f", "Fullscreen")("monitor, m", value<int>()->default_value(0), "Monitor");
 
-	GLFWwindow* window;
-	glfwSetErrorCallback(onError);
-	if (!glfwInit()) exit(EXIT_FAILURE);
+		variables_map vm;
+		store(parse_command_line(argc, argv, desc), vm);
+		notify(vm);
 
-	GLFWmonitor* monitor;
-	if (isFullscreen) {
-		int count;
-		printf("getting monitors\n");
-		GLFWmonitor** monitors = glfwGetMonitors(&count);
-		printf("got %d monitors\n", count);
-		monitor = monitors[monitorNum];
-		auto vidMode = glfwGetVideoMode(monitor);
-		width = vidMode->width;
-		height = vidMode->height;
-	}
+		int width = vm["width"].as<int>();
+		int height = vm["height"].as<int>();
+		// int monitorNum = vm["monitor"];
 
-	window = glfwCreateWindow(width, height, "Simple example", monitor, NULL);
-	if (!window) {
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-	glfwMakeContextCurrent(window);
-	glfwSetKeyCallback(window, onKey);
-	// glfwSetKeyCallback(window, key_callback);
+		GLFWwindow* window;
+		glfwSetErrorCallback(onError);
+		if (!glfwInit()) exit(EXIT_FAILURE);
 
-	float ratio;
-	// int width, height;
-	// glfwGetFramebufferSize(window, &width, &height);
-	ratio = width / (float)height;
-	initDisplay(width, height, ratio);
-
-	vector<Rect*> obstacleRects;
-	generateObstacleRects(width, height, 10, obstacleRects);
-
-	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
-	generateObstacleHash(obstacleRects, obstacleHash);
-
-	/*
-	for (auto row: obstacleHash) {
-	    for (auto value: row) {
-	        printf("%d", value ? 1 : 0);
-	    }
-	    printf("\n");
-	}
-	*/
-
-	auto planner = OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height);
-
-	auto lastTime = glfwGetTime();
-	auto interval = 1.0 / 60.0;
-	/*auto iterations = 0;
-	auto frames = 0;
-	double averageIterations = 0;*/
-
-	Moves currentMoves;
-	glfwSetWindowUserPointer(window, &currentMoves);
-
-	while (!glfwWindowShouldClose(window)) {
-		auto currentTime = glfwGetTime();
-		if (currentTime - lastTime >= interval) {
-			lastTime = currentTime;
-			/*
-			averageIterations = (averageIterations * frames + iterations) / (frames + 1.0);
-			printf("i: %.2f\n", averageIterations);
-			frames += 1;
-			iterations = 0;
-			*/
-
-			glClear(GL_COLOR_BUFFER_BIT);
-
-			display(planner.root, planner.endNode, planner.bestPath, planner.obstacleRects);
-
-			glfwSwapBuffers(window);
-			glfwPollEvents();
-
-			planner.moveStart(currentMoves.uavX, currentMoves.uavY);
-		} else {
-			// iterations++;
-			planner.sample();
+		GLFWmonitor* monitor;
+		if (vm.count("full")) {
+			int count;
+			GLFWmonitor** monitors = glfwGetMonitors(&count);
+			monitor = monitors[vm["monitor"].as<int>()];
+			auto vidMode = glfwGetVideoMode(monitor);
+			width = vidMode->width;
+			height = vidMode->height;
 		}
+
+		window = glfwCreateWindow(width, height, "Simple example", monitor, NULL);
+		if (!window) {
+			glfwTerminate();
+			exit(EXIT_FAILURE);
+		}
+		glfwMakeContextCurrent(window);
+		glfwSetKeyCallback(window, onKey);
+		// glfwSetKeyCallback(window, key_callback);
+
+		float ratio;
+		// int width, height;
+		// glfwGetFramebufferSize(window, &width, &height);
+		ratio = width / (float)height;
+		initDisplay(width, height, ratio);
+
+		double obstacleHashHeight = 100;
+		double obstacleHashWidth = obstacleHashHeight * ratio;
+
+		vector<Rect*> obstacleRects;
+		generateObstacleRects(1.0, 1.0, 10, obstacleRects);
+
+		vector<vector<bool>> obstacleHash(obstacleHashHeight, vector<bool>(obstacleHashWidth, false));
+		generateObstacleHash(obstacleRects, obstacleHash, obstacleHashWidth, obstacleHashHeight);
+
+		for (auto row : obstacleHash) {
+			for (auto value : row) {
+				printf("%d", value ? 1 : 0);
+			}
+			printf("\n");
+		}
+
+		auto planner = OnlineFmtStar(&obstacleHash, &obstacleRects, 0.2, 1.0, 1.0, obstacleHashWidth, obstacleHashHeight);
+
+		auto lastTime = glfwGetTime();
+		auto interval = 1.0 / 60.0;
+		/*auto iterations = 0;
+		auto frames = 0;
+		double averageIterations = 0;*/
+
+		Moves currentMoves;
+		glfwSetWindowUserPointer(window, &currentMoves);
+
+		while (!glfwWindowShouldClose(window)) {
+			auto currentTime = glfwGetTime();
+			if (currentTime - lastTime >= interval) {
+				lastTime = currentTime;
+				/*
+				averageIterations = (averageIterations * frames + iterations) / (frames + 1.0);
+				printf("i: %.2f\n", averageIterations);
+				frames += 1;
+				iterations = 0;
+				*/
+
+				glClear(GL_COLOR_BUFFER_BIT);
+
+				display(planner.root, planner.endNode, planner.bestPath, planner.obstacleRects);
+
+				glfwSwapBuffers(window);
+				glfwPollEvents();
+
+				planner.moveStart(currentMoves.uavX, currentMoves.uavY);
+			} else {
+				// iterations++;
+				planner.sample();
+			}
+		}
+		glfwDestroyWindow(window);
+		glfwTerminate();
+		exit(EXIT_SUCCESS);
+	} catch (const error& ex) {
+		cerr << ex.what() << endl;
 	}
-	glfwDestroyWindow(window);
-	glfwTerminate();
-	exit(EXIT_SUCCESS);
 }

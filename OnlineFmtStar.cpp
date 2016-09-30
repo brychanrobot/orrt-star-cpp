@@ -8,17 +8,20 @@
 
 using namespace std;
 
-OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height) {
-	srand(time(NULL));  // initialize the random number generator so it happens
+OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
+                             double obstacleHashWidth, double obstacleHashHeight) {
+	srand(time(0));  // initialize the random number generator so it happens
 
 	this->width = width;
 	this->height = height;
+	this->obstacleHashWidth = obstacleHashWidth;
+	this->obstacleHashHeight = obstacleHashHeight;
 	this->mapArea = width * height;
 	this->obstacleHash = obstacleHash;
 	this->obstacleRects = obstacleRects;
 	this->maxSegment = maxSegment;
 	this->rewireNeighborhood = maxSegment * 6;
-	this->nodeAddThreshold = 0.015 * width * height;
+	this->nodeAddThreshold = 0.015 * obstacleHashWidth * obstacleHashHeight;
 
 	auto startPoint = this->randomOpenAreaPoint();
 	Coord endPoint;
@@ -48,42 +51,57 @@ OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> 
 	}
 }
 
+double clamp(double val, double lo, double hi) { return std::min(std::max(val, lo), hi); }
+
+bool OnlineFmtStar::pointInObstacle(Coord p) { return (*this->obstacleHash)[p.y() * this->obstacleHashHeight][p.x() * this->obstacleHashWidth]; }
+
 bool OnlineFmtStar::lineIntersectsObstacle(Coord &p1, Coord &p2) {
 	auto dx = p2.x() - p1.x();
 	auto dy = p2.y() - p1.y();
 
+	// printf("(%.2f, %.2f), (%.2f, %.2f)\n", p1.x(), p1.y(), p2.x(), p2.y());
+
 	auto m = 20000.0;  // a big number for vertical slope
 
-	if (dx != 0) {
+	if (abs(dx) > 0.00001) {
 		m = dy / dx;
 	}
 
 	// printf("m: %f\n", m);
 
-	auto b = -m * p1.x() + p1.y();
+	auto b = -m * p1.x() * this->obstacleHashWidth + p1.y() * this->obstacleHashHeight;
 
-	auto minX = std::min(p1.x(), p2.x());
-	auto maxX = std::max(p1.x(), p2.x());
+	// printf("m: %.2f, b: %.2f\n", m, b);
 
-	for (int ix = minX; ix <= maxX; ix++) {
-		auto y = m * ix + b;
-		if ((*this->obstacleHash)[y][ix]) {
+	auto minX = std::min(p1.x(), p2.x()) * obstacleHashWidth;
+	auto maxX = std::max(p1.x(), p2.x()) * obstacleHashWidth;
+
+	// printf("x: %.2f, %.2f\n", minX, maxX);
+
+	for (double ix = minX; ix <= maxX; ix++) {
+		double y = m * ix + b;
+		y = clamp(y, 0, this->obstacleHashHeight - 1);
+		// printf("%.2f, %.2f\n", ix, y);
+		if ((*this->obstacleHash)[ix][y]) {
 			// printf("returning true\n");
 			return true;
 		}
 	}
 
-	auto minY = std::min(p1.y(), p2.y());
-	auto maxY = std::max(p1.y(), p2.y());
+	auto minY = std::min(p1.y(), p2.y()) * this->obstacleHashHeight;
+	auto maxY = std::max(p1.y(), p2.y()) * this->obstacleHashHeight;
 
-	for (int iy = minY; iy < maxY; iy++) {
+	// printf("doingy\n");
+	for (double iy = minY; iy < maxY; iy++) {
 		auto x = (iy - b) / m;
-		if ((*this->obstacleHash)[iy][x]) {
+		x = clamp(x, 0, this->obstacleHashWidth - 1);
+		if ((*this->obstacleHash)[x][iy]) {
 			// printf("returning true\n");
 			return true;
 		}
 	}
 
+	// printf("returning false\n");
 	return false;
 }
 
@@ -139,13 +157,11 @@ void OnlineFmtStar::sampleWithRewire() {
 	}
 }
 
-double clamp(double val, double lo, double hi) { return std::min(std::max(val, lo), hi); }
-
 void OnlineFmtStar::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
-		Coord point(clamp(this->root->coord.x() + dx, 0, this->width - 1), clamp(this->root->coord.y() + dy, 0, this->height - 1));
+		Coord point(clamp(this->root->coord.x() + dx, 0, this->width), clamp(this->root->coord.y() + dy, 0, this->height));
 
-		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
+		if (!this->pointInObstacle(point)) {
 			auto newRoot = new Node(point, NULL, 0.0);
 			newRoot->status = Status::Closed;
 			rtree.insert(RtreeValue(newRoot->coord, newRoot));
@@ -183,7 +199,7 @@ void OnlineFmtStar::refreshBestPath() {
 Coord OnlineFmtStar::randomOpenAreaPoint() {
 	while (true) {
 		auto point = randomPoint(this->width, this->height);
-		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
+		if (!this->pointInObstacle(point)) {
 			return point;
 		}
 	}
