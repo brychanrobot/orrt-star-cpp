@@ -1,8 +1,6 @@
 #include "OnlineFmtStar.hpp"
 #include <stdio.h>
 #include <cstdlib>
-#include <ctime>
-#include <limits>
 #include "geom/Coord.hpp"
 #include "geom/utils.hpp"
 

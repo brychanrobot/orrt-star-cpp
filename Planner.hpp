@@ -26,8 +26,10 @@ class Planner {
 
 	Coord randomOpenAreaPoint();
 	double getCost(Node *start, Node *end);
+	double getCost(Coord &start, Coord &end);
 	void getNeighbors(Coord center, double radius, std::vector<RtreeValue> &results);
-	void findBestNeighbor(Coord point, Node *&bestNeighbor, std::vector<Node *> &neighbors);
+	void findBestNeighbor(Coord point, Node *&bestNeighbor, double &bestCost, std::vector<Node *> &neighbors, std::vector<double> &neighborCosts);
+	void findBestNeighborInNeighborhood(Coord point, Node *&bestNeighbor, std::vector<Node *> &neighbors);
 	bool lineIntersectsObstacle(Coord &p1, Coord &p2);
 
 	void sampleWithRewire();

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "OnlineFmtStar.hpp"
+#include "OnlineRrtStar.hpp"
 #include "cxxopts.hpp"
 #include "utils.hpp"
 

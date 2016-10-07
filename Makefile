@@ -1,6 +1,6 @@
 CC=g++
 
-CFLAGS=-c -Wall -O3 -march=native -std=c++11
+CFLAGS=-c -Wall -O3 -march=native -std=c++11 -g
 LDFLAGS=-lm -lGL -lGLU -lglfw -lX11 -lXrandr -lXinerama -lXi -lXxf86vm -lXcursor -lpthread -ldl -lboost_system
 
 all: directories orrtstar
@@ -8,14 +8,17 @@ all: directories orrtstar
 directories:
 	@mkdir -p bin/geom
 
-orrtstar: bin/main.o bin/OnlineFmtStar.o bin/Planner.o bin/Node.o bin/geom/Rect.o
-	$(CC) bin/main.o bin/OnlineFmtStar.o bin/Planner.o bin/Node.o bin/geom/Rect.o -o bin/orrtstar $(LDFLAGS)
+orrtstar: bin/main.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/Planner.o bin/Node.o bin/geom/Rect.o
+	$(CC) bin/main.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/Planner.o bin/Node.o bin/geom/Rect.o -o bin/orrtstar $(LDFLAGS)
 
 bin/main.o: main.cpp cxxopts.hpp
 	$(CC) $(CFLAGS) main.cpp $(LDFLAGS) -o $@
 
 bin/OnlineFmtStar.o: OnlineFmtStar.cpp
 	$(CC) $(CFLAGS) OnlineFmtStar.cpp $(LDFLAGS) -o $@
+
+bin/OnlineRrtStar.o: OnlineRrtStar.cpp
+	$(CC) $(CFLAGS) OnlineRrtStar.cpp $(LDFLAGS) -o $@
 
 bin/Planner.o: Planner.cpp
 	$(CC) $(CFLAGS) Planner.cpp $(LDFLAGS) -o $@
