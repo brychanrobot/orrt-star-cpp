@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "OnlineFmtStar.hpp"
+#include "cxxopts.hpp"
 #include "utils.hpp"
 
 using namespace std;
@@ -135,21 +136,31 @@ void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* o
 	drawPoint(endNode->coord, 20);
 }
 
-int main(void) {
-	int width, height = 700;
-	bool isFullscreen = true;
+int main(int argc, char* argv[]) {
+	int width = 700;
+	int height = 700;
+	bool isFullscreen = false;
 	int monitorNum = 0;
+
+	// clang-format off
+	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
+	options.add_options()
+		("f,fullscreen", "Enable Fullscreen", cxxopts::value(isFullscreen))
+		("m,monitor", "Set Monitor Number", cxxopts::value(monitorNum));
+	// clang-format on
+
+	options.parse(argc, argv);
 
 	GLFWwindow* window;
 	glfwSetErrorCallback(onError);
 	if (!glfwInit()) exit(EXIT_FAILURE);
 
-	GLFWmonitor* monitor;
+	GLFWmonitor* monitor = NULL;
+	// if (options["fullscreen"].as<bool>()) {
+
 	if (isFullscreen) {
 		int count;
-		printf("getting monitors\n");
 		GLFWmonitor** monitors = glfwGetMonitors(&count);
-		printf("got %d monitors\n", count);
 		monitor = monitors[monitorNum];
 		auto vidMode = glfwGetVideoMode(monitor);
 		width = vidMode->width;
@@ -163,7 +174,6 @@ int main(void) {
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, onKey);
-	// glfwSetKeyCallback(window, key_callback);
 
 	float ratio;
 	// int width, height;

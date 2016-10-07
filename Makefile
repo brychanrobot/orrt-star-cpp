@@ -11,7 +11,7 @@ directories:
 orrtstar: bin/main.o bin/OnlineFmtStar.o bin/Node.o bin/geom/Rect.o
 	$(CC) bin/main.o bin/OnlineFmtStar.o bin/Node.o bin/geom/Rect.o -o bin/orrtstar $(LDFLAGS)
 
-bin/main.o: main.cpp
+bin/main.o: main.cpp cxxopts.hpp
 	$(CC) $(CFLAGS) main.cpp $(LDFLAGS) -o $@
 
 bin/OnlineFmtStar.o: OnlineFmtStar.cpp
