@@ -4,6 +4,8 @@
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry/index/rtree.hpp>
 #include <vector>
+
+#include "Halton.hpp"
 #include "Node.hpp"
 #include "geom/Coord.hpp"
 #include "geom/Rect.hpp"
@@ -23,6 +25,9 @@ class Planner {
 	int rewireNeighborhood;
 	int nodeAddThreshold;
 	Rtree rtree;
+
+	HaltonSampler haltonX;
+	HaltonSampler haltonY;
 
 	Coord randomOpenAreaPoint();
 	double getCost(Node *start, Node *end);

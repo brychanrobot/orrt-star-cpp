@@ -41,7 +41,7 @@ void OnlineRrtStar::sampleAndAdd() {
 		auto x = this->maxSegment * cos(angle) + nn->coord.x();
 		auto y = this->maxSegment * sin(angle) + nn->coord.y();
 
-		printf("nn: (%.2f, %.2f), p: (%.2f, %.2f), np: (%.2f, %.2f), a:%.2f\n", nn->coord.x(), nn->coord.y(), p.x(), p.y(), x, y, 6.282 * angle);
+		// printf("nn: (%.2f, %.2f), p: (%.2f, %.2f), np: (%.2f, %.2f), a:%.2f\n", nn->coord.x(), nn->coord.y(), p.x(), p.y(), x, y, 6.282 * angle);
 		p = Coord(x, y);
 	}
 
@@ -61,8 +61,8 @@ void OnlineRrtStar::sampleAndAdd() {
 			for (unsigned long i = 0; i < neighbors.size(); i++) {
 				if (neighbors[i]->status == Status::Closed && neighbors[i] != bestNeighbor) {
 					// auto cost = this->getCost(bestNeighbor, neighbors[i]);
-					if (bestNeighbor->cumulativeCost + neighborCosts[i] < neighbors[i]->cumulativeCost &&
-					    !this->lineIntersectsObstacle(neighbors[i]->coord, p)) {
+					if (node->cumulativeCost + neighborCosts[i] < neighbors[i]->cumulativeCost &&
+					    !this->lineIntersectsObstacle(neighbors[i]->coord, node->coord)) {
 						neighbors[i]->rewire(node, neighborCosts[i]);
 					}
 				}

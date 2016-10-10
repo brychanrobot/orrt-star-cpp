@@ -1,6 +1,6 @@
 CC=g++
 
-CFLAGS=-c -Wall -O3 -march=native -std=c++11 -g
+CFLAGS=-c -Wall -O3 -march=native -std=c++11
 LDFLAGS=-lm -lGL -lGLU -lglfw -lX11 -lXrandr -lXinerama -lXi -lXxf86vm -lXcursor -lpthread -ldl -lboost_system
 
 all: directories orrtstar
@@ -20,7 +20,7 @@ bin/OnlineFmtStar.o: OnlineFmtStar.cpp
 bin/OnlineRrtStar.o: OnlineRrtStar.cpp
 	$(CC) $(CFLAGS) OnlineRrtStar.cpp $(LDFLAGS) -o $@
 
-bin/Planner.o: Planner.cpp
+bin/Planner.o: Planner.cpp Halton.hpp
 	$(CC) $(CFLAGS) Planner.cpp $(LDFLAGS) -o $@
 
 bin/Node.o: Node.cpp geom/Coord.hpp
