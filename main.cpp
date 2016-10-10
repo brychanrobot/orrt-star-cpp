@@ -142,12 +142,14 @@ int main(int argc, char* argv[]) {
 	int height = 700;
 	bool isFullscreen = false;
 	int monitorNum = 0;
+	bool useFmt = false;
 
 	// clang-format off
 	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
 	options.add_options()
 		("f,fullscreen", "Enable Fullscreen", cxxopts::value(isFullscreen))
-		("m,monitor", "Set Monitor Number", cxxopts::value(monitorNum));
+		("m,monitor", "Set Monitor Number", cxxopts::value(monitorNum))
+		("fmt", "Use FMT*", cxxopts::value(useFmt));
 	// clang-format on
 
 	options.parse(argc, argv);
@@ -197,7 +199,12 @@ int main(int argc, char* argv[]) {
 	}
 	*/
 
-	auto planner = OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height);
+	Planner* planner;
+	if (useFmt) {
+		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height);
+	} else {
+		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height);
+	}
 
 	auto lastTime = glfwGetTime();
 	auto interval = 1.0 / 60.0;
@@ -221,15 +228,15 @@ int main(int argc, char* argv[]) {
 
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			display(planner.root, planner.endNode, planner.bestPath, planner.obstacleRects);
+			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects);
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 
-			planner.moveStart(currentMoves.uavX, currentMoves.uavY);
+			planner->moveStart(currentMoves.uavX, currentMoves.uavY);
 		} else {
 			// iterations++;
-			planner.sample();
+			planner->sample();
 		}
 	}
 	glfwDestroyWindow(window);

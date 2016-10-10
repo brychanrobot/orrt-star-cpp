@@ -11,7 +11,8 @@
 
 using namespace std;
 
-Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height) {
+Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height)
+    : haltonX(19), haltonY(23) {
 	srand(time(NULL));  // initialize the random number generator so it happens
 
 	this->width = width;
@@ -21,7 +22,7 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRec
 	this->obstacleRects = obstacleRects;
 	this->maxSegment = maxSegment;
 	this->rewireNeighborhood = maxSegment * 6;
-	this->nodeAddThreshold = 0.015 * width * height;
+	this->nodeAddThreshold = 0.02 * width * height;
 
 	auto startPoint = this->randomOpenAreaPoint();
 	Coord endPoint;
@@ -147,7 +148,8 @@ void Planner::refreshBestPath() {
 
 Coord Planner::randomOpenAreaPoint() {
 	while (true) {
-		auto point = randomPoint(this->width, this->height);
+		auto point = Coord(this->haltonX.next() * this->width, this->haltonY.next() * this->height);
+		// auto point = randomPoint(this->width, this->height);
 		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
 			return point;
 		}
@@ -183,7 +185,7 @@ void Planner::findBestNeighborInNeighborhood(Coord point, Node *&bestNeighbor, v
 
 void Planner::findBestNeighbor(Coord point, Node *&bestNeighbor, double &bestCost, vector<Node *> &neighbors, vector<double> &neighborCosts) {
 	vector<RtreeValue> neighbor_tuples;
-	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
+	this->getNeighbors(point, this->rewireNeighborhood * 2, neighbor_tuples);
 
 	double bestCumulativeCost = std::numeric_limits<double>::max();
 	// double bestCost = std::numeric_limits<double>::max();
