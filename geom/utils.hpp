@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdlib>
 #include "Coord.hpp"
+#include "Coord3.hpp"
 
 inline double angleBetweenCoords(Coord &c1, Coord &c2) { return atan2(c2.y() - c1.y(), c2.x() - c1.x()); }
 

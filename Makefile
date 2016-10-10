@@ -3,13 +3,19 @@ CC=g++
 CFLAGS=-c -Wall -O3 -march=native -std=c++11 -g
 LDFLAGS=-lm -lGL -lGLU -lglfw -lX11 -lXrandr -lXinerama -lXi -lXxf86vm -lXcursor -lpthread -ldl -lboost_system
 
-all: directories orrtstar
+all: directories orrtstar three
+
+three: bin/threeMain.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/Planner.o bin/Node.o bin/geom/Rect.o
+	$(CC) bin/threeMain.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/Planner.o bin/Node.o bin/geom/Rect.o -o bin/three $(LDFLAGS)
 
 directories:
 	@mkdir -p bin/geom
 
 orrtstar: bin/main.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/Planner.o bin/Node.o bin/geom/Rect.o
 	$(CC) bin/main.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/Planner.o bin/Node.o bin/geom/Rect.o -o bin/orrtstar $(LDFLAGS)
+
+bin/threeMain.o: threeMain.cpp cxxopts.hpp
+		$(CC) $(CFLAGS) threeMain.cpp $(LDFLAGS) -o $@
 
 bin/main.o: main.cpp cxxopts.hpp
 	$(CC) $(CFLAGS) main.cpp $(LDFLAGS) -o $@
