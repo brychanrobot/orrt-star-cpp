@@ -142,22 +142,35 @@ void initDisplay(int width, int height, float ratio) {
 	perspectiveGL(75,width/height,1, 10000);
 	glScalef(1, -1, 1);
 	// glTranslatef(-width/2, -height/2, -1600);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// glEnable(GL_BLEND);
+	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	GLfloat light_position[] = {1.0, 1.0, 1.0, 0};
-	GLfloat light_color[] = {.5,.5,.5, 1.0};
-
-	// glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light_color);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-	// glDisable(GL_DEPTH_TEST);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+
+
+	GLfloat light_ambientColor[] = {0.01, 0.01, 0.01, 1};
+	GLfloat light_color[] = {1.0,1.0,1.0, 1.0};
+
+	// GLfloat light_position[] = {400.0, 200.0, 0.0, 1.0};
+	// glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_color);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_color);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_ambientColor);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	glShadeModel(GL_FLAT);
+
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+	// glDisable(GL_DEPTH_TEST);
 }
 
 
@@ -174,10 +187,10 @@ void drawPoint(Coord point, double radius) {
 
 void drawLine(Coord start, Coord end) {
 	glColor3d(0.5, 0.0, 1.0);
-	GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
-	GLfloat mat_diffuse[] = { .5, 0, 1.0, 1.0 };
-	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+	// GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
+	// GLfloat mat_diffuse[] = { .5, 0, 1.0, 1.0 };
+	// glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+	// glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glLineWidth(1);
 	glBegin(GL_LINES);
 	glVertex2d(start.x(), start.y());
@@ -196,10 +209,10 @@ void drawPath(deque<Coord>& path) {
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(3);
 	glColor3d(0.0, 1.0, 0.2);
-	GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
-	GLfloat mat_diffuse[] = { 0, 1.0, 0.2, 1.0 };
-	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+	// GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
+	// GLfloat mat_diffuse[] = { 0, 1.0, 0.2, 1.0 };
+	// glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+	// glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 
 	glBegin(GL_LINE_STRIP);
 	for (auto point : path) {
@@ -211,55 +224,77 @@ void drawPath(deque<Coord>& path) {
 }
 
 void drawObstacles(vector<Rect*>* obstacleRects) {
-	// glColor3d(0.0, 1.0, 1.0);
-	GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
-	GLfloat mat_diffuse[] = { 0, 0.7, 0.7, 1.0 };
-	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+	glColor3d(0.0, .3, .3);
+	// GLfloat mat_ambient[] = { 0, 0.7, 0.7, 1.0 };
+	// GLfloat mat_diffuse[] = { 0, 0.7, 0.7, 1.0 };
+	// glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+	// glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glBegin(GL_QUADS);
 	for (auto obstacle : *obstacleRects) {
-		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 100);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 100);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 100);
+		//Top
+		// glNormal3i(0,0,-1);
 		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 100);
+		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 100);
+		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 100);
+		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 100);
+
+		//Bottom
+		// glNormal3i(0,0,1);
 		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 0);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 0);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 0);
 		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 0);
+
+		//Back
+		// glNormal3i(1,0,0);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 100);
 		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 100);
 		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 0);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 0);
+
+		//Front
 		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 100);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 100);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 0);
 		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 0);
+
+		//Right
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 100);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 100);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 0);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 0);
-		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 100);
-		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 100);
-		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 0);
+
+		//Left
 		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 0);
+		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 0);
+		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 100);
+		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 100);
 	}
 	glEnd();
 }
 
 void placeCamera(Camera cam){
-  glMatrixMode(GL_MODELVIEW);
+	// glMatrixMode(GL_PROJECTION);
+	// glLoadIdentity();
+	// // glOrtho(0, width, 0, height, -1.f, 1.f);
+	// perspectiveGL(75,width/height,1, 10000);
+	// glScalef(1, -1, 1);
+
+	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	GLfloat light_position[] = {1.0, 1.0, 0.0, 1.0};
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	// rotate(cam.rot.x(), cos(radians(cam.rot.y())),0,sin(radians(cam.rot.y()))) //Translate to c++ later
 	glRotatef(cam.rot.y(), 0,1,0);
 	glTranslatef(cam.pos.x(), cam.pos.y(), cam.pos.z());
+	// glMatrixMode(GL_PROJECTION);
 }
 
 void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* obstacleRects, Camera cam) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	placeCamera(cam);
 
-	//TODO look up depthTest for draw order
 	drawObstacles(obstacleRects);
 	drawTree(root);
 
@@ -361,14 +396,14 @@ int main(int argc, char* argv[]) {
 			frames += 1;
 			iterations = 0;
 			*/
+
+			glClear(GL_COLOR_BUFFER_BIT);
 			cam.pos.setx(cam.pos.x()+currentMoves.cam.pos.x());
 			cam.pos.sety(cam.pos.y()+currentMoves.cam.pos.y());
 			cam.pos.setz(cam.pos.z()+currentMoves.cam.pos.z());
 			cam.rot.setx(cam.rot.x()+currentMoves.cam.rot.x());
 			cam.rot.sety(cam.rot.y()+currentMoves.cam.rot.y());
 			cam.rot.setz(cam.rot.z()+currentMoves.cam.rot.z());
-
-			glClear(GL_COLOR_BUFFER_BIT);
 
 			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, cam);
 
