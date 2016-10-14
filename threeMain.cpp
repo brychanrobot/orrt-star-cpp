@@ -135,7 +135,7 @@ void perspectiveGL( GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFa
 
 void initDisplay(int width, int height, float ratio) {
 	glViewport(0, 0, width, height);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	// glOrtho(0, width, 0, height, -1.f, 1.f);
@@ -150,7 +150,7 @@ void initDisplay(int width, int height, float ratio) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-
+	glfwSwapInterval(0);
 
 	GLfloat light_ambientColor[] = {0.01, 0.01, 0.01, 1};
 	GLfloat light_color[] = {1.0,1.0,1.0, 1.0};
@@ -162,7 +162,7 @@ void initDisplay(int width, int height, float ratio) {
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light_color);
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_ambientColor);
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	// glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 
@@ -291,12 +291,15 @@ void placeCamera(Camera cam){
 	// glMatrixMode(GL_PROJECTION);
 }
 
-void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* obstacleRects, Camera cam) {
+void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* obstacleRects, Camera& cam) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	placeCamera(cam);
 
 	drawObstacles(obstacleRects);
+
+	glDisable(GL_LIGHTING);
 	drawTree(root);
+	glEnable(GL_LIGHTING);
 
 	drawPath(bestPath);
 
@@ -375,10 +378,13 @@ int main(int argc, char* argv[]) {
 
 	auto lastTime = glfwGetTime();
 	auto interval = 1.0 / 60.0;
-	/*auto iterations = 0;
-	auto frames = 0;
-	double averageIterations = 0;*/
-
+	///*
+	// auto iterations = 0;
+	// auto frames = 0;
+	// double averageIterations = 0;
+	//*/
+	// double averageRenderTime = 0;
+	double beginFrame, endFrame, renderTime;
 	Moves currentMoves;
 	glfwSetWindowUserPointer(window, &currentMoves);
 
@@ -395,9 +401,8 @@ int main(int argc, char* argv[]) {
 			printf("i: %.2f\n", averageIterations);
 			frames += 1;
 			iterations = 0;
-			*/
-
-			glClear(GL_COLOR_BUFFER_BIT);
+			//*/
+			beginFrame = glfwGetTime();
 			cam.pos.setx(cam.pos.x()+currentMoves.cam.pos.x());
 			cam.pos.sety(cam.pos.y()+currentMoves.cam.pos.y());
 			cam.pos.setz(cam.pos.z()+currentMoves.cam.pos.z());
@@ -405,12 +410,18 @@ int main(int argc, char* argv[]) {
 			cam.rot.sety(cam.rot.y()+currentMoves.cam.rot.y());
 			cam.rot.setz(cam.rot.z()+currentMoves.cam.rot.z());
 
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, cam);
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 
+			endFrame = glfwGetTime();
+			renderTime = endFrame-beginFrame;
+			// averageRenderTime = (averageRenderTime*4.0 + renderTime) / (5.0);
+			printf("t: %.6f\n", renderTime);
 			planner->moveStart(currentMoves.uavX, currentMoves.uavY);
+
 		} else {
 			// iterations++;
 			planner->sample();
