@@ -11,8 +11,9 @@
 
 using namespace std;
 
-OnlineRrtStar::OnlineRrtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height)
-    : Planner(obstacleHash, obstacleRects, maxSegment, width, height) {
+OnlineRrtStar::OnlineRrtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
+                             bool usePseudoRandom)
+    : Planner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom) {
 	this->root->status = Status::Closed;
 	this->endNode->status = Status::Closed;
 
@@ -45,25 +46,26 @@ void OnlineRrtStar::sampleAndAdd() {
 		p = Coord(x, y);
 	}
 
-	if (!this->obstacleHash->at((int)p.y()).at((int)p.x())) {
+	if (!(*this->obstacleHash)[(int)p.y()][(int)p.x()]) {
 		vector<Node *> neighbors;
 		vector<double> neighborCosts;
 		Node *bestNeighbor = NULL;
 		double bestCost;
 		this->findBestNeighbor(p, bestNeighbor, bestCost, neighbors, neighborCosts);
 		if (bestNeighbor != NULL && bestNeighbor->status == Status::Closed) {
-			Node *node = new Node(p, NULL, 0.0);
+			Node *node = new Node(p, NULL, numeric_limits<double>::max());
 			node->status = Status::Closed;
 			bestNeighbor->addChild(node, bestCost);
-			rtree.insert(RtreeValue(p, node));
+			this->rtree.insert(RtreeValue(p, node));
 			this->numNodes++;
 
 			for (unsigned long i = 0; i < neighbors.size(); i++) {
 				if (neighbors[i]->status == Status::Closed && neighbors[i] != bestNeighbor) {
 					// auto cost = this->getCost(bestNeighbor, neighbors[i]);
-					if (node->cumulativeCost + neighborCosts[i] < neighbors[i]->cumulativeCost &&
-					    !this->lineIntersectsObstacle(neighbors[i]->coord, node->coord)) {
-						neighbors[i]->rewire(node, neighborCosts[i]);
+					if (node->cumulativeCost + neighborCosts[i] < neighbors[i]->cumulativeCost) {
+						if (!this->lineIntersectsObstacle(neighbors[i]->coord, node->coord)) {
+							neighbors[i]->rewire(node, neighborCosts[i]);
+						}
 					}
 				}
 			}

@@ -15,7 +15,8 @@ class OnlineFmtStar : public Planner {
 	void sampleAndAdd();
 
    public:
-	OnlineFmtStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, double maxSegment, int width, int height);
+	OnlineFmtStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
+	              bool usePseudoRandom);
 
 	void sample();
 };

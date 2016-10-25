@@ -34,7 +34,7 @@ class Planner {
 	double getCost(Coord &start, Coord &end);
 	void getNeighbors(Coord center, double radius, std::vector<RtreeValue> &results);
 	void findBestNeighbor(Coord point, Node *&bestNeighbor, double &bestCost, std::vector<Node *> &neighbors, std::vector<double> &neighborCosts);
-	void findBestNeighborInNeighborhood(Coord point, Node *&bestNeighbor, std::vector<Node *> &neighbors);
+	void findBestNeighborWithoutCost(Coord point, Node *&bestNeighbor, std::vector<Node *> &neighbors);
 	bool lineIntersectsObstacle(Coord &p1, Coord &p2);
 
 	void sampleWithRewire();
@@ -45,7 +45,9 @@ class Planner {
 	Node *endNode;
 	std::vector<Rect *> *obstacleRects;
 	std::deque<Coord> bestPath;
-	Planner(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, double maxSegment, int width, int height);
+	bool usePseudoRandom;
+	Planner(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
+	        bool usePseudoRandom);
 	virtual void sample() = 0;
 	void moveStart(double dx, double dy);
 };
