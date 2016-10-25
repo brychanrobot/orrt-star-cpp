@@ -11,7 +11,7 @@ using namespace std;
 struct Camera {
 	Coord3 pos = Coord3(0,0,0);
 	Coord3 rot = Coord3(0,0,0);
-};
+} camera;
 
 struct Moves {
 	double uavX = 0.0;
@@ -20,6 +20,8 @@ struct Moves {
 	double endY = 0.0;
 	Camera cam;
 };
+
+const double PI = 3.141592654;
 
 
 const double MOVERATE = 3;
@@ -77,30 +79,38 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_W:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setz(MOVERATE);
+				currentMoves->cam.pos.setx(-sin(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setz(cos(camera.rot.y()*PI/180) * MOVERATE);
 			} else {
+				currentMoves->cam.pos.setx(0);
 				currentMoves->cam.pos.setz(0);
 			}
 			break;
 		case GLFW_KEY_S:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setz(-MOVERATE);
+				currentMoves->cam.pos.setx(sin(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setz(-cos(camera.rot.y()*PI/180) * MOVERATE);
 			} else {
+				currentMoves->cam.pos.setx(0);
 				currentMoves->cam.pos.setz(0);
 			}
 			break;
 		case GLFW_KEY_A:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setx(MOVERATE);
+				currentMoves->cam.pos.setx(cos(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setz(sin(camera.rot.y()*PI/180) * MOVERATE);
 			} else {
 				currentMoves->cam.pos.setx(0);
+				currentMoves->cam.pos.setz(0);
 			}
 			break;
 		case GLFW_KEY_D:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setx(-MOVERATE);
+				currentMoves->cam.pos.setx(-cos(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setz(-sin(camera.rot.y()*PI/180) * MOVERATE);
 			} else {
 				currentMoves->cam.pos.setx(0);
+				currentMoves->cam.pos.setz(0);
 			}
 			break;
 		case GLFW_KEY_Q:
@@ -384,12 +394,12 @@ int main(int argc, char* argv[]) {
 	// double averageIterations = 0;
 	//*/
 	// double averageRenderTime = 0;
-	double beginFrame, endFrame, renderTime;
+	// double beginFrame, endFrame, renderTime;
 	Moves currentMoves;
 	glfwSetWindowUserPointer(window, &currentMoves);
 
-	Camera cam;
-	cam.pos = Coord3(-width/2, -height/2, -1600);
+	// Camera cam;
+	camera.pos = Coord3(-width/2, -height/2, -1600);
 	// glfwSetWindowUserPointer(window, &cam);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -402,24 +412,24 @@ int main(int argc, char* argv[]) {
 			frames += 1;
 			iterations = 0;
 			//*/
-			beginFrame = glfwGetTime();
-			cam.pos.setx(cam.pos.x()+currentMoves.cam.pos.x());
-			cam.pos.sety(cam.pos.y()+currentMoves.cam.pos.y());
-			cam.pos.setz(cam.pos.z()+currentMoves.cam.pos.z());
-			cam.rot.setx(cam.rot.x()+currentMoves.cam.rot.x());
-			cam.rot.sety(cam.rot.y()+currentMoves.cam.rot.y());
-			cam.rot.setz(cam.rot.z()+currentMoves.cam.rot.z());
+			// beginFrame = glfwGetTime();
+			camera.pos.setx(camera.pos.x()+currentMoves.cam.pos.x());
+			camera.pos.sety(camera.pos.y()+currentMoves.cam.pos.y());
+			camera.pos.setz(camera.pos.z()+currentMoves.cam.pos.z());
+			camera.rot.setx(camera.rot.x()+currentMoves.cam.rot.x());
+			camera.rot.sety(camera.rot.y()+currentMoves.cam.rot.y());
+			camera.rot.setz(camera.rot.z()+currentMoves.cam.rot.z());
 
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, cam);
+			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, camera);
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 
-			endFrame = glfwGetTime();
-			renderTime = endFrame-beginFrame;
-			// averageRenderTime = (averageRenderTime*4.0 + renderTime) / (5.0);
-			printf("t: %.6f\n", renderTime);
+			// endFrame = glfwGetTime();
+			// renderTime = endFrame-beginFrame;
+			// // averageRenderTime = (averageRenderTime*4.0 + renderTime) / (5.0);
+			// printf("t: %.6f\n", renderTime);
 			planner->moveStart(currentMoves.uavX, currentMoves.uavY);
 
 		} else {
