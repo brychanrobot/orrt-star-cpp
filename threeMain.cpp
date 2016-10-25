@@ -1,3 +1,5 @@
+//#include <GL/glut.h>
+#include <GL/glu.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -132,24 +134,24 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 	// printf("key: %d\n, (%.2f, %.2f)", key, currentMoves->uavX, currentMoves->uavY);
 }
 
-void perspectiveGL( GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar ) {
+void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar) {
 	const GLdouble pi = 3.1415926535897932384626433832795;
 	GLdouble fW, fH;
 
-	//fH = tan( (fovY / 2) / 180 * pi ) * zNear;
-	fH = tan( fovY / 360 * pi ) * zNear;
+	// fH = tan( (fovY / 2) / 180 * pi ) * zNear;
+	fH = tan(fovY / 360 * pi) * zNear;
 	fW = fH * aspect;
 
-	glFrustum( -fW, fW, -fH, fH, zNear, zFar );
+	glFrustum(-fW, fW, -fH, fH, zNear, zFar);
 }
 
 void initDisplay(int width, int height, float ratio) {
 	glViewport(0, 0, width, height);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	// glOrtho(0, width, 0, height, -1.f, 1.f);
-	perspectiveGL(75,width/height,1, 10000);
+	perspectiveGL(75, width / height, 1, 10000);
 	glScalef(1, -1, 1);
 	// glTranslatef(-width/2, -height/2, -1600);
 	// glEnable(GL_BLEND);
@@ -163,7 +165,7 @@ void initDisplay(int width, int height, float ratio) {
 	glfwSwapInterval(0);
 
 	GLfloat light_ambientColor[] = {0.01, 0.01, 0.01, 1};
-	GLfloat light_color[] = {1.0,1.0,1.0, 1.0};
+	GLfloat light_color[] = {1.0, 1.0, 1.0, 1.0};
 
 	// GLfloat light_position[] = {400.0, 200.0, 0.0, 1.0};
 	// glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -183,16 +185,20 @@ void initDisplay(int width, int height, float ratio) {
 	// glDisable(GL_DEPTH_TEST);
 }
 
-
 void drawPoint(Coord point, double radius) {
-	glEnable(GL_POINT_SMOOTH);
+	glPushMatrix();
+	glTranslated(point.x(), point.y(), 0);
+	glColor3d(1.0, 1.0, 0);
+	gluSphere(gluNewQuadric(), radius, 20, 20);
+	glPopMatrix();
+	/*glEnable(GL_POINT_SMOOTH);
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	glPointSize(radius);
 	glColor3d(1.0, 1.0, 0);
 
 	glBegin(GL_POINTS);
 	glVertex2d(point.x(), point.y());
-	glEnd();
+	glEnd();*/
 }
 
 void drawLine(Coord start, Coord end) {
@@ -241,40 +247,40 @@ void drawObstacles(vector<Rect*>* obstacleRects) {
 	// glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glBegin(GL_QUADS);
 	for (auto obstacle : *obstacleRects) {
-		//Top
+		// Top
 		// glNormal3i(0,0,-1);
 		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 100);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 100);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 100);
 		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 100);
 
-		//Bottom
+		// Bottom
 		// glNormal3i(0,0,1);
 		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 0);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 0);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 0);
 		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 0);
 
-		//Back
+		// Back
 		// glNormal3i(1,0,0);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 100);
 		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 100);
 		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 0);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 0);
 
-		//Front
+		// Front
 		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 100);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 100);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 0);
 		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 0);
 
-		//Right
+		// Right
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 100);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 100);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 0);
 		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 0);
 
-		//Left
+		// Left
 		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 0);
 		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 0);
 		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 100);
@@ -283,7 +289,7 @@ void drawObstacles(vector<Rect*>* obstacleRects) {
 	glEnd();
 }
 
-void placeCamera(Camera cam){
+void placeCamera(Camera cam) {
 	// glMatrixMode(GL_PROJECTION);
 	// glLoadIdentity();
 	// // glOrtho(0, width, 0, height, -1.f, 1.f);
@@ -296,7 +302,7 @@ void placeCamera(Camera cam){
 	GLfloat light_position[] = {1.0, 1.0, 0.0, 1.0};
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	// rotate(cam.rot.x(), cos(radians(cam.rot.y())),0,sin(radians(cam.rot.y()))) //Translate to c++ later
-	glRotatef(cam.rot.y(), 0,1,0);
+	glRotatef(cam.rot.y(), 0, 1, 0);
 	glTranslatef(cam.pos.x(), cam.pos.y(), cam.pos.z());
 	// glMatrixMode(GL_PROJECTION);
 }
@@ -380,11 +386,11 @@ int main(int argc, char* argv[]) {
 	*/
 
 	Planner* planner;
-  if (useFmt) {
-    planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height);
-  } else {
-    planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height);
-  }
+	if (useFmt) {
+		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, false);
+	} else {
+		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, false);
+	}
 
 	auto lastTime = glfwGetTime();
 	auto interval = 1.0 / 60.0;

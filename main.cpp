@@ -143,13 +143,15 @@ int main(int argc, char* argv[]) {
 	bool isFullscreen = false;
 	int monitorNum = 0;
 	bool useFmt = false;
+	bool usePseudoRandom = false;
 
 	// clang-format off
 	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
 	options.add_options()
 		("f,fullscreen", "Enable Fullscreen", cxxopts::value(isFullscreen))
 		("m,monitor", "Set Monitor Number", cxxopts::value(monitorNum))
-		("fmt", "Use FMT*", cxxopts::value(useFmt));
+		("fmt", "Use FMT*", cxxopts::value(useFmt))
+		("p,pr", "Use pseudo-random numbers", cxxopts::value(usePseudoRandom));
 	// clang-format on
 
 	options.parse(argc, argv);
@@ -201,9 +203,9 @@ int main(int argc, char* argv[]) {
 
 	Planner* planner;
 	if (useFmt) {
-		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height);
+		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
 	} else {
-		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height);
+		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
 	}
 
 	auto lastTime = glfwGetTime();
