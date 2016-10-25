@@ -174,6 +174,7 @@ void initDisplay(int width, int height, float ratio) {
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light_color);
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_ambientColor);
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 	// glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
@@ -299,11 +300,11 @@ void placeCamera(Camera cam) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	GLfloat light_position[] = {1.0, 1.0, 0.0, 1.0};
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	GLfloat light_position[] = {500.0, 200.0, 120.0, 1.0};
 	// rotate(cam.rot.x(), cos(radians(cam.rot.y())),0,sin(radians(cam.rot.y()))) //Translate to c++ later
 	glRotatef(cam.rot.y(), 0, 1, 0);
 	glTranslatef(cam.pos.x(), cam.pos.y(), cam.pos.z());
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	// glMatrixMode(GL_PROJECTION);
 }
 
