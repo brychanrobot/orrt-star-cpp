@@ -11,12 +11,14 @@
 
 using namespace std;
 
-Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height, bool usePseudoRandom)
+Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height, int depth,
+                 bool usePseudoRandom)
     : haltonX(19), haltonY(23) {
 	srand(time(NULL));  // initialize the random number generator so it happens
 
 	this->width = width;
 	this->height = height;
+	this->depth = depth;
 	this->mapArea = width * height;
 	this->obstacleHash = obstacleHash;
 	this->obstacleRects = obstacleRects;
@@ -111,7 +113,7 @@ void Planner::sampleWithRewire() {
 
 void Planner::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
-		Coord point(clamp(this->root->coord.x() + dx, 0, this->width - 1), clamp(this->root->coord.y() + dy, 0, this->height - 1));
+		Coord point(clamp(this->root->coord.x() + dx, 0, this->width - 1), clamp(this->root->coord.y() + dy, 0, this->height - 1), this->depth);
 
 		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
 			auto newRoot = new Node(point, NULL, 0.0);
@@ -152,9 +154,9 @@ Coord Planner::randomOpenAreaPoint() {
 	while (true) {
 		Coord point;
 		if (this->usePseudoRandom) {
-			point = randomPoint(this->width, this->height);
+			point = randomPoint(this->width, this->height, this->depth);
 		} else {
-			point = Coord(this->haltonX.next() * this->width, this->haltonY.next() * this->height);
+			point = Coord(this->haltonX.next() * this->width, this->haltonY.next() * this->height, this->depth);
 		}
 		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
 			return point;
@@ -166,7 +168,7 @@ double Planner::getCost(Node *start, Node *end) { return this->getCost(start->co
 double Planner::getCost(Coord &start, Coord &end) { return euclideanDistance(start, end); }
 
 void Planner::getNeighbors(Coord center, double radius, vector<RtreeValue> &results) {
-	box query_box(point(center.x() - radius, center.y() - radius), point(center.x() + radius, center.y() + radius));
+	box query_box(point(center.x() - radius, center.y() - radius, this->depth - 1), point(center.x() + radius, center.y() + radius, this->depth + 1));
 	this->rtree.query(boost::geometry::index::intersects(query_box), back_inserter(results));
 }
 

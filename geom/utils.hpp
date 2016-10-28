@@ -14,6 +14,6 @@ inline double euclideanDistance(Coord &c1, Coord &c2) {
 	return sqrt(dx * dx + dy * dy);
 }
 
-inline Coord randomPoint(int dx, int dy) { return Coord(rand() % dx, rand() % dy); }
+inline Coord randomPoint(int dx, int dy, int dz) { return Coord(rand() % dx, rand() % dy, dz); }
 
 inline double clamp(double val, double lo, double hi) { return std::min(std::max(val, lo), hi); }

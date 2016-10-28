@@ -11,8 +11,8 @@
 using namespace std;
 
 struct Camera {
-	Coord3 pos = Coord3(0,0,0);
-	Coord3 rot = Coord3(0,0,0);
+	Coord3 pos = Coord3(0, 0, 0);
+	Coord3 rot = Coord3(0, 0, 0);
 } camera;
 
 struct Moves {
@@ -24,7 +24,6 @@ struct Moves {
 };
 
 const double PI = 3.141592654;
-
 
 const double MOVERATE = 3;
 
@@ -39,14 +38,14 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_UP:
 			if (action != GLFW_RELEASE) {
-				currentMoves->uavY = -MOVERATE;
+				currentMoves->uavY = MOVERATE;
 			} else {
 				currentMoves->uavY = 0;
 			}
 			break;
 		case GLFW_KEY_DOWN:
 			if (action != GLFW_RELEASE) {
-				currentMoves->uavY = MOVERATE;
+				currentMoves->uavY = -MOVERATE;
 			} else {
 				currentMoves->uavY = 0;
 			}
@@ -81,8 +80,8 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_W:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setx(-sin(camera.rot.y()*PI/180) * MOVERATE);
-				currentMoves->cam.pos.setz(cos(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setx(-sin(camera.rot.y() * PI / 180) * MOVERATE);
+				currentMoves->cam.pos.setz(cos(camera.rot.y() * PI / 180) * MOVERATE);
 			} else {
 				currentMoves->cam.pos.setx(0);
 				currentMoves->cam.pos.setz(0);
@@ -90,8 +89,8 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_S:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setx(sin(camera.rot.y()*PI/180) * MOVERATE);
-				currentMoves->cam.pos.setz(-cos(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setx(sin(camera.rot.y() * PI / 180) * MOVERATE);
+				currentMoves->cam.pos.setz(-cos(camera.rot.y() * PI / 180) * MOVERATE);
 			} else {
 				currentMoves->cam.pos.setx(0);
 				currentMoves->cam.pos.setz(0);
@@ -99,8 +98,8 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_A:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setx(cos(camera.rot.y()*PI/180) * MOVERATE);
-				currentMoves->cam.pos.setz(sin(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setx(cos(camera.rot.y() * PI / 180) * MOVERATE);
+				currentMoves->cam.pos.setz(sin(camera.rot.y() * PI / 180) * MOVERATE);
 			} else {
 				currentMoves->cam.pos.setx(0);
 				currentMoves->cam.pos.setz(0);
@@ -108,8 +107,8 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_D:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setx(-cos(camera.rot.y()*PI/180) * MOVERATE);
-				currentMoves->cam.pos.setz(-sin(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setx(-cos(camera.rot.y() * PI / 180) * MOVERATE);
+				currentMoves->cam.pos.setz(-sin(camera.rot.y() * PI / 180) * MOVERATE);
 			} else {
 				currentMoves->cam.pos.setx(0);
 				currentMoves->cam.pos.setz(0);
@@ -152,7 +151,7 @@ void initDisplay(int width, int height, float ratio) {
 	glLoadIdentity();
 	// glOrtho(0, width, 0, height, -1.f, 1.f);
 	perspectiveGL(75, width / height, 1, 10000);
-	glScalef(1, -1, 1);
+	glScalef(1, 1, 1);
 	// glTranslatef(-width/2, -height/2, -1600);
 	// glEnable(GL_BLEND);
 	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -188,7 +187,7 @@ void initDisplay(int width, int height, float ratio) {
 
 void drawPoint(Coord point, double radius) {
 	glPushMatrix();
-	glTranslated(point.x(), point.y(), 0);
+	glTranslated(point.x(), point.y(), point.z());
 	glColor3d(1.0, 1.0, 0);
 	gluSphere(gluNewQuadric(), radius, 20, 20);
 	glPopMatrix();
@@ -210,8 +209,8 @@ void drawLine(Coord start, Coord end) {
 	// glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glLineWidth(1);
 	glBegin(GL_LINES);
-	glVertex2d(start.x(), start.y());
-	glVertex2d(end.x(), end.y());
+	glVertex3d(start.x(), start.y(), start.z());
+	glVertex3d(end.x(), end.y(), end.z());
 	glEnd();
 }
 
@@ -233,7 +232,7 @@ void drawPath(deque<Coord>& path) {
 
 	glBegin(GL_LINE_STRIP);
 	for (auto point : path) {
-		glVertex2d(point.x(), point.y());
+		glVertex3d(point.x(), point.y(), point.z());
 	}
 	glEnd();
 
@@ -372,7 +371,7 @@ int main(int argc, char* argv[]) {
 	initDisplay(width, height, ratio);
 
 	vector<Rect*> obstacleRects;
-	generateObstacleRects(width, height, 10, obstacleRects);
+	generateObstacleRects(width, height, 500, 10, obstacleRects);
 
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
 	generateObstacleHash(obstacleRects, obstacleHash);
@@ -388,25 +387,25 @@ int main(int argc, char* argv[]) {
 
 	Planner* planner;
 	if (useFmt) {
-		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, false);
+		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, 500, false);
 	} else {
-		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, false);
+		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, 500, false);
 	}
 
 	auto lastTime = glfwGetTime();
-	auto interval = 1.0 / 60.0;
+	auto interval = 1.0 / 30.0;
 	///*
 	// auto iterations = 0;
 	// auto frames = 0;
 	// double averageIterations = 0;
 	//*/
 	// double averageRenderTime = 0;
-	// double beginFrame, endFrame, renderTime;
+	double beginFrame, endFrame, renderTime;
 	Moves currentMoves;
 	glfwSetWindowUserPointer(window, &currentMoves);
 
 	// Camera cam;
-	camera.pos = Coord3(-width/2, -height/2, -1600);
+	camera.pos = Coord3(-width / 2, -height / 2, -1600);
 	// glfwSetWindowUserPointer(window, &cam);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -419,24 +418,24 @@ int main(int argc, char* argv[]) {
 			frames += 1;
 			iterations = 0;
 			//*/
-			// beginFrame = glfwGetTime();
-			camera.pos.setx(camera.pos.x()+currentMoves.cam.pos.x());
-			camera.pos.sety(camera.pos.y()+currentMoves.cam.pos.y());
-			camera.pos.setz(camera.pos.z()+currentMoves.cam.pos.z());
-			camera.rot.setx(camera.rot.x()+currentMoves.cam.rot.x());
-			camera.rot.sety(camera.rot.y()+currentMoves.cam.rot.y());
-			camera.rot.setz(camera.rot.z()+currentMoves.cam.rot.z());
+			beginFrame = glfwGetTime();
+			camera.pos.setx(camera.pos.x() + currentMoves.cam.pos.x());
+			camera.pos.sety(camera.pos.y() + currentMoves.cam.pos.y());
+			camera.pos.setz(camera.pos.z() + currentMoves.cam.pos.z());
+			camera.rot.setx(camera.rot.x() + currentMoves.cam.rot.x());
+			camera.rot.sety(camera.rot.y() + currentMoves.cam.rot.y());
+			camera.rot.setz(camera.rot.z() + currentMoves.cam.rot.z());
 
-			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, camera);
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 
-			// endFrame = glfwGetTime();
-			// renderTime = endFrame-beginFrame;
+			endFrame = glfwGetTime();
+			renderTime = endFrame - beginFrame;
 			// // averageRenderTime = (averageRenderTime*4.0 + renderTime) / (5.0);
-			// printf("t: %.6f\n", renderTime);
+			printf("t: %.6f\n", renderTime);
 			planner->moveStart(currentMoves.uavX, currentMoves.uavY);
 
 		} else {

@@ -19,6 +19,7 @@ class Planner {
    protected:
 	int width;
 	int height;
+	int depth;
 	int mapArea;
 	std::vector<std::vector<bool>> *obstacleHash;
 	int maxSegment;
@@ -46,7 +47,7 @@ class Planner {
 	std::vector<Rect *> *obstacleRects;
 	std::deque<Coord> bestPath;
 	bool usePseudoRandom;
-	Planner(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
+	Planner(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, double maxSegment, int width, int height, int depth,
 	        bool usePseudoRandom);
 	virtual void sample() = 0;
 	void moveStart(double dx, double dy);

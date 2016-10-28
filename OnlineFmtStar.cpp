@@ -6,9 +6,9 @@
 
 using namespace std;
 
-OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
+OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height, int depth,
                              bool usePseudoRandom)
-    : Planner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom) {
+    : Planner(obstacleHash, obstacleRects, maxSegment, width, height, depth, usePseudoRandom) {
 	this->open.push(this->root);
 
 	for (int n = 0; n < this->nodeAddThreshold; n++) {

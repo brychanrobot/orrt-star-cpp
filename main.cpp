@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
 	initDisplay(width, height, ratio);
 
 	vector<Rect*> obstacleRects;
-	generateObstacleRects(width, height, 10, obstacleRects);
+	generateObstacleRects(width, height, 0, 10, obstacleRects);
 
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
 	generateObstacleHash(obstacleRects, obstacleHash);
@@ -203,9 +203,9 @@ int main(int argc, char* argv[]) {
 
 	Planner* planner;
 	if (useFmt) {
-		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
+		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, 500, usePseudoRandom);
 	} else {
-		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
+		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, 500, usePseudoRandom);
 	}
 
 	auto lastTime = glfwGetTime();

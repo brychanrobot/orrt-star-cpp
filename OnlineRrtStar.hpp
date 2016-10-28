@@ -12,7 +12,7 @@ class OnlineRrtStar : public Planner {
 
    public:
 	OnlineRrtStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
-	              bool usePseudoRandom);
+	              int depth, bool usePseudoRandom);
 
 	void sample();
 };
