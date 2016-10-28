@@ -25,6 +25,7 @@ void Node::removeChild(Node* child) {
 
 void Node::rewire(Node* newParent, double cost) {
 	if (this->parent != NULL) {
+		auto size = this->parent->children.size();
 		this->parent->removeChild(this);
 	}
 	newParent->children.push_back(this);

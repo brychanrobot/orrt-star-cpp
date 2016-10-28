@@ -191,7 +191,7 @@ void Planner::findBestNeighborWithoutCost(Coord point, Node *&bestNeighbor, vect
 
 void Planner::findBestNeighbor(Coord point, Node *&bestNeighbor, double &bestCost, vector<Node *> &neighbors, vector<double> &neighborCosts) {
 	vector<RtreeValue> neighbor_tuples;
-	this->getNeighbors(point, this->rewireNeighborhood * 3, neighbor_tuples);
+	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
 
 	double bestCumulativeCost = std::numeric_limits<double>::max();
 	// double bestCost = std::numeric_limits<double>::max();
@@ -203,7 +203,7 @@ void Planner::findBestNeighbor(Coord point, Node *&bestNeighbor, double &bestCos
 		neighborCosts.push_back(cost);
 		if (neighbor->status == Status::Closed && (neighbor->cumulativeCost + cost < bestCumulativeCost)) {
 			bestCost = cost;
-			bestCumulativeCost = neighbor->cumulativeCost;
+			bestCumulativeCost = neighbor->cumulativeCost + cost;
 			bestNeighbor = neighbor;
 		}
 	}

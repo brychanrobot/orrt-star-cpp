@@ -24,7 +24,7 @@ void OnlineRrtStar::sample() {
 	if (this->numNodes < this->nodeAddThreshold) {
 		this->sampleAndAdd();
 	} else {
-		this->sampleWithRewire();
+		// this->sampleWithRewire();
 	}
 
 	this->refreshBestPath();
@@ -42,7 +42,6 @@ void OnlineRrtStar::sampleAndAdd() {
 		auto x = this->maxSegment * cos(angle) + nn->coord.x();
 		auto y = this->maxSegment * sin(angle) + nn->coord.y();
 
-		// printf("nn: (%.2f, %.2f), p: (%.2f, %.2f), np: (%.2f, %.2f), a:%.2f\n", nn->coord.x(), nn->coord.y(), p.x(), p.y(), x, y, 6.282 * angle);
 		p = Coord(x, y);
 	}
 
@@ -52,7 +51,7 @@ void OnlineRrtStar::sampleAndAdd() {
 		Node *bestNeighbor = NULL;
 		double bestCost;
 		this->findBestNeighbor(p, bestNeighbor, bestCost, neighbors, neighborCosts);
-		if (bestNeighbor != NULL && bestNeighbor->status == Status::Closed) {
+		if (bestNeighbor != NULL && bestNeighbor->status == Status::Closed && !this->lineIntersectsObstacle(p, bestNeighbor->coord)) {
 			Node *node = new Node(p, NULL, numeric_limits<double>::max());
 			node->status = Status::Closed;
 			bestNeighbor->addChild(node, bestCost);
@@ -61,6 +60,9 @@ void OnlineRrtStar::sampleAndAdd() {
 
 			for (unsigned long i = 0; i < neighbors.size(); i++) {
 				if (neighbors[i]->status == Status::Closed && neighbors[i] != bestNeighbor) {
+					// printf("nc: %.2f\n", neighbors[i]->cumulativeCost);
+					// printf("pot: %.2f, curr: %.2f\n", min(node->cumulativeCost + neighborCosts[i], 10000.0),
+					//       min(neighbors[i]->cumulativeCost, 10000.0));
 					// auto cost = this->getCost(bestNeighbor, neighbors[i]);
 					if (node->cumulativeCost + neighborCosts[i] < neighbors[i]->cumulativeCost) {
 						if (!this->lineIntersectsObstacle(neighbors[i]->coord, node->coord)) {
