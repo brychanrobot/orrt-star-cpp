@@ -24,6 +24,7 @@ class Planner {
 	int maxSegment;
 	int rewireNeighborhood;
 	int nodeAddThreshold;
+  double maxTravel = 2;
 	Rtree rtree;
 
 	HaltonSampler haltonX;
@@ -32,12 +33,14 @@ class Planner {
 	Coord randomOpenAreaPoint();
 	double getCost(Node *start, Node *end);
 	double getCost(Coord &start, Coord &end);
+  Node* getNearestNeighbor(Coord& point);
 	void getNeighbors(Coord center, double radius, std::vector<RtreeValue> &results);
 	void findBestNeighbor(Coord point, Node *&bestNeighbor, double &bestCost, std::vector<Node *> &neighbors, std::vector<double> &neighborCosts);
 	void findBestNeighborWithoutCost(Coord point, Node *&bestNeighbor, std::vector<Node *> &neighbors);
 	bool lineIntersectsObstacle(Coord &p1, Coord &p2);
 
 	void sampleWithRewire();
+  void replan(Coord& newEndpoint);
 	void refreshBestPath();
 
    public:
@@ -50,4 +53,6 @@ class Planner {
 	        bool usePseudoRandom);
 	virtual void sample() = 0;
 	void moveStart(double dx, double dy);
+  void randomReplan();
+  void followPath();
 };

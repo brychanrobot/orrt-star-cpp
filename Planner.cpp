@@ -40,8 +40,8 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRec
 	this->endNode = new Node(endPoint, NULL, std::numeric_limits<double>::max() / 2.0);
 	this->rtree.insert(RtreeValue(endPoint, endNode));
 
-	printf("s: (%.2f, %.2f)\n", startPoint.x(), startPoint.y());
-	printf("e: (%.2f, %.2f)\n\n\n", endPoint.x(), endPoint.y());
+	//printf("s: (%.2f, %.2f)\n", startPoint.x(), startPoint.y());
+	//printf("e: (%.2f, %.2f)\n\n\n", endPoint.x(), endPoint.y());
 }
 
 bool Planner::lineIntersectsObstacle(Coord &p1, Coord &p2) {
@@ -137,6 +137,28 @@ void Planner::moveStart(double dx, double dy) {
 	}
 }
 
+void Planner::followPath() {
+  if (this->bestPath.size() > 2) {
+    auto currentWaypoint = this->bestPath[1];
+    auto angle = angleBetweenCoords(this->root->coord, currentWaypoint);
+    auto dx = this->maxTravel * cos(angle);
+    auto dy = this->maxTravel * sin(angle);
+
+    this->moveStart(dx, dy);
+  }
+}
+
+void Planner::replan(Coord& newEndpoint)
+{
+  this->endNode = this->getNearestNeighbor(newEndpoint);
+  this->refreshBestPath();
+}
+
+void Planner::randomReplan() {
+  auto p = this->randomOpenAreaPoint();
+  this->replan(p);
+}
+
 void Planner::refreshBestPath() {
 	if (this->endNode->parent != NULL) {
 		this->bestPath.clear();
@@ -165,6 +187,12 @@ Coord Planner::randomOpenAreaPoint() {
 double Planner::getCost(Node *start, Node *end) { return this->getCost(start->coord, end->coord); }
 double Planner::getCost(Coord &start, Coord &end) { return euclideanDistance(start, end); }
 
+Node* Planner::getNearestNeighbor(Coord& p) {
+  vector<RtreeValue> result;
+	this->rtree.query(boost::geometry::index::nearest((point)p, 1), back_inserter(result));
+	return result[0].second;
+}
+
 void Planner::getNeighbors(Coord center, double radius, vector<RtreeValue> &results) {
 	box query_box(point(center.x() - radius, center.y() - radius), point(center.x() + radius, center.y() + radius));
 	this->rtree.query(boost::geometry::index::intersects(query_box), back_inserter(results));
@@ -174,7 +202,7 @@ void Planner::findBestNeighborWithoutCost(Coord point, Node *&bestNeighbor, vect
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
 
-	double bestCumulativeCost = std::numeric_limits<double>::max();
+	double bestCumulativeCost = 9999999999999999;///std::numeric_limits<double>::max();
 	// double bestCost = std::numeric_limits<double>::max();
 
 	for (auto neighbor_tuple : neighbor_tuples) {
@@ -193,7 +221,7 @@ void Planner::findBestNeighbor(Coord point, Node *&bestNeighbor, double &bestCos
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
 
-	double bestCumulativeCost = std::numeric_limits<double>::max();
+	double bestCumulativeCost = 999999999999999;//std::numeric_limits<double>::max();
 	// double bestCost = std::numeric_limits<double>::max();
 
 	for (auto neighbor_tuple : neighbor_tuples) {

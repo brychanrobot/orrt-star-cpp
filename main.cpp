@@ -144,6 +144,7 @@ int main(int argc, char* argv[]) {
 	int monitorNum = 0;
 	bool useFmt = false;
 	bool usePseudoRandom = false;
+	double replanFrequency = -1;
 
 	// clang-format off
 	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
@@ -151,7 +152,8 @@ int main(int argc, char* argv[]) {
 		("f,fullscreen", "Enable Fullscreen", cxxopts::value(isFullscreen))
 		("m,monitor", "Set Monitor Number", cxxopts::value(monitorNum))
 		("fmt", "Use FMT*", cxxopts::value(useFmt))
-		("p,pr", "Use pseudo-random numbers", cxxopts::value(usePseudoRandom));
+		("p,pr", "Use pseudo-random numbers", cxxopts::value(usePseudoRandom))
+		("r,replan", "Replan frequency", cxxopts::value(replanFrequency));
 	// clang-format on
 
 	options.parse(argc, argv);
@@ -208,8 +210,11 @@ int main(int argc, char* argv[]) {
 		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
 	}
 
-	auto lastTime = glfwGetTime();
-	auto interval = 1.0 / 60.0;
+	auto lastFrame = glfwGetTime();
+	auto frameInterval = 1.0 / 30.0;
+
+	auto lastReplan = glfwGetTime();
+	auto replanInterval = 1.0 / replanFrequency;
 	/*auto iterations = 0;
 	auto frames = 0;
 	double averageIterations = 0;*/
@@ -219,8 +224,8 @@ int main(int argc, char* argv[]) {
 
 	while (!glfwWindowShouldClose(window)) {
 		auto currentTime = glfwGetTime();
-		if (currentTime - lastTime >= interval) {
-			lastTime = currentTime;
+		if (currentTime - lastFrame >= frameInterval) {
+			lastFrame = currentTime;
 			/*
 			averageIterations = (averageIterations * frames + iterations) / (frames + 1.0);
 			printf("i: %.2f\n", averageIterations);
@@ -235,7 +240,11 @@ int main(int argc, char* argv[]) {
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 
-			planner->moveStart(currentMoves.uavX, currentMoves.uavY);
+			planner->followPath();
+			//planner->moveStart(currentMoves.uavX, currentMoves.uavY);
+		} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval){
+			lastReplan = currentTime;
+			planner->randomReplan();
 		} else {
 			// iterations++;
 			planner->sample();

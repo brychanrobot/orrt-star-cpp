@@ -24,7 +24,7 @@ void OnlineRrtStar::sample() {
 	if (this->numNodes < this->nodeAddThreshold) {
 		this->sampleAndAdd();
 	} else {
-		// this->sampleWithRewire();
+		this->sampleWithRewire();
 	}
 
 	this->refreshBestPath();
@@ -32,9 +32,7 @@ void OnlineRrtStar::sample() {
 
 void OnlineRrtStar::sampleAndAdd() {
 	auto p = this->randomOpenAreaPoint();
-	vector<RtreeValue> result;
-	this->rtree.query(boost::geometry::index::nearest((point)p, 1), back_inserter(result));
-	auto nn = result[0].second;
+	auto nn = this->getNearestNeighbor(p);
 	auto dist = euclideanDistance(p, nn->coord);
 
 	if (dist > this->maxSegment) {
@@ -52,7 +50,8 @@ void OnlineRrtStar::sampleAndAdd() {
 		double bestCost;
 		this->findBestNeighbor(p, bestNeighbor, bestCost, neighbors, neighborCosts);
 		if (bestNeighbor != NULL && bestNeighbor->status == Status::Closed && !this->lineIntersectsObstacle(p, bestNeighbor->coord)) {
-			Node *node = new Node(p, NULL, numeric_limits<double>::max());
+
+      Node *node = new Node(p, NULL, numeric_limits<double>::max());
 			node->status = Status::Closed;
 			bestNeighbor->addChild(node, bestCost);
 			this->rtree.insert(RtreeValue(p, node));
@@ -64,6 +63,7 @@ void OnlineRrtStar::sampleAndAdd() {
 					// printf("pot: %.2f, curr: %.2f\n", min(node->cumulativeCost + neighborCosts[i], 10000.0),
 					//       min(neighbors[i]->cumulativeCost, 10000.0));
 					// auto cost = this->getCost(bestNeighbor, neighbors[i]);
+
 					if (node->cumulativeCost + neighborCosts[i] < neighbors[i]->cumulativeCost) {
 						if (!this->lineIntersectsObstacle(neighbors[i]->coord, node->coord)) {
 							neighbors[i]->rewire(node, neighborCosts[i]);
