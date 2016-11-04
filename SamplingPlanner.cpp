@@ -1,4 +1,4 @@
-#include "Planner.hpp"
+#include "SamplingPlanner.hpp"
 
 #include <stdio.h>
 #include <cstdlib>
@@ -11,7 +11,8 @@
 
 using namespace std;
 
-Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height, bool usePseudoRandom)
+SamplingPlanner::SamplingPlanner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
+                                 bool usePseudoRandom)
     : haltonX(19), haltonY(23) {
 	srand(time(NULL));  // initialize the random number generator so it happens
 
@@ -40,11 +41,11 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRec
 	this->endNode = new Node(endPoint, NULL, std::numeric_limits<double>::max() / 2.0);
 	this->rtree.insert(RtreeValue(endPoint, endNode));
 
-	//printf("s: (%.2f, %.2f)\n", startPoint.x(), startPoint.y());
-	//printf("e: (%.2f, %.2f)\n\n\n", endPoint.x(), endPoint.y());
+	// printf("s: (%.2f, %.2f)\n", startPoint.x(), startPoint.y());
+	// printf("e: (%.2f, %.2f)\n\n\n", endPoint.x(), endPoint.y());
 }
 
-bool Planner::lineIntersectsObstacle(Coord &p1, Coord &p2) {
+bool SamplingPlanner::lineIntersectsObstacle(Coord &p1, Coord &p2) {
 	auto dx = p2.x() - p1.x();
 	auto dy = p2.y() - p1.y();
 
@@ -93,7 +94,7 @@ bool Planner::lineIntersectsObstacle(Coord &p1, Coord &p2) {
 	return false;
 }
 
-void Planner::sampleWithRewire() {
+void SamplingPlanner::sampleWithRewire() {
 	auto point = this->randomOpenAreaPoint();
 	vector<Node *> neighbors;
 	Node *bestNeighbor;
@@ -109,7 +110,7 @@ void Planner::sampleWithRewire() {
 	}
 }
 
-void Planner::moveStart(double dx, double dy) {
+void SamplingPlanner::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
 		Coord point(clamp(this->root->coord.x() + dx, 0, this->width - 1), clamp(this->root->coord.y() + dy, 0, this->height - 1));
 
@@ -137,29 +138,28 @@ void Planner::moveStart(double dx, double dy) {
 	}
 }
 
-void Planner::followPath() {
-  if (this->bestPath.size() > 2) {
-    auto currentWaypoint = this->bestPath[1];
-    auto angle = angleBetweenCoords(this->root->coord, currentWaypoint);
-    auto dx = this->maxTravel * cos(angle);
-    auto dy = this->maxTravel * sin(angle);
+void SamplingPlanner::followPath() {
+	if (this->bestPath.size() > 2) {
+		auto currentWaypoint = this->bestPath[1];
+		auto angle = angleBetweenCoords(this->root->coord, currentWaypoint);
+		auto dx = this->maxTravel * cos(angle);
+		auto dy = this->maxTravel * sin(angle);
 
-    this->moveStart(dx, dy);
-  }
+		this->moveStart(dx, dy);
+	}
 }
 
-void Planner::replan(Coord& newEndpoint)
-{
-  this->endNode = this->getNearestNeighbor(newEndpoint);
-  this->refreshBestPath();
+void SamplingPlanner::replan(Coord &newEndpoint) {
+	this->endNode = this->getNearestNeighbor(newEndpoint);
+	this->refreshBestPath();
 }
 
-void Planner::randomReplan() {
-  auto p = this->randomOpenAreaPoint();
-  this->replan(p);
+void SamplingPlanner::randomReplan() {
+	auto p = this->randomOpenAreaPoint();
+	this->replan(p);
 }
 
-void Planner::refreshBestPath() {
+void SamplingPlanner::refreshBestPath() {
 	if (this->endNode->parent != NULL) {
 		this->bestPath.clear();
 		auto currentNode = this->endNode;
@@ -170,7 +170,7 @@ void Planner::refreshBestPath() {
 	}
 }
 
-Coord Planner::randomOpenAreaPoint() {
+Coord SamplingPlanner::randomOpenAreaPoint() {
 	while (true) {
 		Coord point;
 		if (this->usePseudoRandom) {
@@ -184,25 +184,25 @@ Coord Planner::randomOpenAreaPoint() {
 	}
 }
 
-double Planner::getCost(Node *start, Node *end) { return this->getCost(start->coord, end->coord); }
-double Planner::getCost(Coord &start, Coord &end) { return euclideanDistance(start, end); }
+double SamplingPlanner::getCost(Node *start, Node *end) { return this->getCost(start->coord, end->coord); }
+double SamplingPlanner::getCost(Coord &start, Coord &end) { return euclideanDistance(start, end); }
 
-Node* Planner::getNearestNeighbor(Coord& p) {
-  vector<RtreeValue> result;
+Node *SamplingPlanner::getNearestNeighbor(Coord &p) {
+	vector<RtreeValue> result;
 	this->rtree.query(boost::geometry::index::nearest((point)p, 1), back_inserter(result));
 	return result[0].second;
 }
 
-void Planner::getNeighbors(Coord center, double radius, vector<RtreeValue> &results) {
+void SamplingPlanner::getNeighbors(Coord center, double radius, vector<RtreeValue> &results) {
 	box query_box(point(center.x() - radius, center.y() - radius), point(center.x() + radius, center.y() + radius));
 	this->rtree.query(boost::geometry::index::intersects(query_box), back_inserter(results));
 }
 
-void Planner::findBestNeighborWithoutCost(Coord point, Node *&bestNeighbor, vector<Node *> &neighbors) {
+void SamplingPlanner::findBestNeighborWithoutCost(Coord point, Node *&bestNeighbor, vector<Node *> &neighbors) {
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
 
-	double bestCumulativeCost = 9999999999999999;///std::numeric_limits<double>::max();
+	double bestCumulativeCost = 9999999999999999;  /// std::numeric_limits<double>::max();
 	// double bestCost = std::numeric_limits<double>::max();
 
 	for (auto neighbor_tuple : neighbor_tuples) {
@@ -217,11 +217,11 @@ void Planner::findBestNeighborWithoutCost(Coord point, Node *&bestNeighbor, vect
 	}
 }
 
-void Planner::findBestNeighbor(Coord point, Node *&bestNeighbor, double &bestCost, vector<Node *> &neighbors, vector<double> &neighborCosts) {
+void SamplingPlanner::findBestNeighbor(Coord point, Node *&bestNeighbor, double &bestCost, vector<Node *> &neighbors, vector<double> &neighborCosts) {
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
 
-	double bestCumulativeCost = 999999999999999;//std::numeric_limits<double>::max();
+	double bestCumulativeCost = 999999999999999;  // std::numeric_limits<double>::max();
 	// double bestCost = std::numeric_limits<double>::max();
 
 	for (auto neighbor_tuple : neighbor_tuples) {

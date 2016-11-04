@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Planner.hpp"
+#include "SamplingPlanner.hpp"
 
 #include <deque>
 #include <queue>
 #include <vector>
 
-class OnlineFmtStar : public Planner {
+class OnlineFmtStar : public SamplingPlanner {
    private:
 	std::priority_queue<Node *> open;
 

@@ -386,7 +386,7 @@ int main(int argc, char* argv[]) {
 	}
 	*/
 
-	Planner* planner;
+	SamplingPlanner* planner;
 	if (useFmt) {
 		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, false);
 	} else {

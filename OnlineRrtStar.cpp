@@ -13,7 +13,7 @@ using namespace std;
 
 OnlineRrtStar::OnlineRrtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
                              bool usePseudoRandom)
-    : Planner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom) {
+    : SamplingPlanner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom) {
 	this->root->status = Status::Closed;
 	this->endNode->status = Status::Closed;
 

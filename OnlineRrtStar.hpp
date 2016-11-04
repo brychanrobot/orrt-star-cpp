@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Planner.hpp"
+#include "SamplingPlanner.hpp"
 
 #include <vector>
 
-class OnlineRrtStar : public Planner {
+class OnlineRrtStar : public SamplingPlanner {
    private:
 	long numNodes;
 

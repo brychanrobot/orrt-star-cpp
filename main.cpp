@@ -203,7 +203,7 @@ int main(int argc, char* argv[]) {
 	}
 	*/
 
-	Planner* planner;
+	SamplingPlanner* planner;
 	if (useFmt) {
 		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
 	} else {
@@ -241,8 +241,8 @@ int main(int argc, char* argv[]) {
 			glfwPollEvents();
 
 			planner->followPath();
-			//planner->moveStart(currentMoves.uavX, currentMoves.uavY);
-		} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval){
+			// planner->moveStart(currentMoves.uavX, currentMoves.uavY);
+		} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
 			lastReplan = currentTime;
 			planner->randomReplan();
 		} else {
