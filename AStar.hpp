@@ -1,9 +1,13 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "Planner.hpp"
 
 class AStar : public Planner {
    protected:
+	std::unordered_map<Coord *, std::vector<Coord *>> baseVisibilityGraph;
+
 	void replan(Coord &newEndpoint);
 	void buildBaseVisibilityGraph();
 
