@@ -5,20 +5,23 @@ LDFLAGS=-lm -lGL -lGLU -lglfw -lglut -lX11 -lXrandr -lXinerama -lXi -lXxf86vm -l
 
 all: directories orrtstar three
 
-three: bin/threeMain.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/SamplingPlanner.o bin/Planner.o bin/Node.o bin/geom/Rect.o
-	$(CC) bin/threeMain.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/SamplingPlanner.o bin/Planner.o bin/Node.o bin/geom/Rect.o -o bin/three $(LDFLAGS)
+three: bin/threeMain.o bin/AStar.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/SamplingPlanner.o bin/Planner.o bin/Node.o bin/geom/Rect.o
+	$(CC) bin/threeMain.o bin/AStar.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/SamplingPlanner.o bin/Planner.o bin/Node.o bin/geom/Rect.o -o bin/three $(LDFLAGS)
 
 directories:
 	@mkdir -p bin/geom
 
-orrtstar: bin/main.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/SamplingPlanner.o bin/Planner.o bin/Node.o bin/geom/Rect.o
-	$(CC) bin/main.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/SamplingPlanner.o bin/Planner.o bin/Node.o bin/geom/Rect.o -o bin/orrtstar $(LDFLAGS)
+orrtstar: bin/main.o bin/AStar.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/SamplingPlanner.o bin/Planner.o bin/Node.o bin/geom/Rect.o
+	$(CC) bin/main.o bin/AStar.o bin/OnlineFmtStar.o bin/OnlineRrtStar.o bin/SamplingPlanner.o bin/Planner.o bin/Node.o bin/geom/Rect.o -o bin/orrtstar $(LDFLAGS)
 
 bin/threeMain.o: threeMain.cpp cxxopts.hpp
 		$(CC) $(CFLAGS) threeMain.cpp $(LDFLAGS) -o $@
 
 bin/main.o: main.cpp cxxopts.hpp
 	$(CC) $(CFLAGS) main.cpp $(LDFLAGS) -o $@
+
+bin/AStar.o: AStar.cpp
+	$(CC) $(CFLAGS) AStar.cpp $(LDFLAGS) -o $@
 
 bin/OnlineFmtStar.o: OnlineFmtStar.cpp
 	$(CC) $(CFLAGS) OnlineFmtStar.cpp $(LDFLAGS) -o $@

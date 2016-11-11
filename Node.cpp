@@ -6,7 +6,7 @@ Node::Node(Coord coord, Node* parent, double cumulativeCost) {
 	this->cumulativeCost = cumulativeCost;
 }
 
-bool Node::operator<(const Node* rhs) { return this->cumulativeCost < rhs->cumulativeCost; }
+bool Node::operator<(const Node* rhs) { return this->heuristic < rhs->heuristic; }
 
 void Node::addChild(Node* child, double cost) {
 	this->children.push_back(child);

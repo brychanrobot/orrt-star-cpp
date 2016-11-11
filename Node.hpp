@@ -14,6 +14,7 @@ class Node {
 	Status status = Status::Unvisited;
 	Coord coord;
 	double cumulativeCost;
+	double heuristic;
 	Node* parent;
 	std::vector<Node*> children;
 

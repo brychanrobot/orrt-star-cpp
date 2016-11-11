@@ -1,5 +1,7 @@
 #include "Rect.hpp"
 
+using namespace std;
+
 Rect::Rect(Coord tl, Coord br) {
 	double minx, maxx, miny, maxy;
 	if (tl.x() < br.x()) {
@@ -48,10 +50,12 @@ double Rect::width() { return this->bottomRight.x() - this->topLeft.x(); }
 
 double Rect::height() { return this->bottomRight.y() - this->topLeft.y(); }
 
-void points(vector<Coord>& points) {
-	points.push_back(this->topLeft);
-	points.push_back(this->bottomRight);
+void Rect::getPoints(vector<Coord>& points) {
+	double pad = 1;
 
-	points.push_back(this->topLeft.x(), this->bottomRight.y());
-	points.push_back(this->bottomRight.x(), this->topLeft.y());
+	points.push_back(Coord(this->topLeft.x() - pad, this->topLeft.y() - pad));
+	points.push_back(Coord(this->bottomRight.x() + pad, this->bottomRight.y() + pad));
+
+	points.push_back(Coord(this->topLeft.x() - pad, this->bottomRight.y() + pad));
+	points.push_back(Coord(this->bottomRight.x() + pad, this->topLeft.y() - pad));
 }

@@ -25,6 +25,7 @@ class Planner {
 
 	bool lineIntersectsObstacle(Coord &p1, Coord &p2);
 
+	void refreshBestPath();
 	virtual void replan(Coord &newEndpoint);
 
    public:

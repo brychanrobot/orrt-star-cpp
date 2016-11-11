@@ -73,17 +73,6 @@ void SamplingPlanner::replan(Coord &newEndpoint) {
 	this->refreshBestPath();
 }
 
-void SamplingPlanner::refreshBestPath() {
-	if (this->endNode->parent != NULL) {
-		this->bestPath.clear();
-		auto currentNode = this->endNode;
-		while (currentNode != NULL) {
-			this->bestPath.push_front(currentNode->coord);
-			currentNode = currentNode->parent;
-		}
-	}
-}
-
 Node *SamplingPlanner::getNearestNeighbor(Coord &p) {
 	vector<RtreeValue> result;
 	this->rtree.query(boost::geometry::index::nearest((point)p, 1), back_inserter(result));

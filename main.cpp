@@ -1,6 +1,8 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <set>
+#include "AStar.hpp"
 #include "OnlineFmtStar.hpp"
 #include "OnlineRrtStar.hpp"
 #include "cxxopts.hpp"
@@ -16,6 +18,7 @@ struct Moves {
 };
 
 const double MOVERATE = 3;
+const double OBSTACLE_PADDING = 5;
 
 static void onError(int error, const char* description) { fputs(description, stderr); }
 
@@ -101,6 +104,21 @@ void drawTree(Node* root) {
 	}
 }
 
+void drawGraphRecursive(Node* node, set<Node*>& visited) {
+	visited.insert(node);
+	for (auto child : node->children) {
+		drawLine(node->coord, child->coord);
+		if (visited.find(child) == visited.end()) {
+			drawGraphRecursive(child, visited);
+		}
+	}
+}
+
+void drawGraph(Node* root) {
+	set<Node*> visited;
+	drawGraphRecursive(root, visited);
+}
+
 void drawPath(deque<Coord>& path) {
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(3);
@@ -119,17 +137,18 @@ void drawObstacles(vector<Rect*>* obstacleRects) {
 	glColor3d(0.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
 	for (auto obstacle : *obstacleRects) {
-		glVertex2d(obstacle->topLeft.x(), obstacle->topLeft.y());
-		glVertex2d(obstacle->bottomRight.x(), obstacle->topLeft.y());
-		glVertex2d(obstacle->bottomRight.x(), obstacle->bottomRight.y());
-		glVertex2d(obstacle->topLeft.x(), obstacle->bottomRight.y());
+		glVertex2d(obstacle->topLeft.x() + OBSTACLE_PADDING, obstacle->topLeft.y() + OBSTACLE_PADDING);
+		glVertex2d(obstacle->bottomRight.x() - OBSTACLE_PADDING, obstacle->topLeft.y() + OBSTACLE_PADDING);
+		glVertex2d(obstacle->bottomRight.x() - OBSTACLE_PADDING, obstacle->bottomRight.y() - OBSTACLE_PADDING);
+		glVertex2d(obstacle->topLeft.x() + OBSTACLE_PADDING, obstacle->bottomRight.y() - OBSTACLE_PADDING);
 	}
 	glEnd();
 }
 
 void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* obstacleRects) {
 	drawObstacles(obstacleRects);
-	drawTree(root);
+	// drawTree(root);
+	drawGraph(root);
 
 	drawPath(bestPath);
 
@@ -189,7 +208,7 @@ int main(int argc, char* argv[]) {
 	initDisplay(width, height, ratio);
 
 	vector<Rect*> obstacleRects;
-	generateObstacleRects(width, height, 10, obstacleRects);
+	generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
 
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
 	generateObstacleHash(obstacleRects, obstacleHash);
@@ -203,12 +222,13 @@ int main(int argc, char* argv[]) {
 	}
 	*/
 
-	SamplingPlanner* planner;
+	/*SamplingPlanner* planner;
 	if (useFmt) {
-		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
+	    planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
 	} else {
-		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
-	}
+	    planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
+	}*/
+	Planner* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 
 	auto lastFrame = glfwGetTime();
 	auto frameInterval = 1.0 / 30.0;
@@ -240,14 +260,14 @@ int main(int argc, char* argv[]) {
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 
-			planner->followPath();
+			// planner->followPath();
 			// planner->moveStart(currentMoves.uavX, currentMoves.uavY);
 		} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
 			lastReplan = currentTime;
-			planner->randomReplan();
+			// planner->randomReplan();
 		} else {
 			// iterations++;
-			planner->sample();
+			// planner->sample();
 		}
 	}
 	glfwDestroyWindow(window);

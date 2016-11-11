@@ -94,6 +94,17 @@ void Planner::moveStart(double dx, double dy) {
 	}
 }
 
+void Planner::refreshBestPath() {
+	if (this->endNode->parent != NULL) {
+		this->bestPath.clear();
+		auto currentNode = this->endNode;
+		while (currentNode != NULL) {
+			this->bestPath.push_front(currentNode->coord);
+			currentNode = currentNode->parent;
+		}
+	}
+}
+
 void Planner::followPath() {
 	if (this->bestPath.size() > 2) {
 		auto currentWaypoint = this->bestPath[1];

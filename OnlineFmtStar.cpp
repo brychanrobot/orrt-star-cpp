@@ -46,6 +46,7 @@ void OnlineFmtStar::sampleAndAdd() {
 			if (bestParent != NULL && !this->lineIntersectsObstacle(neighbor->coord, bestParent->coord)) {
 				bestParent->addChild(neighbor, bestCost);
 				neighbor->status = Status::Open;
+				neighbor->heuristic = neighbor->cumulativeCost;
 				this->open.push(neighbor);
 			}
 		}

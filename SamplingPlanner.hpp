@@ -31,7 +31,6 @@ class SamplingPlanner : public Planner {
 
 	void replan(Coord &newEndpoint);
 	void sampleWithRewire();
-	void refreshBestPath();
 
    public:
 	SamplingPlanner(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
