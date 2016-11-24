@@ -63,8 +63,8 @@ void AStar::plan() {
 				q.push_back(neighbor);
 				push_heap(q.begin(), q.end());
 			} else if (neighbor->status == Status::Open) {
-				auto potentialCost = euclideanDistance(n->coord, neighbor->coord)  // this->getCost(n, neighbor);
-				    if (n->cumulativeCost + potentialCost < neighbor->cumulativeCost) {
+				auto potentialCost = euclideanDistance(n->coord, neighbor->coord);  // this->getCost(n, neighbor);
+				if (n->cumulativeCost + potentialCost < neighbor->cumulativeCost) {
 					neighbor->cumulativeCost = n->cumulativeCost + potentialCost;
 					neighbor->parent = n;
 					neighbor->heuristic = neighbor->cumulativeCost + euclideanDistance(neighbor->coord, this->endNode->coord);
