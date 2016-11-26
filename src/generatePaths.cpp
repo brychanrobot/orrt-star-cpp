@@ -1,3 +1,4 @@
+#include <FreeImage.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,10 +64,10 @@ void drawPath(deque<Coord>& path) {
 	glDisable(GL_LINE_SMOOTH);
 }
 
-void drawObstacles(vector<Rect*>* obstacleRects) {
+void drawObstacles(vector<shared_ptr<Rect>>& obstacleRects) {
 	glColor3d(0.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
-	for (auto obstacle : *obstacleRects) {
+	for (const auto& obstacle : obstacleRects) {
 		glVertex2d(obstacle->topLeft.x() + OBSTACLE_PADDING, obstacle->topLeft.y() + OBSTACLE_PADDING);
 		glVertex2d(obstacle->bottomRight.x() - OBSTACLE_PADDING, obstacle->topLeft.y() + OBSTACLE_PADDING);
 		glVertex2d(obstacle->bottomRight.x() - OBSTACLE_PADDING, obstacle->bottomRight.y() - OBSTACLE_PADDING);
@@ -75,7 +76,7 @@ void drawObstacles(vector<Rect*>* obstacleRects) {
 	glEnd();
 }
 
-void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* obstacleRects) {
+void display(shared_ptr<Node>& root, shared_ptr<Node>& endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>& obstacleRects) {
 	drawObstacles(obstacleRects);
 	drawPath(bestPath);
 
@@ -132,7 +133,7 @@ int main(int argc, char* argv[]) {
 	initDisplay(width, height, ratio);
 
 	/*
-	vector<Rect*> obstacleRects;
+	vector<shared_ptr<Rect>> obstacleRects;
 	generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
 
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
@@ -141,8 +142,8 @@ int main(int argc, char* argv[]) {
 	AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 	*/
 	AStar* planner = NULL;
-	vector<Rect*> obstacleRects;
-	vector<vector<bool>>* obstacleHash = NULL;
+	vector<shared_ptr<Rect>> obstacleRects;
+	vector<vector<bool>> obstacleHash;
 
 	auto lastFrame = glfwGetTime();
 	auto frameInterval = 1.0 / 30.0;
@@ -154,19 +155,52 @@ int main(int argc, char* argv[]) {
 
 	while (!glfwWindowShouldClose(window)) {
 		if (replanCount % 100000 == 0) {
-			for (auto rect : obstacleRects) {
-				delete rect;
+			/*for (auto rect : obstacleRects) {
+			    delete rect;
+			}*/
+			if (planner != NULL) {
+				GLint viewport[4];
+				glGetIntegerv(GL_VIEWPORT, viewport);
+				//*width = viewport[2];
+				//*height = viewport[3];
+
+				// GLuint texture;
+				// glGenTextures(1, &texture);
+				// glBindTexture(GL_TEXTURE_2D, texture);
+
+				// rgb image
+				// glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, viewport[0], viewport[1], viewport[2], viewport[3], 0);
+
+				// glPixelStorei(GL_PACK_ALIGNMENT, 1);
+				BYTE* raw_img = (BYTE*)malloc(sizeof(BYTE) * width * height * 3);
+				// glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, raw_img);
+				glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, raw_img);
+
+				FIBITMAP* image = FreeImage_ConvertFromRawBits(raw_img, FIT_BITMAP, width, height, 3, 8, 0xFF000000, 0x00FF0000, 0x0000FF00, false);
+				FreeImage_Save(FIF_PNG, image, "test.png", 0);
+
+				FreeImage_Unload(image);
+
+				delete raw_img;
 			}
+
+			delete planner;
 			obstacleRects.clear();
 			generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
 
-			delete obstacleHash;
-			obstacleHash = new vector<vector<bool>>(height, vector<bool>(width, false));
-			generateObstacleHash(obstacleRects, *obstacleHash);
+			/*delete[] obstacleHash;
+			obstacleHash = new vector<vector<bool>>(height, vector<bool>(width, false));*/
+			obstacleHash = vector<vector<bool>>(height, vector<bool>(width, false));
+			/*for (int r = 0; r < obstacleHash->size(); r++) {
+			    for (int c = 0; c < (*obstacleHash)[r].size(); c++) {
+			        (*obstacleHash)[r][c] = false;
+			    }
+			}*/
+			generateObstacleHash(obstacleRects, obstacleHash);
 
-			delete planner;
-			planner = new AStar(obstacleHash, &obstacleRects, width, height, usePseudoRandom);
-			printf("created planner\n");
+			// delete planner;
+			planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
+			// printf("created planner\n");
 		}
 
 		auto currentTime = glfwGetTime();
@@ -176,7 +210,7 @@ int main(int argc, char* argv[]) {
 			// replanCount = 0;
 
 			glClear(GL_COLOR_BUFFER_BIT);
-			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects);
+			display(planner->root, planner->endNode, planner->bestPath, *planner->obstacleRects);
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		} else {  // if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {

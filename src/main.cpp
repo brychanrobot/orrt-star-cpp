@@ -106,14 +106,14 @@ void drawLine(Coord start, Coord end, HSL hsl, int linewidth) {
 	glEnd();
 }
 
-void drawTree(Node* root) {
+void drawTree(const shared_ptr<Node>& root) {
 	for (auto child : root->children) {
 		drawLine(root->coord, child->coord, HSL(100, 1, 0.5), 1);
 		drawTree(child);
 	}
 }
 
-void drawGraphRecursive(Node* node, set<Node*>& visited) {
+void drawGraphRecursive(const shared_ptr<Node>& node, set<shared_ptr<Node>>& visited) {
 	visited.insert(node);
 	for (auto child : node->children) {
 		HSL* hsl;
@@ -196,7 +196,7 @@ void drawPath(deque<Coord>& path) {
 	glDisable(GL_LINE_SMOOTH);
 }
 
-void drawObstacles(vector<Rect*>* obstacleRects) {
+void drawObstacles(vector<shared_ptr<Rect>>* obstacleRects) {
 	glColor3d(0.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
 	for (auto obstacle : *obstacleRects) {
@@ -208,7 +208,7 @@ void drawObstacles(vector<Rect*>* obstacleRects) {
 	glEnd();
 }
 
-void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* obstacleRects) {
+void display(const shared_ptr<Node> root, const shared_ptr<Node>& endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects) {
 	drawObstacles(obstacleRects);
 	// drawTree(root);
 	// drawGraph(root, visibilityGraph);
@@ -270,7 +270,7 @@ int main(int argc, char* argv[]) {
 	ratio = width / (float)height;
 	initDisplay(width, height, ratio);
 
-	vector<Rect*> obstacleRects;
+	vector<shared_ptr<Rect>> obstacleRects;
 	generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
 
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));

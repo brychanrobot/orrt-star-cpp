@@ -7,7 +7,7 @@ enum Status { Unvisited, Open, Closed };
 
 class Node {
    private:
-	void removeChild(Node* child);
+	void removeChild(std::shared_ptr<Node> child);
 	void updateCumulativeCost(double newCumulativeCost);
 
    public:
@@ -15,13 +15,13 @@ class Node {
 	Coord coord;
 	double cumulativeCost;
 	double heuristic;
-	Node* parent;
-	std::vector<Node*> children;
+	std::shared_ptr<Node> parent;
+	std::vector<std::shared_ptr<Node>> children;
 
 	Node() {}
-	Node(Coord coord, Node* parent, double cumulativeCost);
-	bool operator<(const Node* rhs);
-	void addChild(Node* child, double cost);
+	Node(Coord coord, std::shared_ptr<Node> parent, double cumulativeCost);
+	bool operator<(const std::shared_ptr<Node> rhs);
+	void addChild(std::shared_ptr<Node> child, double cost);
 	void printChildren();
-	void rewire(Node* newParent, double cost);
+	void rewire(std::shared_ptr<Node> newParent, double cost);
 };

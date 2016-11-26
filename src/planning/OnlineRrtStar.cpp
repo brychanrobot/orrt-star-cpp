@@ -11,7 +11,7 @@
 
 using namespace std;
 
-OnlineRrtStar::OnlineRrtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
+OnlineRrtStar::OnlineRrtStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width, int height,
                              bool usePseudoRandom)
     : SamplingPlanner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom) {
 	this->root->status = Status::Closed;
@@ -44,14 +44,13 @@ void OnlineRrtStar::sampleAndAdd() {
 	}
 
 	if (!(*this->obstacleHash)[(int)p.y()][(int)p.x()]) {
-		vector<Node *> neighbors;
+		vector<shared_ptr<Node>> neighbors;
 		vector<double> neighborCosts;
-		Node *bestNeighbor = NULL;
+		shared_ptr<Node> bestNeighbor;
 		double bestCost;
 		this->findBestNeighbor(p, bestNeighbor, bestCost, neighbors, neighborCosts);
-		if (bestNeighbor != NULL && bestNeighbor->status == Status::Closed && !this->lineIntersectsObstacle(p, bestNeighbor->coord)) {
-
-      Node *node = new Node(p, NULL, numeric_limits<double>::max());
+		if (bestNeighbor && bestNeighbor->status == Status::Closed && !this->lineIntersectsObstacle(p, bestNeighbor->coord)) {
+			auto node = make_shared<Node>(p, nullptr, numeric_limits<double>::max());
 			node->status = Status::Closed;
 			bestNeighbor->addChild(node, bestCost);
 			this->rtree.insert(RtreeValue(p, node));

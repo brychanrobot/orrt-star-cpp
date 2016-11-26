@@ -27,7 +27,7 @@ struct PriorityQueue {
 /////////////////////////////
 ////////////////////////////
 
-AStar::AStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, int width, int height, bool usePseudoRandom)
+AStar::AStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom)
     : Planner(obstacleHash, obstacleRects, width, height, usePseudoRandom) {
 	buildBaseVisibilityGraph();
 	plan();  // make an initial plan
@@ -36,20 +36,23 @@ AStar::AStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, 
 AStar::~AStar() {
 	// Planner::~Planner();
 
+	/*
 	for (auto pair : this->baseVisibilityGraph) {
-		delete pair.first;
+	    delete pair.first;
+	    printf("deleted pair\n");
 	}
+	*/
 	// delete baseVisibilityGraph;
+	// printf("destructed AStar\n");
 }
 
 void AStar::buildBaseVisibilityGraph() {
-	printf("building visibility graph\n");
-	vector<Node *> allNodes;
+	vector<shared_ptr<Node>> allNodes;
 	for (auto obstacleRect : *this->obstacleRects) {
 		vector<Coord> points;
 		obstacleRect->getPoints(points);
 		for (auto point : points) {
-			allNodes.push_back(new Node(point, NULL, -1.0));
+			allNodes.push_back(make_shared<Node>(point, shared_ptr<Node>(nullptr), -1.0));
 		}
 	}
 
@@ -65,12 +68,10 @@ void AStar::buildBaseVisibilityGraph() {
 			}
 		}
 	}
-
-	printf("finished building visibility graph\n");
 }
 
 void AStar::plan() {
-	PriorityQueue<Node *, double> frontier;
+	PriorityQueue<shared_ptr<Node>, double> frontier;
 	frontier.put(this->root, 0.0);
 
 	while (!frontier.empty()) {

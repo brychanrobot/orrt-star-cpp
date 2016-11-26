@@ -240,7 +240,7 @@ void drawPath(deque<Coord>& path) {
 	glDisable(GL_LINE_SMOOTH);
 }
 
-void drawObstacles(vector<Rect*>* obstacleRects) {
+void drawObstacles(vector<shared_ptr<Rect>>* obstacleRects) {
 	glColor3d(0.0, .3, .3);
 	// GLfloat mat_ambient[] = { 0, 0.7, 0.7, 1.0 };
 	// GLfloat mat_diffuse[] = { 0, 0.7, 0.7, 1.0 };
@@ -308,7 +308,7 @@ void placeCamera(Camera cam) {
 	// glMatrixMode(GL_PROJECTION);
 }
 
-void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* obstacleRects, Camera& cam) {
+void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects, Camera& cam) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	placeCamera(cam);
 
@@ -371,7 +371,7 @@ int main(int argc, char* argv[]) {
 	ratio = width / (float)height;
 	initDisplay(width, height, ratio);
 
-	vector<Rect*> obstacleRects;
+	vector<shared_ptr<Rect>> obstacleRects;
 	generateObstacleRects(width, height, 10, obstacleRects);
 
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));

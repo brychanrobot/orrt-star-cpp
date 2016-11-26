@@ -6,8 +6,8 @@
 #include "../geom/Rect.hpp"
 #include "../geom/utils.hpp"
 
-bool hasIntersection(Rect& rect, std::vector<Rect*>& obstacles) {
-	for (auto obstacle : obstacles) {
+bool hasIntersection(Rect& rect, std::vector<std::shared_ptr<Rect>>& obstacles) {
+	for (const auto& obstacle : obstacles) {
 		if (obstacle->intersects(rect)) {
 			return true;
 		}
@@ -16,15 +16,15 @@ bool hasIntersection(Rect& rect, std::vector<Rect*>& obstacles) {
 	return false;
 }
 
-void generateObstacleRects(int width, int height, int count, std::vector<Rect*>& obstacles, double padding = 5) {
+void generateObstacleRects(int width, int height, int count, std::vector<std::shared_ptr<Rect>>& obstacles, double padding = 5) {
 	for (int x = 0; x < count; x++) {
-		Rect* rect = NULL;
+		std::shared_ptr<Rect> rect;
 		while (true) {
 			auto topLeft = randomPoint(width, height);
 			auto bottomRight = randomPoint(width, height);
 
-			delete rect;
-			rect = new Rect(topLeft, bottomRight);
+			// delete rect;
+			rect = std::make_shared<Rect>(topLeft, bottomRight);
 			if (rect->width() > padding * 2 && rect->height() > padding * 2 && !hasIntersection(*rect, obstacles)) {
 				break;
 			}
@@ -34,8 +34,8 @@ void generateObstacleRects(int width, int height, int count, std::vector<Rect*>&
 	}
 }
 
-void generateObstacleHash(std::vector<Rect*>& obstacleRects, std::vector<std::vector<bool>>& obstacleHash) {
-	for (auto obstacle : obstacleRects) {
+void generateObstacleHash(std::vector<std::shared_ptr<Rect>>& obstacleRects, std::vector<std::vector<bool>>& obstacleHash) {
+	for (const auto& obstacle : obstacleRects) {
 		for (int r = obstacle->topLeft.y(); r < obstacle->bottomRight.y(); r++) {
 			for (int c = obstacle->topLeft.x(); c < obstacle->bottomRight.x(); c++) {
 				obstacleHash[r][c] = true;

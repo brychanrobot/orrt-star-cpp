@@ -6,7 +6,7 @@
 
 using namespace std;
 
-OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
+OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width, int height,
                              bool usePseudoRandom)
     : SamplingPlanner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom) {
 	this->open.push(this->root);
@@ -14,7 +14,7 @@ OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<Rect *> 
 	for (int n = 0; n < this->nodeAddThreshold; n++) {
 		auto point = this->randomOpenAreaPoint();
 
-		auto node = new Node(point, NULL, numeric_limits<double>::max());
+		auto node = make_shared<Node>(point, nullptr, numeric_limits<double>::max());
 
 		this->rtree.insert(RtreeValue(point, node));
 	}
@@ -40,10 +40,10 @@ void OnlineFmtStar::sampleAndAdd() {
 	for (auto neighbor_tuple : neighbors) {
 		auto neighbor = neighbor_tuple.second;
 		if (neighbor->status == Status::Unvisited) {
-			Node *bestParent = NULL;
+			shared_ptr<Node> bestParent;
 			double bestCost;
 			findBestOpenNeighbor(neighbor, bestParent, bestCost);
-			if (bestParent != NULL && !this->lineIntersectsObstacle(neighbor->coord, bestParent->coord)) {
+			if (bestParent && !this->lineIntersectsObstacle(neighbor->coord, bestParent->coord)) {
 				bestParent->addChild(neighbor, bestCost);
 				neighbor->status = Status::Open;
 				neighbor->heuristic = neighbor->cumulativeCost;
@@ -57,7 +57,7 @@ void OnlineFmtStar::sampleAndAdd() {
 	bestOpenNode->status = Status::Closed;
 }
 
-void OnlineFmtStar::findBestOpenNeighbor(Node *node, Node *&bestNeighbor, double &bestCost) {
+void OnlineFmtStar::findBestOpenNeighbor(shared_ptr<Node> &node, shared_ptr<Node> &bestNeighbor, double &bestCost) {
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(node->coord, this->rewireNeighborhood, neighbor_tuples);
 

@@ -1,20 +1,22 @@
 #include "Node.hpp"
 
-Node::Node(Coord coord, Node* parent, double cumulativeCost) {
+using namespace std;
+
+Node::Node(Coord coord, shared_ptr<Node> parent, double cumulativeCost) {
 	this->coord = coord;
 	this->parent = parent;
 	this->cumulativeCost = cumulativeCost;
 }
 
-bool Node::operator<(const Node* rhs) { return this->heuristic < rhs->heuristic; }
+bool Node::operator<(const shared_ptr<Node> rhs) { return this->heuristic < rhs->heuristic; }
 
-void Node::addChild(Node* child, double cost) {
+void Node::addChild(shared_ptr<Node> child, double cost) {
 	this->children.push_back(child);
-	child->parent = this;
+	child->parent = shared_ptr<Node>(this);
 	child->cumulativeCost = this->cumulativeCost + cost;
 }
 
-void Node::removeChild(Node* child) {
+void Node::removeChild(shared_ptr<Node> child) {
 	for (auto iter = this->children.begin(); iter != this->children.end(); ++iter) {
 		if (*iter == child) {
 			this->children.erase(iter);
@@ -23,11 +25,11 @@ void Node::removeChild(Node* child) {
 	}
 }
 
-void Node::rewire(Node* newParent, double cost) {
-	if (this->parent != NULL) {
-		this->parent->removeChild(this);
+void Node::rewire(shared_ptr<Node> newParent, double cost) {
+	if (this->parent) {
+		this->parent->removeChild(shared_ptr<Node>(this));
 	}
-	newParent->children.push_back(this);
+	newParent->children.push_back(shared_ptr<Node>(this));
 	this->parent = newParent;
 	this->updateCumulativeCost(newParent->cumulativeCost + cost);
 }

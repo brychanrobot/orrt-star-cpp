@@ -11,7 +11,7 @@
 
 using namespace std;
 
-Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, int width, int height, bool usePseudoRandom)
+Planner::Planner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom)
     : haltonX(19), haltonY(23) {
 	srand(time(NULL));  // initialize the random number generator so it happens
 
@@ -30,9 +30,9 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRec
 		endPoint = this->randomOpenAreaPoint();
 	} while (euclideanDistance(startPoint, endPoint) < width / 2.0);
 
-	this->root = new Node(startPoint, NULL, 0.0);
+	this->root = make_shared<Node>(startPoint, shared_ptr<Node>(nullptr), 0.0);
 
-	this->endNode = new Node(endPoint, NULL, std::numeric_limits<double>::max() / 2.0);
+	this->endNode = make_shared<Node>(endPoint, shared_ptr<Node>(nullptr), std::numeric_limits<double>::max() / 2.0);
 }
 
 Planner::~Planner() {
@@ -45,13 +45,20 @@ Planner::~Planner() {
 	// delete this->obstacleRects;
 	printf("deleted obstacle stuff\n");
 	*/
-	delete this->root;
-	delete this->endNode;
+	// delete this->obstacleHash;
+	// delete this->root;
+	// delete this->endNode;
+
+	// printf("destructed planner\n");
 }
 
 bool Planner::lineIntersectsObstacle(Coord &p1, Coord &p2) {
 	auto dx = p2.x() - p1.x();
 	auto dy = p2.y() - p1.y();
+
+	if (p1.x() < 0 || p1.y() < 0 || p2.x() < 0 || p2.y() < 0) {
+		return true;
+	}
 
 	/*
 	auto m = 20000.0;  // a big number for vertical slope
@@ -74,6 +81,9 @@ bool Planner::lineIntersectsObstacle(Coord &p1, Coord &p2) {
 			auto y = m * ix + b;
 			// printf("[%.2f, %.2f]:[%.2f, %.2f] %.3f, (%d, %f)\n", p1.x(), p1.y(), p2.x(), p2.y(), m, ix, y);
 			// printf("h: [%.2f, %.2f]:[%.2f, %.2f] --------dx: %f m: %f, b: %.2f, (%d, %.2f)\n", p1.x(), p1.y(), p2.x(), p2.y(), dx, m, b, ix, y);
+			// printf("%.2d, %.2d\n", (int)y, ix);
+
+			// printf("%.2f, %.2f : %d\n", p1.x(), p2.x(), ix);
 			if (y > 0 && y < this->height && (*this->obstacleHash)[(int)y][ix]) {
 				// printf("returning true\n");
 				return true;
@@ -109,10 +119,10 @@ void Planner::moveStart(double dx, double dy) {
 }
 
 void Planner::refreshBestPath() {
-	if (this->endNode->parent != NULL) {
+	if (this->endNode->parent) {
 		this->bestPath.clear();
 		auto currentNode = this->endNode;
-		while (currentNode != NULL) {
+		while (currentNode) {
 			this->bestPath.push_front(currentNode->coord);
 			currentNode = currentNode->parent;
 		}
@@ -151,5 +161,5 @@ Coord Planner::randomOpenAreaPoint() {
 	}
 }
 
-double Planner::getCost(Node *start, Node *end) { return this->getCost(start->coord, end->coord); }
+double Planner::getCost(shared_ptr<Node> &start, shared_ptr<Node> &end) { return this->getCost(start->coord, end->coord); }
 double Planner::getCost(Coord &start, Coord &end) { return euclideanDistance(start, end); }

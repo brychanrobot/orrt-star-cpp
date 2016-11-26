@@ -20,7 +20,7 @@ class Planner {
 	HaltonSampler haltonY;
 
 	Coord randomOpenAreaPoint();
-	double getCost(Node *start, Node *end);
+	double getCost(std::shared_ptr<Node> &start, std::shared_ptr<Node> &end);
 	double getCost(Coord &start, Coord &end);
 
 	bool lineIntersectsObstacle(Coord &p1, Coord &p2);
@@ -29,12 +29,13 @@ class Planner {
 	virtual void replan(Coord &newEndpoint);
 
    public:
-	Node *root;
-	Node *endNode;
-	std::vector<Rect *> *obstacleRects;
+	std::shared_ptr<Node> root;
+	std::shared_ptr<Node> endNode;
+	std::vector<std::shared_ptr<Rect>> *obstacleRects;
 	std::deque<Coord> bestPath;
 	bool usePseudoRandom;
-	Planner(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, int width, int height, bool usePseudoRandom);
+	Planner(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height,
+	        bool usePseudoRandom);
 	virtual ~Planner();
 	virtual void moveStart(double dx, double dy);
 	void randomReplan();

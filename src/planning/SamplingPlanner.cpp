@@ -11,8 +11,8 @@
 
 using namespace std;
 
-SamplingPlanner::SamplingPlanner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
-                                 bool usePseudoRandom)
+SamplingPlanner::SamplingPlanner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
+                                 int height, bool usePseudoRandom)
     : Planner(obstacleHash, obstacleRects, width, height, usePseudoRandom) {
 	this->maxSegment = maxSegment;
 	this->rewireNeighborhood = maxSegment * 6;
@@ -26,8 +26,8 @@ SamplingPlanner::SamplingPlanner(vector<vector<bool>> *obstacleHash, vector<Rect
 
 void SamplingPlanner::sampleWithRewire() {
 	auto point = this->randomOpenAreaPoint();
-	vector<Node *> neighbors;
-	Node *bestNeighbor;
+	vector<shared_ptr<Node>> neighbors;
+	shared_ptr<Node> bestNeighbor;
 	this->findBestNeighborWithoutCost(point, bestNeighbor, neighbors);
 	for (auto neighbor : neighbors) {
 		if (neighbor->status == Status::Closed && neighbor != bestNeighbor) {
@@ -45,7 +45,7 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 		Coord point(clamp(this->root->coord.x() + dx, 0, this->width - 1), clamp(this->root->coord.y() + dy, 0, this->height - 1));
 
 		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
-			auto newRoot = new Node(point, NULL, 0.0);
+			auto newRoot = make_shared<Node>(point, nullptr, 0.0);
 			newRoot->status = Status::Closed;
 			this->rtree.insert(RtreeValue(newRoot->coord, newRoot));
 
@@ -73,7 +73,7 @@ void SamplingPlanner::replan(Coord &newEndpoint) {
 	this->refreshBestPath();
 }
 
-Node *SamplingPlanner::getNearestNeighbor(Coord &p) {
+shared_ptr<Node> SamplingPlanner::getNearestNeighbor(Coord &p) {
 	vector<RtreeValue> result;
 	this->rtree.query(boost::geometry::index::nearest((point)p, 1), back_inserter(result));
 	return result[0].second;
@@ -84,7 +84,7 @@ void SamplingPlanner::getNeighbors(Coord center, double radius, vector<RtreeValu
 	this->rtree.query(boost::geometry::index::intersects(query_box), back_inserter(results));
 }
 
-void SamplingPlanner::findBestNeighborWithoutCost(Coord point, Node *&bestNeighbor, vector<Node *> &neighbors) {
+void SamplingPlanner::findBestNeighborWithoutCost(Coord point, shared_ptr<Node> &bestNeighbor, vector<shared_ptr<Node>> &neighbors) {
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
 
@@ -103,7 +103,8 @@ void SamplingPlanner::findBestNeighborWithoutCost(Coord point, Node *&bestNeighb
 	}
 }
 
-void SamplingPlanner::findBestNeighbor(Coord point, Node *&bestNeighbor, double &bestCost, vector<Node *> &neighbors, vector<double> &neighborCosts) {
+void SamplingPlanner::findBestNeighbor(Coord point, shared_ptr<Node> &bestNeighbor, double &bestCost, vector<shared_ptr<Node>> &neighbors,
+                                       vector<double> &neighborCosts) {
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
 

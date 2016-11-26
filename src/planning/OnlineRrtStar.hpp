@@ -11,8 +11,8 @@ class OnlineRrtStar : public SamplingPlanner {
 	void sampleAndAdd();
 
    public:
-	OnlineRrtStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, double maxSegment, int width, int height,
-	              bool usePseudoRandom);
+	OnlineRrtStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
+	              int height, bool usePseudoRandom);
 
 	void sample();
 };
