@@ -5,6 +5,7 @@
 #include "AStar.hpp"
 #include "OnlineFmtStar.hpp"
 #include "OnlineRrtStar.hpp"
+#include "color.hpp"
 #include "cxxopts.hpp"
 #include "utils.hpp"
 
@@ -19,6 +20,8 @@ struct Moves {
 
 const double MOVERATE = 3;
 const double OBSTACLE_PADDING = 5;
+
+bool planAgain = false;
 
 static void onError(int error, const char* description) { fputs(description, stderr); }
 
@@ -57,6 +60,11 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 				currentMoves->uavX = 0;
 			}
 			break;
+		case GLFW_KEY_P:
+			if (action == GLFW_RELEASE) {
+				planAgain = true;
+			}
+			break;
 	}
 
 	// printf("key: %d\n, (%.2f, %.2f)", key, currentMoves->uavX, currentMoves->uavY);
@@ -88,9 +96,10 @@ void drawPoint(Coord point, double radius) {
 	glEnd();
 }
 
-void drawLine(Coord start, Coord end) {
-	glColor3d(0.5, 0.0, 1.0);
-	glLineWidth(1);
+void drawLine(Coord start, Coord end, HSL hsl, int linewidth) {
+	auto rgb = HSLToRGB(hsl);
+	glColor3d(rgb.R, rgb.G, rgb.B);
+	glLineWidth(linewidth);
 	glBegin(GL_LINES);
 	glVertex2d(start.x(), start.y());
 	glVertex2d(end.x(), end.y());
@@ -99,7 +108,7 @@ void drawLine(Coord start, Coord end) {
 
 void drawTree(Node* root) {
 	for (auto child : root->children) {
-		drawLine(root->coord, child->coord);
+		drawLine(root->coord, child->coord, HSL(100, 1, 0.5), 1);
 		drawTree(child);
 	}
 }
@@ -107,17 +116,71 @@ void drawTree(Node* root) {
 void drawGraphRecursive(Node* node, set<Node*>& visited) {
 	visited.insert(node);
 	for (auto child : node->children) {
-		drawLine(node->coord, child->coord);
+		HSL* hsl;
+		int linewidth = 3;
+		switch (child->status) {
+			case Status::Unvisited:
+				hsl = new HSL(100, 1, 0.5);
+				linewidth = 1;
+				break;
+			case Status::Open:
+				hsl = new HSL(50, 1, 0.5);
+				break;
+			case Status::Closed:
+				hsl = new HSL(250, 1, 0.5);
+				break;
+			default:
+				hsl = new HSL(360, 1, 0.5);
+		}
+
+		drawLine(node->coord, child->coord, *hsl, linewidth);
 		if (visited.find(child) == visited.end()) {
 			drawGraphRecursive(child, visited);
 		}
 	}
 }
 
-void drawGraph(Node* root) {
-	set<Node*> visited;
-	drawGraphRecursive(root, visited);
+/*
+void drawGraphIterative(set<Node*>& visited, unordered_map<Node*, vector<Node*>> visibilityGraph) {
+    for (auto kv_pair : visibilityGraph) {
+        auto parent = kv_pair.first;
+
+        if (visited.find(parent) != visited.end()) {
+            continue;
+        }
+
+        for (auto child : kv_pair.second) {
+            HSL* hsl;
+            int linewidth = 3;
+            switch (child->status) {
+                case Status::Unvisited:
+                    hsl = new HSL(100, 1, 0.5);
+                    linewidth = 1;
+                    break;
+                case Status::Open:
+                    hsl = new HSL(50, 1, 0.5);
+                    linewidth = 1;
+                    break;
+                case Status::Closed:
+                    hsl = new HSL(250, 1, 0.5);
+                    break;
+                default:
+                    hsl = new HSL(360, 1, 0.5);
+            }
+
+            if (child->status == Status::Closed) {
+                drawLine(parent->coord, child->coord, *hsl, linewidth);
+            }
+        }
+    }
 }
+
+void drawGraph(Node* root, unordered_map<Node*, vector<Node*>> visibilityGraph) {
+    set<Node*> visited;
+    // drawGraphRecursive(root, visited);
+    drawGraphIterative(visited, visibilityGraph);
+}
+*/
 
 void drawPath(deque<Coord>& path) {
 	glEnable(GL_LINE_SMOOTH);
@@ -148,7 +211,7 @@ void drawObstacles(vector<Rect*>* obstacleRects) {
 void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* obstacleRects) {
 	drawObstacles(obstacleRects);
 	// drawTree(root);
-	drawGraph(root);
+	// drawGraph(root, visibilityGraph);
 
 	drawPath(bestPath);
 
@@ -228,7 +291,7 @@ int main(int argc, char* argv[]) {
 	} else {
 	    planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
 	}*/
-	Planner* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
+	AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 
 	auto lastFrame = glfwGetTime();
 	auto frameInterval = 1.0 / 30.0;
@@ -238,6 +301,7 @@ int main(int argc, char* argv[]) {
 	/*auto iterations = 0;
 	auto frames = 0;
 	double averageIterations = 0;*/
+	printf("%.2f\n", replanInterval);
 
 	Moves currentMoves;
 	glfwSetWindowUserPointer(window, &currentMoves);
@@ -260,14 +324,19 @@ int main(int argc, char* argv[]) {
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 
-			// planner->followPath();
-			// planner->moveStart(currentMoves.uavX, currentMoves.uavY);
+			planner->followPath();
+			planner->moveStart(currentMoves.uavX, currentMoves.uavY);
 		} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
 			lastReplan = currentTime;
-			// planner->randomReplan();
+			planner->randomReplan();
 		} else {
 			// iterations++;
 			// planner->sample();
+		}
+
+		if (planAgain) {
+			planner->plan();
+			planAgain = false;
 		}
 	}
 	glfwDestroyWindow(window);

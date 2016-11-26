@@ -106,7 +106,7 @@ void Planner::refreshBestPath() {
 }
 
 void Planner::followPath() {
-	if (this->bestPath.size() > 2) {
+	if (this->bestPath.size() > 1) {
 		auto currentWaypoint = this->bestPath[1];
 		auto angle = angleBetweenCoords(this->root->coord, currentWaypoint);
 		auto dx = this->maxTravel * cos(angle);
