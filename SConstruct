@@ -10,14 +10,15 @@ env.VariantDir('build', 'src', duplicate=0)
 objects = [
 	env.Object('build/geom/Rect.cpp'),
 
-	env.Object('build/Node.cpp'),
+	env.Object('build/planning/Node.cpp'),
 
-	env.Object('build/Planner.cpp'),
-	env.Object('build/AStar.cpp'),
+	env.Object('build/planning/Planner.cpp'),
+	env.Object('build/planning/AStar.cpp'),
 
-	env.Object('build/SamplingPlanner.cpp'),
-	env.Object('build/OnlineFmtStar.cpp'),
-	env.Object('build/OnlineRrtStar.cpp')
+	env.Object('build/planning/SamplingPlanner.cpp'),
+	env.Object('build/planning/OnlineFmtStar.cpp'),
+	env.Object('build/planning/OnlineRrtStar.cpp')
 ]
 
 env.Program(['build/main.cpp'] + objects)
+env.Program(['build/generatePaths.cpp'] + objects)

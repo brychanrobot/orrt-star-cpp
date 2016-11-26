@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <queue>
 
-#include "geom/utils.hpp"
+#include "../geom/utils.hpp"
 
 using namespace std;
 
@@ -100,6 +100,8 @@ void AStar::moveStart(double dx, double dy) {
 		}
 	}
 }
+
+void AStar::randomStart() { this->root->coord = this->randomOpenAreaPoint(); }
 
 void AStar::replan(Coord &newEndpoint) {
 	Planner::replan(newEndpoint);

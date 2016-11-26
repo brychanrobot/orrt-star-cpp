@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <cmath>
 #include <cstdlib>
-#include "geom/Coord.hpp"
-#include "geom/utils.hpp"
+#include "../geom/Coord.hpp"
+#include "../geom/utils.hpp"
 
 //#include <boost/geometry.hpp>
 //#include <boost/geometry/geometries/geometries.hpp>

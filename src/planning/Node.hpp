@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "geom/Coord.hpp"
+#include "../geom/Coord.hpp"
 
 enum Status { Unvisited, Open, Closed };
 

@@ -5,8 +5,8 @@
 
 #include "Halton.hpp"
 #include "Node.hpp"
-#include "geom/Coord.hpp"
-#include "geom/Rect.hpp"
+#include "../geom/Coord.hpp"
+#include "../geom/Rect.hpp"
 
 class Planner {
    protected:

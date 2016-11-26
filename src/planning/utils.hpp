@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <cmath>
 // #include <math.h>
-#include "geom/Rect.hpp"
-#include "geom/utils.hpp"
+#include "../geom/Rect.hpp"
+#include "../geom/utils.hpp"
 
 bool hasIntersection(Rect& rect, std::vector<Rect*>& obstacles) {
 	for (auto obstacle : obstacles) {

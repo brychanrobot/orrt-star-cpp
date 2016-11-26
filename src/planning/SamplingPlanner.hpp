@@ -9,8 +9,8 @@
 
 #include "Halton.hpp"
 #include "Node.hpp"
-#include "geom/Coord.hpp"
-#include "geom/Rect.hpp"*/
+#include "../geom/Coord.hpp"
+#include "../geom/Rect.hpp"*/
 
 // template<typename Params>;
 typedef boost::geometry::model::box<point> box;

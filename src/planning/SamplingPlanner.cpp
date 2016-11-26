@@ -6,8 +6,8 @@
 #include <limits>
 #include <vector>
 
-#include "geom/Coord.hpp"
-#include "geom/utils.hpp"
+#include "../geom/Coord.hpp"
+#include "../geom/utils.hpp"
 
 using namespace std;
 

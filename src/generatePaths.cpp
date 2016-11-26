@@ -11,63 +11,16 @@
 
 using namespace std;
 
-struct Moves {
-	double uavX = 0.0;
-	double uavY = 0.0;
-	double endX = 0.0;
-	double endY = 0.0;
-};
-
-const double MOVERATE = 3;
 const double OBSTACLE_PADDING = 5;
-
-bool planAgain = false;
 
 static void onError(int error, const char* description) { fputs(description, stderr); }
 
 static void onKey(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	Moves* currentMoves = static_cast<Moves*>(glfwGetWindowUserPointer(window));
-
 	switch (key) {
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(window, GL_TRUE);
 			break;
-		case GLFW_KEY_UP:
-			if (action != GLFW_RELEASE) {
-				currentMoves->uavY = -MOVERATE;
-			} else {
-				currentMoves->uavY = 0;
-			}
-			break;
-		case GLFW_KEY_DOWN:
-			if (action != GLFW_RELEASE) {
-				currentMoves->uavY = MOVERATE;
-			} else {
-				currentMoves->uavY = 0;
-			}
-			break;
-		case GLFW_KEY_LEFT:
-			if (action != GLFW_RELEASE) {
-				currentMoves->uavX = -MOVERATE;
-			} else {
-				currentMoves->uavX = 0;
-			}
-			break;
-		case GLFW_KEY_RIGHT:
-			if (action != GLFW_RELEASE) {
-				currentMoves->uavX = MOVERATE;
-			} else {
-				currentMoves->uavX = 0;
-			}
-			break;
-		case GLFW_KEY_P:
-			if (action == GLFW_RELEASE) {
-				planAgain = true;
-			}
-			break;
 	}
-
-	// printf("key: %d\n, (%.2f, %.2f)", key, currentMoves->uavX, currentMoves->uavY);
 }
 
 void initDisplay(int width, int height, float ratio) {
@@ -95,92 +48,6 @@ void drawPoint(Coord point, double radius) {
 	glVertex2d(point.x(), point.y());
 	glEnd();
 }
-
-void drawLine(Coord start, Coord end, HSL hsl, int linewidth) {
-	auto rgb = HSLToRGB(hsl);
-	glColor3d(rgb.R, rgb.G, rgb.B);
-	glLineWidth(linewidth);
-	glBegin(GL_LINES);
-	glVertex2d(start.x(), start.y());
-	glVertex2d(end.x(), end.y());
-	glEnd();
-}
-
-void drawTree(Node* root) {
-	for (auto child : root->children) {
-		drawLine(root->coord, child->coord, HSL(100, 1, 0.5), 1);
-		drawTree(child);
-	}
-}
-
-void drawGraphRecursive(Node* node, set<Node*>& visited) {
-	visited.insert(node);
-	for (auto child : node->children) {
-		HSL* hsl;
-		int linewidth = 3;
-		switch (child->status) {
-			case Status::Unvisited:
-				hsl = new HSL(100, 1, 0.5);
-				linewidth = 1;
-				break;
-			case Status::Open:
-				hsl = new HSL(50, 1, 0.5);
-				break;
-			case Status::Closed:
-				hsl = new HSL(250, 1, 0.5);
-				break;
-			default:
-				hsl = new HSL(360, 1, 0.5);
-		}
-
-		drawLine(node->coord, child->coord, *hsl, linewidth);
-		if (visited.find(child) == visited.end()) {
-			drawGraphRecursive(child, visited);
-		}
-	}
-}
-
-/*
-void drawGraphIterative(set<Node*>& visited, unordered_map<Node*, vector<Node*>> visibilityGraph) {
-    for (auto kv_pair : visibilityGraph) {
-        auto parent = kv_pair.first;
-
-        if (visited.find(parent) != visited.end()) {
-            continue;
-        }
-
-        for (auto child : kv_pair.second) {
-            HSL* hsl;
-            int linewidth = 3;
-            switch (child->status) {
-                case Status::Unvisited:
-                    hsl = new HSL(100, 1, 0.5);
-                    linewidth = 1;
-                    break;
-                case Status::Open:
-                    hsl = new HSL(50, 1, 0.5);
-                    linewidth = 1;
-                    break;
-                case Status::Closed:
-                    hsl = new HSL(250, 1, 0.5);
-                    break;
-                default:
-                    hsl = new HSL(360, 1, 0.5);
-            }
-
-            if (child->status == Status::Closed) {
-                drawLine(parent->coord, child->coord, *hsl, linewidth);
-            }
-        }
-    }
-}
-
-void drawGraph(Node* root, unordered_map<Node*, vector<Node*>> visibilityGraph) {
-    set<Node*> visited;
-    // drawGraphRecursive(root, visited);
-    drawGraphIterative(visited, visibilityGraph);
-}
-*/
 
 void drawPath(deque<Coord>& path) {
 	glEnable(GL_LINE_SMOOTH);
@@ -210,9 +77,6 @@ void drawObstacles(vector<Rect*>* obstacleRects) {
 
 void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* obstacleRects) {
 	drawObstacles(obstacleRects);
-	// drawTree(root);
-	// drawGraph(root, visibilityGraph);
-
 	drawPath(bestPath);
 
 	drawPoint(root->coord, 20);
@@ -224,7 +88,6 @@ int main(int argc, char* argv[]) {
 	int height = 700;
 	bool isFullscreen = false;
 	int monitorNum = 0;
-	bool useFmt = false;
 	bool usePseudoRandom = false;
 	double replanFrequency = -1;
 
@@ -233,7 +96,6 @@ int main(int argc, char* argv[]) {
 	options.add_options()
 		("f,fullscreen", "Enable Fullscreen", cxxopts::value(isFullscreen))
 		("m,monitor", "Set Monitor Number", cxxopts::value(monitorNum))
-		("fmt", "Use FMT*", cxxopts::value(useFmt))
 		("p,pr", "Use pseudo-random numbers", cxxopts::value(usePseudoRandom))
 		("r,replan", "Replan frequency", cxxopts::value(replanFrequency));
 	// clang-format on
@@ -264,10 +126,7 @@ int main(int argc, char* argv[]) {
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, onKey);
 
-	float ratio;
-	// int width, height;
-	// glfwGetFramebufferSize(window, &width, &height);
-	ratio = width / (float)height;
+	float ratio = width / (float)height;
 	initDisplay(width, height, ratio);
 
 	vector<Rect*> obstacleRects;
@@ -276,68 +135,35 @@ int main(int argc, char* argv[]) {
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
 	generateObstacleHash(obstacleRects, obstacleHash);
 
-	/*
-	for (auto row: obstacleHash) {
-	    for (auto value: row) {
-	        printf("%d", value ? 1 : 0);
-	    }
-	    printf("\n");
-	}
-	*/
-
-	/*SamplingPlanner* planner;
-	if (useFmt) {
-	    planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
-	} else {
-	    planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
-	}*/
 	AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 
 	auto lastFrame = glfwGetTime();
 	auto frameInterval = 1.0 / 30.0;
+	int replanCount = 0;
 
 	auto lastReplan = glfwGetTime();
 	auto replanInterval = 1.0 / replanFrequency;
-	/*auto iterations = 0;
-	auto frames = 0;
-	double averageIterations = 0;*/
 	printf("%.2f\n", replanInterval);
-
-	Moves currentMoves;
-	glfwSetWindowUserPointer(window, &currentMoves);
 
 	while (!glfwWindowShouldClose(window)) {
 		auto currentTime = glfwGetTime();
 		if (currentTime - lastFrame >= frameInterval) {
 			lastFrame = currentTime;
-			/*
-			averageIterations = (averageIterations * frames + iterations) / (frames + 1.0);
-			printf("i: %.2f\n", averageIterations);
-			frames += 1;
-			iterations = 0;
-			*/
+			printf("replans: %d\n", replanCount * 30);
+			replanCount = 0;
 
 			glClear(GL_COLOR_BUFFER_BIT);
-
 			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects);
-
 			glfwSwapBuffers(window);
 			glfwPollEvents();
-
-			planner->followPath();
-			planner->moveStart(currentMoves.uavX, currentMoves.uavY);
 		} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
 			lastReplan = currentTime;
+			planner->randomStart();
 			planner->randomReplan();
-			// printf("replan: %.5f\n", glfwGetTime() - lastReplan);
+			replanCount++;
 		} else {
 			// iterations++;
 			// planner->sample();
-		}
-
-		if (planAgain) {
-			// planner->plan();
-			planAgain = false;
 		}
 	}
 	glfwDestroyWindow(window);
