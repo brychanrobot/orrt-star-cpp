@@ -3,10 +3,10 @@
 #include <deque>
 #include <vector>
 
-#include "Halton.hpp"
-#include "Node.hpp"
 #include "../geom/Coord.hpp"
 #include "../geom/Rect.hpp"
+#include "Halton.hpp"
+#include "Node.hpp"
 
 class Planner {
    protected:
@@ -35,6 +35,7 @@ class Planner {
 	std::deque<Coord> bestPath;
 	bool usePseudoRandom;
 	Planner(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, int width, int height, bool usePseudoRandom);
+	virtual ~Planner();
 	virtual void moveStart(double dx, double dy);
 	void randomReplan();
 	void followPath();

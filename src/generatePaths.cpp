@@ -84,6 +84,8 @@ void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<Rect*>* o
 }
 
 int main(int argc, char* argv[]) {
+	srand(time(NULL));
+
 	int width = 700;
 	int height = 700;
 	bool isFullscreen = false;
@@ -129,6 +131,7 @@ int main(int argc, char* argv[]) {
 	float ratio = width / (float)height;
 	initDisplay(width, height, ratio);
 
+	/*
 	vector<Rect*> obstacleRects;
 	generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
 
@@ -136,6 +139,10 @@ int main(int argc, char* argv[]) {
 	generateObstacleHash(obstacleRects, obstacleHash);
 
 	AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
+	*/
+	AStar* planner = NULL;
+	vector<Rect*> obstacleRects;
+	vector<vector<bool>>* obstacleHash = NULL;
 
 	auto lastFrame = glfwGetTime();
 	auto frameInterval = 1.0 / 30.0;
@@ -146,24 +153,37 @@ int main(int argc, char* argv[]) {
 	printf("%.2f\n", replanInterval);
 
 	while (!glfwWindowShouldClose(window)) {
+		if (replanCount % 100000 == 0) {
+			for (auto rect : obstacleRects) {
+				delete rect;
+			}
+			obstacleRects.clear();
+			generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
+
+			delete obstacleHash;
+			obstacleHash = new vector<vector<bool>>(height, vector<bool>(width, false));
+			generateObstacleHash(obstacleRects, *obstacleHash);
+
+			delete planner;
+			planner = new AStar(obstacleHash, &obstacleRects, width, height, usePseudoRandom);
+			printf("created planner\n");
+		}
+
 		auto currentTime = glfwGetTime();
 		if (currentTime - lastFrame >= frameInterval) {
 			lastFrame = currentTime;
-			printf("replans: %d\n", replanCount * 30);
-			replanCount = 0;
+			// printf("replans: %d\n", replanCount * 30);
+			// replanCount = 0;
 
 			glClear(GL_COLOR_BUFFER_BIT);
 			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects);
 			glfwSwapBuffers(window);
 			glfwPollEvents();
-		} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
-			lastReplan = currentTime;
+		} else {  // if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
+			// lastReplan = currentTime;
 			planner->randomStart();
 			planner->randomReplan();
 			replanCount++;
-		} else {
-			// iterations++;
-			// planner->sample();
 		}
 	}
 	glfwDestroyWindow(window);

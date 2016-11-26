@@ -33,6 +33,15 @@ AStar::AStar(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRects, 
 	plan();  // make an initial plan
 }
 
+AStar::~AStar() {
+	// Planner::~Planner();
+
+	for (auto pair : this->baseVisibilityGraph) {
+		delete pair.first;
+	}
+	// delete baseVisibilityGraph;
+}
+
 void AStar::buildBaseVisibilityGraph() {
 	printf("building visibility graph\n");
 	vector<Node *> allNodes;

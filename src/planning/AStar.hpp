@@ -15,6 +15,7 @@ class AStar : public Planner {
 
    public:
 	AStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<Rect *> *obstacleRects, int width, int height, bool usePseudoRandom);
+	~AStar();
 	void moveStart(double dx, double dy);
 	void randomStart();
 };

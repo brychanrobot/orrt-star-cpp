@@ -35,6 +35,20 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<Rect *> *obstacleRec
 	this->endNode = new Node(endPoint, NULL, std::numeric_limits<double>::max() / 2.0);
 }
 
+Planner::~Planner() {
+	/*printf("starting planner desturctor\n");
+
+	// delete this->obstacleHash;
+	for (auto obstacle : *(this->obstacleRects)) {
+	    delete obstacle;
+	}
+	// delete this->obstacleRects;
+	printf("deleted obstacle stuff\n");
+	*/
+	delete this->root;
+	delete this->endNode;
+}
+
 bool Planner::lineIntersectsObstacle(Coord &p1, Coord &p2) {
 	auto dx = p2.x() - p1.x();
 	auto dy = p2.y() - p1.y();
