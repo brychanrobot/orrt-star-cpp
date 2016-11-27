@@ -1,7 +1,7 @@
-#include <FreeImage.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 #include <set>
 #include "color.hpp"
 #include "cxxopts.hpp"
@@ -84,6 +84,42 @@ void display(shared_ptr<Node>& root, shared_ptr<Node>& endNode, deque<Coord>& be
 	drawPoint(endNode->coord, 20);
 }
 
+void saveMap(string filename, vector<vector<bool>>& map) {
+	ofstream f(filename, std::ofstream::out);
+	f << "[";
+	for (int r = 0; r < map.size(); r++) {
+		f << "[";
+		for (int c = 0; c < map[r].size(); c++) {
+			f << map[r][c] ? 1 : 0;
+			if (c < map[r].size() - 1) {
+				f << ", ";
+			}
+		}
+		if (r < map.size() - 1) {
+			f << "],";
+		} else {
+			f << "]";
+		}
+	}
+	f << "]";
+	f.close();
+}
+
+void appendPath(string filename, Coord& start, Coord& end, deque<Coord>& path) {
+	ofstream f(filename, std::ofstream::app);
+	if (f.tellp() == 0) {
+		f << "[";
+	}
+
+	f << "[[" << start.x() << "," << start.y() << "], [" << end.x() << "," << end.y() << "], [";
+	for (auto& c : path) {
+		f << "[" << c.x() << "," << c.y() << "],";
+	}
+	f.seekp(f.tellp() - 1);
+	f << "],";
+	f.close();
+}
+
 int main(int argc, char* argv[]) {
 	srand(time(NULL));
 
@@ -153,35 +189,20 @@ int main(int argc, char* argv[]) {
 	auto replanInterval = 1.0 / replanFrequency;
 	printf("%.2f\n", replanInterval);
 
+	int mapNum = 0;
+
 	while (!glfwWindowShouldClose(window)) {
 		if (replanCount % 100000 == 0) {
 			/*for (auto rect : obstacleRects) {
 			    delete rect;
 			}*/
 			if (planner != NULL) {
-				GLint viewport[4];
-				glGetIntegerv(GL_VIEWPORT, viewport);
-				//*width = viewport[2];
-				//*height = viewport[3];
-
-				// GLuint texture;
-				// glGenTextures(1, &texture);
-				// glBindTexture(GL_TEXTURE_2D, texture);
-
-				// rgb image
-				// glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, viewport[0], viewport[1], viewport[2], viewport[3], 0);
-
-				// glPixelStorei(GL_PACK_ALIGNMENT, 1);
-				BYTE* raw_img = (BYTE*)malloc(sizeof(BYTE) * width * height * 3);
-				// glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, raw_img);
-				glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, raw_img);
-
-				FIBITMAP* image = FreeImage_ConvertFromRawBits(raw_img, FIT_BITMAP, width, height, 3, 8, 0xFF000000, 0x00FF0000, 0x0000FF00, false);
-				FreeImage_Save(FIF_PNG, image, "test.png", 0);
-
-				FreeImage_Unload(image);
-
-				delete raw_img;
+				saveMap("data/" + to_string(mapNum) + "map.json", obstacleHash);
+				ofstream f("data/" + to_string(mapNum) + "paths.json", std::ofstream::app);
+				f.seekp(f.tellp() - 1);
+				f << "]";
+				f.close();
+				mapNum++;
 			}
 
 			delete planner;
@@ -200,6 +221,7 @@ int main(int argc, char* argv[]) {
 
 			// delete planner;
 			planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
+			appendPath("data/" + to_string(mapNum) + "paths.json", planner->root->coord, planner->endNode->coord, planner->bestPath);
 			// printf("created planner\n");
 		}
 
@@ -218,6 +240,8 @@ int main(int argc, char* argv[]) {
 			planner->randomStart();
 			planner->randomReplan();
 			replanCount++;
+
+			appendPath("data/" + to_string(mapNum) + "paths.json", planner->root->coord, planner->endNode->coord, planner->bestPath);
 		}
 	}
 	glfwDestroyWindow(window);

@@ -1,7 +1,7 @@
 
 libs= ['m', 'GL', 'GLU', 'glfw', 'glut',
 'X11', 'Xrandr', 'Xinerama', 'Xi', 'Xxf86vm', 'Xcursor',
-'pthread', 'dl', 'boost_system', 'freeimage']
+'pthread', 'dl', 'boost_system']
 
 
 env=Environment(CXXFLAGS='-Wall -O3 -march=native -std=c++11', LIBS=libs)

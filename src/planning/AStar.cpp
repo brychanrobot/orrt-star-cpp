@@ -8,6 +8,7 @@
 using namespace std;
 
 //////////////////////////
+// Adapted from Red Blob Games example
 ////////////////////////////
 template <typename T, typename priority_t>
 struct PriorityQueue {
