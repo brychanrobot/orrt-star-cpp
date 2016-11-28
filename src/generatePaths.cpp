@@ -115,7 +115,7 @@ void appendPath(string filename, Coord& start, Coord& end, deque<Coord>& path) {
 	for (auto& c : path) {
 		f << "[" << c.x() << "," << c.y() << "],";
 	}
-	f.seekp(f.tellp() - 1);
+	f.seekp(2, ios_base::end);
 	f << "],";
 	f.close();
 }
@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
 			if (planner != NULL) {
 				saveMap("data/" + to_string(mapNum) + "map.json", obstacleHash);
 				ofstream f("data/" + to_string(mapNum) + "paths.json", std::ofstream::app);
-				f.seekp(f.tellp() - 1);
+				f.seekp(2, ios_base::end);
 				f << "]";
 				f.close();
 				mapNum++;
