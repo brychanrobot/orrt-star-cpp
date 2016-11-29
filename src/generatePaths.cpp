@@ -106,17 +106,27 @@ void saveMap(string filename, vector<vector<bool>>& map) {
 }
 
 void appendPath(string filename, Coord& start, Coord& end, deque<Coord>& path) {
-	ofstream f(filename, std::ofstream::app);
+	ofstream f(filename, std::ofstream::out | std::ofstream::app);
 	if (f.tellp() == 0) {
 		f << "[";
+	} else {
+		f << ", ";
 	}
 
 	f << "[[" << start.x() << "," << start.y() << "], [" << end.x() << "," << end.y() << "], [";
-	for (auto& c : path) {
-		f << "[" << c.x() << "," << c.y() << "],";
+	for (int c = 0; c < path.size(); c++) {
+		if (c == 0) {
+			f << "[";
+		} else {
+			f << ",[";
+		}
+		f << path[c].x() << "," << path[c].y() << "]";
 	}
-	f.seekp(2, ios_base::end);
-	f << "],";
+	// f.seekp(2, ios_base::end);
+	// f << "\b";
+	// f.seekp(f.tellp() - 1);
+	// f.write("],", 2);
+	f << "]]";
 	f.close();
 }
 
@@ -192,16 +202,19 @@ int main(int argc, char* argv[]) {
 	int mapNum = 0;
 
 	while (!glfwWindowShouldClose(window)) {
-		if (replanCount % 100000 == 0) {
+		if (replanCount % 10 == 0) {
 			/*for (auto rect : obstacleRects) {
 			    delete rect;
 			}*/
 			if (planner != NULL) {
 				saveMap("data/" + to_string(mapNum) + "map.json", obstacleHash);
 				ofstream f("data/" + to_string(mapNum) + "paths.json", std::ofstream::app);
-				f.seekp(2, ios_base::end);
+				// f.seekp(2, ios_base::end);
+				// f << "\b";
 				f << "]";
-				f.close();
+				// f.seekp(f.tellp() - 1);
+				// f.write("]", 1);
+				// f.close();
 				mapNum++;
 			}
 
