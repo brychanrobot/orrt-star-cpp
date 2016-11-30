@@ -4,7 +4,7 @@ libs= ['m', 'GL', 'GLU', 'glfw', 'glut',
 'pthread', 'dl', 'boost_system']
 
 
-env=Environment(CXXFLAGS='-Wall -O3 -march=native -std=c++11', LIBS=libs)
+env=Environment(CXXFLAGS='-Wall -O3 -march=native -std=c++14', LIBS=libs)
 debug = ARGUMENTS.get('debug', 0)
 if int(debug):
 	env.Append(CCFLAGS = '-g')
