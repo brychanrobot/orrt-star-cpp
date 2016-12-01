@@ -7,6 +7,7 @@
 #include "planning/AStar.hpp"
 #include "planning/OnlineFmtStar.hpp"
 #include "planning/OnlineRrtStar.hpp"
+#include "planning/PrmStar.hpp"
 #include "planning/utils.hpp"
 
 using namespace std;
@@ -291,7 +292,8 @@ int main(int argc, char* argv[]) {
 	} else {
 	    planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
 	}*/
-	AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
+	// AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
+	PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 
 	auto lastFrame = glfwGetTime();
 	auto frameInterval = 1.0 / 30.0;

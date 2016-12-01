@@ -18,6 +18,7 @@ objects = [
 
 	env.Object('build/planning/Planner.cpp'),
 	env.Object('build/planning/AStar.cpp'),
+	env.Object('build/planning/PrmStar.cpp'),
 
 	env.Object('build/planning/SamplingPlanner.cpp'),
 	env.Object('build/planning/OnlineFmtStar.cpp'),
