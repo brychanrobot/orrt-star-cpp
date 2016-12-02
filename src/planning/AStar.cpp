@@ -28,10 +28,13 @@ struct PriorityQueue {
 /////////////////////////////
 ////////////////////////////
 
-AStar::AStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom)
+AStar::AStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom,
+             bool initialize)
     : Planner(obstacleHash, obstacleRects, width, height, usePseudoRandom) {
-	buildBaseVisibilityGraph();
-	plan();  // make an initial plan
+	if (initialize) {
+		buildBaseVisibilityGraph();
+		plan();  // make an initial plan
+	}
 }
 
 AStar::~AStar() {
@@ -69,6 +72,7 @@ void AStar::buildBaseVisibilityGraph() {
 			}
 		}
 	}
+	printf("A*\n");
 }
 
 void AStar::plan() {

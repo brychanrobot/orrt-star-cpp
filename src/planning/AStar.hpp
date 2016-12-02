@@ -10,12 +10,12 @@ class AStar : public Planner {
    protected:
 	std::unordered_map<std::shared_ptr<Node>, std::set<std::shared_ptr<Node>>> baseVisibilityGraph;
 	void plan();
-	void replan(Coord &newEndpoint);
-	void buildBaseVisibilityGraph();
+	virtual void replan(Coord &newEndpoint);
+	virtual void buildBaseVisibilityGraph();
 
    public:
 	AStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height,
-	      bool usePseudoRandom);
+	      bool usePseudoRandom, bool initialize = true);
 	~AStar();
 	void moveStart(double dx, double dy);
 	void randomStart();

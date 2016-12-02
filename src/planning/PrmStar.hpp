@@ -4,6 +4,7 @@
 
 class PrmStar : public AStar {
    protected:
+	void replan(Coord &newEndpoint);
 	void buildBaseVisibilityGraph();
 
    public:

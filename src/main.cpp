@@ -195,6 +195,10 @@ void drawPath(deque<Coord>& path) {
 	glEnd();
 
 	glDisable(GL_LINE_SMOOTH);
+
+	for (auto point : path) {
+		drawPoint(point, 5);
+	}
 }
 
 void drawObstacles(vector<shared_ptr<Rect>>* obstacleRects) {
