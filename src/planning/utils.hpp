@@ -25,7 +25,8 @@ void generateObstacleRects(int width, int height, int count, std::vector<std::sh
 
 			// delete rect;
 			rect = std::make_shared<Rect>(topLeft, bottomRight);
-			if (rect->width() > padding * 2 && rect->height() > padding * 2 && !hasIntersection(*rect, obstacles)) {
+			if (rect->width() > padding * 2 && rect->height() > padding * 2 && rect->width() < 0.5 * width && rect->height() < 0.5 * height &&
+			    !hasIntersection(*rect, obstacles)) {
 				break;
 			}
 		}

@@ -57,20 +57,22 @@ void appendPath(string filename, Coord& start, Coord& end, deque<Coord>& path) {
 }
 
 int main(int argc, char* argv[]) {
-	srand(time(NULL));
+	srand(time(0));
 
-	int width = 300;
-	int height = 300;
+	int width = 50;
+	int height = 50;
 	bool usePseudoRandom = true;
 
 	AStar* planner = NULL;
 	vector<shared_ptr<Rect>> obstacleRects;
 	vector<vector<bool>> obstacleHash;
 
-	for (int mapNum = 0; mapNum < 1; mapNum++) {
+	for (int mapNum = 0; mapNum < 1000; mapNum++) {
 		delete planner;
 		obstacleRects.clear();
-		generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
+		int num_obstacles = rand() % 4 + 1;
+		printf("%d\n", num_obstacles);
+		generateObstacleRects(width, height, num_obstacles, obstacleRects, OBSTACLE_PADDING);
 
 		obstacleHash = vector<vector<bool>>(height, vector<bool>(width, false));
 		generateObstacleHash(obstacleRects, obstacleHash);
@@ -80,7 +82,7 @@ int main(int argc, char* argv[]) {
 
 		saveMap("data/" + to_string(mapNum) + "map.json", obstacleHash);
 
-		for (int replanCount = 0; replanCount < 10000; replanCount++) {
+		for (int replanCount = 0; replanCount < 500; replanCount++) {
 			planner->randomStart();
 			planner->randomReplan();
 
