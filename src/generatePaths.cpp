@@ -31,6 +31,19 @@ void saveMap(string filename, vector<vector<bool>>& map) {
 	f.close();
 }
 
+void saveMapRects(string filename, vector<shared_ptr<Rect>> rects) {
+	ofstream f(filename, std::ofstream::out);
+	f << "[";
+	for (uint r = 0; r < rects.size(); r++) {
+		f << "[[" << rects[r]->topLeft.x() << "," << rects[r]->topLeft.y() << "],[";
+		f << rects[r]->bottomRight.x() << "," << rects[r]->bottomRight.y() << "]]";
+		if (r != rects.size() - 1) {
+			f << ", ";
+		}
+	}
+	f << "]";
+}
+
 void appendPath(string filename, Coord& start, Coord& end, deque<Coord>& path) {
 	ofstream f(filename, std::ofstream::out | std::ofstream::app);
 	if (f.tellp() == 0) {
@@ -81,6 +94,7 @@ int main(int argc, char* argv[]) {
 		appendPath("data/" + to_string(mapNum) + "paths.json", planner->root->coord, planner->endNode->coord, planner->bestPath);
 
 		saveMap("data/" + to_string(mapNum) + "map.json", obstacleHash);
+		saveMapRects("data/" + to_string(mapNum) + "maprects.json", obstacleRects);
 
 		for (int replanCount = 0; replanCount < 500; replanCount++) {
 			planner->randomStart();
