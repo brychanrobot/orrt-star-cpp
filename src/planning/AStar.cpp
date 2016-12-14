@@ -75,6 +75,30 @@ void AStar::buildBaseVisibilityGraph() {
 	printf("A*\n");
 }
 
+/*
+void AStar::buildBaseVisibilityGraph() {
+    vector<shared_ptr<Node>> allNodes;
+
+    for (int i = 0; i < width; i += (int)(width / 20)) {
+        for (int j = 0; j < height; j += (int)(height / 20)) {
+            allNodes.push_back(make_shared<Node>(Coord(i, j), shared_ptr<Node>(nullptr), -1.0));
+        }
+    }
+
+    allNodes.push_back(this->root);
+    this->endNode->cumulativeCost = -1.0;
+    allNodes.push_back(this->endNode);
+
+    for (auto n1 : allNodes) {
+        for (auto n2 : allNodes) {
+            if (n1 != n2 && !this->lineIntersectsObstacle(n1->coord, n2->coord)) {
+                baseVisibilityGraph[n1].insert(n2);
+            }
+        }
+    }
+}
+*/
+
 void AStar::plan() {
 	PriorityQueue<shared_ptr<Node>, double> frontier;
 	frontier.put(this->root, 0.0);

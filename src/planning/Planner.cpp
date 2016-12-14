@@ -12,7 +12,7 @@
 using namespace std;
 
 Planner::Planner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom)
-    : haltonX(19), haltonY(23) {
+    : haltonX(19), haltonY(31) {
 	// srand(time(NULL));  // initialize the random number generator so it happens
 
 	this->width = width;
