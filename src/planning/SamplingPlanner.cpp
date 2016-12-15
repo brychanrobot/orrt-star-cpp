@@ -79,11 +79,6 @@ shared_ptr<Node> SamplingPlanner::getNearestNeighbor(Coord &p) {
 	return result[0].second;
 }
 
-void SamplingPlanner::getNeighbors(Coord center, double radius, vector<RtreeValue> &results) {
-	box query_box(point(center.x() - radius, center.y() - radius), point(center.x() + radius, center.y() + radius));
-	this->rtree.query(boost::geometry::index::intersects(query_box), back_inserter(results));
-}
-
 void SamplingPlanner::findBestNeighborWithoutCost(Coord point, shared_ptr<Node> &bestNeighbor, vector<shared_ptr<Node>> &neighbors) {
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);

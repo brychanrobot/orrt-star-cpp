@@ -3,10 +3,18 @@
 #include <deque>
 #include <vector>
 
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/geometries.hpp>
+#include <boost/geometry/index/rtree.hpp>
+
 #include "../geom/Coord.hpp"
 #include "../geom/Rect.hpp"
 #include "Halton.hpp"
 #include "Node.hpp"
+
+typedef boost::geometry::model::box<point> box;
+typedef std::pair<point, std::shared_ptr<Node>> RtreeValue;
+typedef boost::geometry::index::rtree<RtreeValue, boost::geometry::index::rstar<16>> Rtree;
 
 class Planner {
    protected:
@@ -19,6 +27,8 @@ class Planner {
 	HaltonSampler haltonX;
 	HaltonSampler haltonY;
 
+	Rtree rtree;
+
 	Coord randomOpenAreaPoint();
 	double getCost(std::shared_ptr<Node> &start, std::shared_ptr<Node> &end);
 	double getCost(Coord &start, Coord &end);
@@ -27,6 +37,8 @@ class Planner {
 
 	void refreshBestPath();
 	virtual void replan(Coord &newEndpoint);
+
+	void getNeighbors(Coord center, double radius, std::vector<RtreeValue> &results);
 
    public:
 	std::shared_ptr<Node> root;

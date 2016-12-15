@@ -37,18 +37,7 @@ AStar::AStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obsta
 	}
 }
 
-AStar::~AStar() {
-	// Planner::~Planner();
-
-	/*
-	for (auto pair : this->baseVisibilityGraph) {
-	    delete pair.first;
-	    printf("deleted pair\n");
-	}
-	*/
-	// delete baseVisibilityGraph;
-	// printf("destructed AStar\n");
-}
+AStar::~AStar() {}
 
 void AStar::buildBaseVisibilityGraph() {
 	vector<shared_ptr<Node>> allNodes;
@@ -78,10 +67,17 @@ void AStar::buildBaseVisibilityGraph() {
 /*
 void AStar::buildBaseVisibilityGraph() {
     vector<shared_ptr<Node>> allNodes;
+    auto ratio = this->width / (double)this->height;
+    this->dx = width / 100;
+    this->dy = height / (100 * ratio);
 
-    for (int i = 0; i < width; i += (int)(width / 20)) {
-        for (int j = 0; j < height; j += (int)(height / 20)) {
-            allNodes.push_back(make_shared<Node>(Coord(i, j), shared_ptr<Node>(nullptr), -1.0));
+    for (int i = this->dx / 2; i < width; i += this->dx) {
+        for (int j = this->dy / 2; j < height; j += this->dy) {
+            if (!(*this->obstacleHash)[j][i]) {
+                auto node = make_shared<Node>(Coord(i, j), shared_ptr<Node>(nullptr), -1.0);
+                allNodes.push_back(node);
+                this->rtree.insert(RtreeValue(node->coord, node));
+            }
         }
     }
 
@@ -90,8 +86,11 @@ void AStar::buildBaseVisibilityGraph() {
     allNodes.push_back(this->endNode);
 
     for (auto n1 : allNodes) {
-        for (auto n2 : allNodes) {
-            if (n1 != n2 && !this->lineIntersectsObstacle(n1->coord, n2->coord)) {
+        vector<RtreeValue> results;
+        this->getNeighbors(n1->coord, (this->dx + this->dy), results);
+        for (auto pair : results) {
+            auto n2 = pair.second;
+            if (n1 != n2 && euclideanDistance(n1->coord, n2->coord) < this->dx + this->dy && !this->lineIntersectsObstacle(n1->coord, n2->coord)) {
                 baseVisibilityGraph[n1].insert(n2);
             }
         }
@@ -130,6 +129,7 @@ void AStar::moveStart(double dx, double dy) {
 
 		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
 			this->root->coord = point;
+
 			this->bestPath[0] = point;
 
 			if (euclideanDistance(this->root->coord, this->bestPath[1]) < 1.5) {

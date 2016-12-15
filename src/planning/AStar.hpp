@@ -12,11 +12,13 @@ class AStar : public Planner {
 	void plan();
 	virtual void replan(Coord &newEndpoint);
 	virtual void buildBaseVisibilityGraph();
+	int dx;
+	int dy;
 
    public:
 	AStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height,
 	      bool usePseudoRandom, bool initialize = true);
 	~AStar();
-	void moveStart(double dx, double dy);
+	virtual void moveStart(double dx, double dy);
 	void randomStart();
 };

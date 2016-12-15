@@ -4,37 +4,79 @@
 
 using namespace std;
 
-PrmStar::PrmStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom)
+PrmStar::PrmStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom,
+                 GraphType graphType)
     : AStar(obstacleHash, obstacleRects, width, height, usePseudoRandom, false) {
+	this->graphType = graphType;
 	this->buildBaseVisibilityGraph();
 	this->plan();  // make an initial plan
 }
 
 PrmStar::~PrmStar() {}
 
+void PrmStar::sampleRandom(vector<shared_ptr<Node>> &allNodes) {
+	for (auto j = 0; j < 0.02 * this->width * this->height; j++) {
+		auto node = make_shared<Node>(this->randomOpenAreaPoint(), shared_ptr<Node>(nullptr), -1.0);
+		allNodes.push_back(node);
+		this->rtree.insert(RtreeValue(node->coord, node));
+	}
+}
+
+void PrmStar::sampleGrid(vector<shared_ptr<Node>> &allNodes) {
+	auto ratio = this->width / (double)this->height;
+	this->dx = width / 100;
+	this->dy = height / (100 * ratio);
+
+	for (int i = this->dx / 2; i < width; i += this->dx) {
+		for (int j = this->dy / 2; j < height; j += this->dy) {
+			if (!(*this->obstacleHash)[j][i]) {
+				auto node = make_shared<Node>(Coord(i, j), shared_ptr<Node>(nullptr), -1.0);
+				allNodes.push_back(node);
+				this->rtree.insert(RtreeValue(node->coord, node));
+			}
+		}
+	}
+}
+
 void PrmStar::buildBaseVisibilityGraph() {
 	vector<shared_ptr<Node>> allNodes;
-	for (auto j = 0; j < 0.02 * this->width * this->height; j++) {
-		allNodes.push_back(make_shared<Node>(this->randomOpenAreaPoint(), shared_ptr<Node>(nullptr), -1.0));
+	if (this->graphType == GraphType::Random) {
+		this->sampleRandom(allNodes);
+	} else {
+		this->sampleGrid(allNodes);
 	}
 
 	allNodes.push_back(this->root);
 	this->endNode->cumulativeCost = -1.0;
 	allNodes.push_back(this->endNode);
 
-	for (auto n1 : allNodes) {
-		for (auto n2 : allNodes) {
-			if (n1 != n2 && euclideanDistance(n1->coord, n2->coord) < 24 && !this->lineIntersectsObstacle(n1->coord, n2->coord)) {
-				baseVisibilityGraph[n1].insert(n2);
-				// n1->children.push_back(n2);
+	this->rtree.insert(RtreeValue(this->root->coord, this->root));
+	this->rtree.insert(RtreeValue(this->endNode->coord, this->endNode));
+
+	for (auto n : allNodes) {
+		vector<RtreeValue> results;
+		this->getNeighbors(n->coord, 24, results);
+		for (auto pair : results) {
+			auto neighbor = pair.second;
+			if (n != neighbor && !this->lineIntersectsObstacle(n->coord, neighbor->coord)) {
+				baseVisibilityGraph[n].insert(neighbor);
 			}
 		}
 	}
-	printf("prm*\n");
+}
+
+void PrmStar::moveStart(double dx, double dy) {
+	if (dx != 0 || dy != 0) {
+		this->rtree.remove(RtreeValue(this->root->coord, this->root));
+		AStar::moveStart(dx, dy);
+		this->rtree.insert(RtreeValue(this->root->coord, this->root));
+	}
 }
 
 void PrmStar::replan(Coord &newEndpoint) {
+	this->rtree.remove(RtreeValue(this->endNode->coord, this->endNode));
 	Planner::replan(newEndpoint);
+	this->rtree.insert(RtreeValue(this->endNode->coord, this->endNode));
 
 	for (auto neighbor : this->baseVisibilityGraph[this->root]) {
 		this->baseVisibilityGraph[neighbor].erase(this->root);
@@ -50,15 +92,23 @@ void PrmStar::replan(Coord &newEndpoint) {
 	for (auto pair : this->baseVisibilityGraph) {
 		auto neighbor = pair.first;
 		neighbor->cumulativeCost = -1;
+	}
 
-		if (neighbor != this->root && euclideanDistance(this->root->coord, neighbor->coord) < 24 &&
-		    !this->lineIntersectsObstacle(this->root->coord, neighbor->coord)) {
+	vector<RtreeValue> rootNeighbors;
+	this->getNeighbors(this->root->coord, 24, rootNeighbors);
+	for (auto pair : rootNeighbors) {
+		auto neighbor = pair.second;
+		if (neighbor != this->root && !this->lineIntersectsObstacle(this->root->coord, neighbor->coord)) {
 			this->baseVisibilityGraph[this->root].insert(neighbor);
 			this->baseVisibilityGraph[neighbor].insert(this->root);
 		}
+	}
 
-		if (neighbor != this->endNode && euclideanDistance(this->endNode->coord, neighbor->coord) < 24 &&
-		    !this->lineIntersectsObstacle(this->endNode->coord, neighbor->coord)) {
+	vector<RtreeValue> endNodeNeighbors;
+	this->getNeighbors(this->endNode->coord, 24, endNodeNeighbors);
+	for (auto pair : endNodeNeighbors) {
+		auto neighbor = pair.second;
+		if (neighbor != this->endNode && !this->lineIntersectsObstacle(this->endNode->coord, neighbor->coord)) {
 			this->baseVisibilityGraph[this->endNode].insert(neighbor);
 			this->baseVisibilityGraph[neighbor].insert(this->endNode);
 		}

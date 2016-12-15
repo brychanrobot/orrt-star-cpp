@@ -163,3 +163,8 @@ Coord Planner::randomOpenAreaPoint() {
 
 double Planner::getCost(shared_ptr<Node> &start, shared_ptr<Node> &end) { return this->getCost(start->coord, end->coord); }
 double Planner::getCost(Coord &start, Coord &end) { return euclideanDistance(start, end); }
+
+void Planner::getNeighbors(Coord center, double radius, vector<RtreeValue> &results) {
+	box query_box(point(center.x() - radius, center.y() - radius), point(center.x() + radius, center.y() + radius));
+	this->rtree.query(boost::geometry::index::intersects(query_box), back_inserter(results));
+}
