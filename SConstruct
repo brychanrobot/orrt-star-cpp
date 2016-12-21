@@ -27,3 +27,4 @@ objects = [
 
 env.Program(['build/main.cpp'] + objects)
 env.Program(['build/generatePaths.cpp'] + objects)
+env.Program(['build/generateTruth.cpp'] + objects)

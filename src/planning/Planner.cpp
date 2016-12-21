@@ -137,7 +137,17 @@ void Planner::followPath() {
 		auto dy = this->maxTravel * sin(angle);
 
 		this->moveStart(dx, dy);
+
+		this->bestPath[0] = this->root->coord;
 	}
+}
+
+double Planner::calculatePathCost() {
+	double cost;
+	for (unsigned int i = 0; i < this->bestPath.size() - 1; i++) {
+		cost += this->getCost(bestPath[i], bestPath[i + 1]);
+	}
+	return cost;
 }
 
 void Planner::replan(Coord &newEndpoint) { this->endNode->coord = newEndpoint; }

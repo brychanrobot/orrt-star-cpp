@@ -52,4 +52,5 @@ class Planner {
 	virtual void moveStart(double dx, double dy);
 	void randomReplan();
 	void followPath();
+	double calculatePathCost();
 };

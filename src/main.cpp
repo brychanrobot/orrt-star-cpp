@@ -297,7 +297,7 @@ int main(int argc, char* argv[]) {
 	    planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
 	}*/
 	// AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
-	PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
+	PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
 
 	auto lastFrame = glfwGetTime();
 	auto frameInterval = 1.0 / 30.0;
