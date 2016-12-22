@@ -16,6 +16,17 @@ using json = nlohmann::json;
 const double MOVERATE = 3;
 const double OBSTACLE_PADDING = 5;
 
+vector<double> linspace(double a, double b, int n) {
+	vector<double> array;
+	double step = (b - a) / (n - 1);
+
+	while (a <= b) {
+		array.push_back(a);
+		a += step;  // could recode to better handle rounding errors
+	}
+	return array;
+}
+
 void saveJson(string filename, json& j) {
 	ofstream o(filename);
 	o << j << endl;
@@ -32,7 +43,6 @@ void saveMap(string filename, int width, int height, vector<shared_ptr<Rect>>& o
 		m["obstacles"].push_back(r);
 	}
 
-	cout << m << endl;
 	saveJson(filename, m);
 }
 
@@ -54,8 +64,8 @@ int main(int argc, char* argv[]) {
 	bool isFullscreen = false;
 	int monitorNum = 0;
 	bool useFmt = false;
-	bool usePseudoRandom = false;
-	double replanFrequency = -1;
+	bool usePseudoRandom = true;
+	// double replanFrequency = -1;
 
 	// clang-format off
 	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
@@ -63,8 +73,7 @@ int main(int argc, char* argv[]) {
 		("f,fullscreen", "Enable Fullscreen", cxxopts::value(isFullscreen))
 		("m,monitor", "Set Monitor Number", cxxopts::value(monitorNum))
 		("fmt", "Use FMT*", cxxopts::value(useFmt))
-		("p,pr", "Use pseudo-random numbers", cxxopts::value(usePseudoRandom))
-		("r,replan", "Replan frequency", cxxopts::value(replanFrequency));
+		("p,pr", "Use pseudo-random numbers", cxxopts::value(usePseudoRandom));
 	// clang-format on
 
 	options.parse(argc, argv);
@@ -84,39 +93,41 @@ int main(int argc, char* argv[]) {
 	AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
 
-	auto moveInterval = 1.0 / 30.0;               // seconds
-	auto replanInterval = 1.0 / replanFrequency;  // seconds
-	/*auto iterations = 0;
-	auto frames = 0;
-	double averageIterations = 0;*/
-	printf("%.2f\n", replanInterval);
-	double currentTime = 0.0;
-	double lastMove = 0.0;
-	double lastReplan = 0.0;
-
 	saveMap("data/map0.json", width, height, obstacleRects);
-	cout << jsonifyPath(planner->bestPath, planner->endNode->cumulativeCost) << endl;
-	json movePaths;
-	json replanPaths;
+	json allPaths;
 
-	while (currentTime < 120.0) {
-		currentTime += 0.0000001;
-		if (currentTime - lastMove >= moveInterval) {
-			lastMove = currentTime;
-			planner->followPath();
-			movePaths.push_back(jsonifyPath(planner->bestPath, planner->calculatePathCost()));
+	for (auto& preReplanFrequency : linspace(0.1, 5, 30)) {
+		auto replanFrequency = pow(preReplanFrequency, 5);
+		auto moveInterval = 1.0 / 30.0;               // seconds
+		auto replanInterval = 1.0 / replanFrequency;  // seconds
+		/*auto iterations = 0;
+		auto frames = 0;
+		double averageIterations = 0;*/
+		printf("%.6f, %.4f\n", replanFrequency, replanInterval);
+		double lastMove = 0.0;
+		double lastReplan = 0.0;
 
-		} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
-			lastReplan = currentTime;
-			planner->randomReplan();
-			replanPaths.push_back(jsonifyPath(planner->bestPath, planner->calculatePathCost()));
+		json paths;
+		paths["frequency"] = replanFrequency;
 
-		} else {
-			// iterations++;
-			// planner->sample();
+		for (double currentTime = 0.0; currentTime < 120; currentTime += 0.0000001) {
+			if (currentTime - lastMove >= moveInterval) {
+				lastMove = currentTime;
+				planner->followPath();
+				paths["paths"]["move"].push_back(jsonifyPath(planner->bestPath, planner->calculatePathCost()));
+
+			} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
+				lastReplan = currentTime;
+				planner->randomReplan();
+				paths["paths"]["replan"].push_back(jsonifyPath(planner->bestPath, planner->calculatePathCost()));
+
+			} else {
+				// iterations++;
+				// planner->sample();
+			}
 		}
+		allPaths.push_back(paths);
 	}
 
-	saveJson("data/map0move.json", movePaths);
-	saveJson("data/map0replan.json", replanPaths);
+	saveJson("data/map0paths.json", allPaths);
 }
