@@ -9,6 +9,7 @@ class Rect {
 	Coord topLeft;
 	Coord bottomRight;
 	Rect(Coord tl, Coord br);
+	Rect(double tlx, double tly, double brx, double bry);
 	bool contains(Coord point);
 	bool intersects(Rect& rect);
 	void inflate(double dx, double dy);

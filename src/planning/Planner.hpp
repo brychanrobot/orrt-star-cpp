@@ -36,7 +36,6 @@ class Planner {
 	bool lineIntersectsObstacle(Coord &p1, Coord &p2);
 
 	void refreshBestPath();
-	virtual void replan(Coord &newEndpoint);
 
 	void getNeighbors(Coord center, double radius, std::vector<RtreeValue> &results);
 
@@ -50,6 +49,7 @@ class Planner {
 	        bool usePseudoRandom);
 	virtual ~Planner();
 	virtual void moveStart(double dx, double dy);
+	virtual void replan(Coord &newEndpoint);
 	void randomReplan();
 	void followPath();
 	double calculatePathCost();

@@ -21,7 +21,6 @@ class SamplingPlanner : public Planner {
 	                      std::vector<double> &neighborCosts);
 	void findBestNeighborWithoutCost(Coord point, std::shared_ptr<Node> &bestNeighbor, std::vector<std::shared_ptr<Node>> &neighbors);
 
-	void replan(Coord &newEndpoint);
 	void sampleWithRewire();
 
    public:
@@ -29,4 +28,5 @@ class SamplingPlanner : public Planner {
 	                int height, bool usePseudoRandom);
 	virtual void sample() = 0;
 	void moveStart(double dx, double dy);
+	void replan(Coord &newEndpoint);
 };

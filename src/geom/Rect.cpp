@@ -2,22 +2,24 @@
 
 using namespace std;
 
-Rect::Rect(Coord tl, Coord br) {
+Rect::Rect(Coord tl, Coord br) : Rect(tl.x(), tl.y(), br.x(), br.y()) {}
+
+Rect::Rect(double tlx, double tly, double brx, double bry) {
 	double minx, maxx, miny, maxy;
-	if (tl.x() < br.x()) {
-		minx = tl.x();
-		maxx = br.x();
+	if (tlx < brx) {
+		minx = tlx;
+		maxx = brx;
 	} else {
-		minx = br.x();
-		maxx = tl.x();
+		minx = brx;
+		maxx = tlx;
 	}
 
-	if (tl.y() < br.y()) {
-		miny = tl.y();
-		maxy = br.y();
+	if (tly < bry) {
+		miny = tly;
+		maxy = bry;
 	} else {
-		miny = br.y();
-		maxy = tl.y();
+		miny = bry;
+		maxy = tly;
 	}
 
 	this->topLeft = Coord(minx, miny);

@@ -7,7 +7,6 @@ enum GraphType { Random, Grid };
 class PrmStar : public AStar {
    protected:
 	void buildBaseVisibilityGraph();
-	void replan(Coord &newEndpoint);
 
 	void sampleRandom(std::vector<std::shared_ptr<Node>> &allNodes);
 	void sampleGrid(std::vector<std::shared_ptr<Node>> &allNodes);
@@ -20,4 +19,5 @@ class PrmStar : public AStar {
 	~PrmStar();
 
 	void moveStart(double dx, double dy);
+	void replan(Coord &newEndpoint);
 };
