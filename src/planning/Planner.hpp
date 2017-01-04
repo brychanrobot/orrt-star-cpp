@@ -45,6 +45,8 @@ class Planner {
 	std::vector<std::shared_ptr<Rect>> *obstacleRects;
 	std::deque<Coord> bestPath;
 	bool usePseudoRandom;
+	std::string name = "unset";
+
 	Planner(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height,
 	        bool usePseudoRandom);
 	virtual ~Planner();

@@ -28,6 +28,14 @@ vector<double> linspace(double a, double b, int n) {
 	return array;
 }
 
+template <typename... Args>
+string string_format(const std::string& format, Args... args) {
+	size_t size = snprintf(nullptr, 0, format.c_str(), args...) + 1;  // Extra space for '\0'
+	unique_ptr<char[]> buf(new char[size]);
+	snprintf(buf.get(), size, format.c_str(), args...);
+	return string(buf.get(), buf.get() + size - 1);  // We don't want the '\0' inside
+}
+
 void saveJson(string filename, json& j) {
 	ofstream o(filename);
 	o << j << endl;
@@ -61,88 +69,103 @@ json readAllPaths(string filename) {
 int main(int argc, char* argv[]) {
 	int width = 700;
 	int height = 700;
-	bool isFullscreen = false;
-	int monitorNum = 0;
-	bool useFmt = false;
+	int numMaps = 2;
 	bool usePseudoRandom = true;
 	// double replanFrequency = -1;
 
 	// clang-format off
 	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
 	options.add_options()
-		("f,fullscreen", "Enable Fullscreen", cxxopts::value(isFullscreen))
-		("m,monitor", "Set Monitor Number", cxxopts::value(monitorNum))
-		("fmt", "Use FMT*", cxxopts::value(useFmt))
+		("nmaps", "Enable Fullscreen", cxxopts::value(numMaps))
 		("p,pr", "Use pseudo-random numbers", cxxopts::value(usePseudoRandom));
 	// clang-format on
 
 	options.parse(argc, argv);
 
-	vector<shared_ptr<Rect>> obstacleRects;
-	// generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
-	readMap("data/map0.json", width, height, obstacleRects);
+	for (int mapNum = 0; mapNum < numMaps; mapNum++) {
+		vector<shared_ptr<Rect>> obstacleRects;
+		// generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
+		readMap(string_format("data/map%d.json", mapNum), width, height, obstacleRects);
 
-	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
-	generateObstacleHash(obstacleRects, obstacleHash);
+		vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
+		generateObstacleHash(obstacleRects, obstacleHash);
 
-	/*SamplingPlanner* planner;
-	if (useFmt) {
-	    planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
-	} else {
-	    planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
-	}*/
-	AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
-	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
+		/*SamplingPlanner* planner;
+		if (useFmt) {
+		    planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
+		} else {
+		    planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
+		}*/
+		AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
+		// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Random);
 
-	auto allPaths = readAllPaths("data/map0paths.json");
+		auto allPaths = readAllPaths(string_format("data/map%dpaths.json", mapNum));
 
-	printf("%.2f\n", (double)allPaths[28]["frequency"]);
+		// printf("%.2f\n", (double)allPaths[28]["frequency"]);
 
-	for (auto& paths : allPaths) {
-		auto replanFrequency = (double)paths["frequency"];  // pow(preReplanFrequency, 5);
-		auto moveInterval = 1.0 / 30.0;                     // seconds
-		auto replanInterval = 1.0 / replanFrequency;        // seconds
-		printf("%.6f, %.4f\n", replanFrequency, replanInterval);
-		double lastMove = 0.0;
-		double lastReplan = 0.0;
+		json results;
 
-		int moveIdx = 0;
-		int replanIdx = 0;
+		for (auto& paths : allPaths) {
+			auto replanFrequency = (double)paths["frequency"];  // pow(preReplanFrequency, 5);
+			auto moveInterval = 1.0 / 30.0;                     // seconds
+			auto replanInterval = 1.0 / replanFrequency;        // seconds
+			printf("%.6f, %.4f\n", replanFrequency, replanInterval);
+			double lastMove = 0.0;
+			double lastReplan = 0.0;
 
-		json currentPath;
+			int moveIdx = 0;
+			int replanIdx = 0;
 
-		for (double currentTime = 0.0; currentTime < 120; currentTime += 0.0000001) {
-			if (currentTime - lastMove >= moveInterval) {
-				lastMove = currentTime;
-				// planner->followPath();
-				currentPath = paths["paths"]["move"][moveIdx]["path"];
-				moveIdx++;
+			json currentPath;
+			chrono::duration<double> totalReplanTime(0);
 
-				// printf("moving start\n");
-				// printf("%.2f\n", (double)currentPath[0][0]);
-				planner->moveStart((double)currentPath[0][0] - planner->root->coord.x(), (double)currentPath[0][1] - planner->root->coord.y());
-				// printf("start moved\n");
+			double availableTime = (double)paths["triallength"];
 
-			} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
-				lastReplan = currentTime;
+			for (double currentTime = 0.0; currentTime < availableTime; currentTime += 0.0000001) {
+				if (currentTime - lastMove >= moveInterval) {
+					lastMove = currentTime;
+					// planner->followPath();
+					currentPath = paths["paths"]["move"][moveIdx]["path"];
+					moveIdx++;
 
-				currentPath = paths["paths"]["replan"][replanIdx]["path"];
-				replanIdx++;
+					// printf("moving start\n");
+					// printf("%.2f\n", (double)currentPath[0][0]);
+					planner->moveStart((double)currentPath[0][0] - planner->root->coord.x(), (double)currentPath[0][1] - planner->root->coord.y());
+					// printf("start moved\n");
 
-				auto p = Coord((double)currentPath.back()[0], (double)currentPath.back()[1]);
+				} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
+					lastReplan = currentTime;
 
-				auto begin = chrono::high_resolution_clock::now();
+					currentPath = paths["paths"]["replan"][replanIdx]["path"];
+					replanIdx++;
 
-				planner->replan(p);  // code to benchmark
+					auto p = Coord((double)currentPath.back()[0], (double)currentPath.back()[1]);
 
-				auto end = chrono::high_resolution_clock::now();
-				chrono::duration_cast<chrono::seconds>(end - begin).count();
+					auto begin = chrono::high_resolution_clock::now();
 
-				planner->replan(p);
-			} else {
-				// iterations++;
-				// planner->sample();
+					planner->replan(p);  // code to benchmark
+
+					auto end = chrono::high_resolution_clock::now();
+					chrono::duration<double> duration = end - begin;
+
+					totalReplanTime = totalReplanTime + duration;
+
+					planner->replan(p);
+				} else {
+					// iterations++;
+					// planner->sample();
+				}
 			}
+
+			results.push_back({{"frequency", replanFrequency},
+			                   {"interval", replanInterval},
+			                   {"timeused", totalReplanTime.count()},
+			                   {"timeavailable", availableTime}});
+			cout << totalReplanTime.count() << endl;
 		}
+
+		ofstream o(string_format("data/map%dresults_%s.json", mapNum, planner->name.c_str()));
+		o << results << endl;
+		o.close();
 	}
 }

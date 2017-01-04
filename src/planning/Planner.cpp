@@ -143,7 +143,7 @@ void Planner::followPath() {
 }
 
 double Planner::calculatePathCost() {
-	double cost;
+	double cost = 0.0;
 	for (unsigned int i = 0; i < this->bestPath.size() - 1; i++) {
 		cost += this->getCost(bestPath[i], bestPath[i + 1]);
 	}

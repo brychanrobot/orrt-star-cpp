@@ -14,6 +14,7 @@ using namespace std;
 OnlineRrtStar::OnlineRrtStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width, int height,
                              bool usePseudoRandom)
     : SamplingPlanner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom) {
+	this->name = "orrtstar";
 	this->root->status = Status::Closed;
 	this->endNode->status = Status::Closed;
 

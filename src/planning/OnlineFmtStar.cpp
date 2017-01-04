@@ -9,6 +9,7 @@ using namespace std;
 OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width, int height,
                              bool usePseudoRandom)
     : SamplingPlanner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom) {
+	this->name = "ofmtstar";
 	this->open.push(this->root);
 
 	for (int n = 0; n < this->nodeAddThreshold; n++) {

@@ -7,6 +7,11 @@ using namespace std;
 PrmStar::PrmStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom,
                  GraphType graphType)
     : AStar(obstacleHash, obstacleRects, width, height, usePseudoRandom, false) {
+	if (graphType == GraphType::Random) {
+		this->name = "prmstar";
+	} else {
+		this->name = "astar_grid";
+	}
 	this->graphType = graphType;
 	this->buildBaseVisibilityGraph();
 	this->plan();  // make an initial plan
