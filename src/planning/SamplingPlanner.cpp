@@ -12,16 +12,30 @@
 using namespace std;
 
 SamplingPlanner::SamplingPlanner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
-                                 int height, bool usePseudoRandom)
+                                 int height, bool usePseudoRandom, Coord *start)
     : Planner(obstacleHash, obstacleRects, width, height, usePseudoRandom) {
 	this->maxSegment = maxSegment;
 	this->rewireNeighborhood = maxSegment * 6;
 	this->nodeAddThreshold = 0.02 * width * height;
 
+	if (start != NULL) {
+		this->root->coord = Coord(start->x(), start->y());
+	}
+
 	this->root->status = Status::Open;
 	this->rtree.insert(RtreeValue(this->root->coord, this->root));
 
 	this->rtree.insert(RtreeValue(this->endNode->coord, this->endNode));
+}
+
+void SamplingPlanner::sample() {
+	if (!this->isDoneBuilding()) {
+		this->sampleAndAdd();
+	} else {
+		this->sampleWithRewire();
+	}
+
+	this->refreshBestPath();
 }
 
 void SamplingPlanner::sampleWithRewire() {
@@ -44,6 +58,7 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
 		Coord point(clamp(this->root->coord.x() + dx, 0, this->width - 1), clamp(this->root->coord.y() + dy, 0, this->height - 1));
 
+		// printf("clamped point %.2f, %.2f\n", point.x(), point.y());
 		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
 			auto newRoot = make_shared<Node>(point, nullptr, 0.0);
 			newRoot->status = Status::Closed;

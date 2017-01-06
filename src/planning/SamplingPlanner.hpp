@@ -21,12 +21,15 @@ class SamplingPlanner : public Planner {
 	                      std::vector<double> &neighborCosts);
 	void findBestNeighborWithoutCost(Coord point, std::shared_ptr<Node> &bestNeighbor, std::vector<std::shared_ptr<Node>> &neighbors);
 
+	virtual void sampleAndAdd() = 0;
 	void sampleWithRewire();
 
    public:
 	SamplingPlanner(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
-	                int height, bool usePseudoRandom);
-	virtual void sample() = 0;
+	                int height, bool usePseudoRandom, Coord *start);
+	// virtual void sample() = 0;
+	virtual bool isDoneBuilding() = 0;
+	void sample();
 	void moveStart(double dx, double dy);
 	void replan(Coord &newEndpoint);
 };

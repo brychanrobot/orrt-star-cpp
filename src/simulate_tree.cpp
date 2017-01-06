@@ -86,6 +86,7 @@ int main(int argc, char* argv[]) {
 		vector<shared_ptr<Rect>> obstacleRects;
 		// generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
 		readMap(string_format("data/map%d.json", mapNum), width, height, obstacleRects);
+		auto allPaths = readAllPaths(string_format("data/map%dpaths.json", mapNum));
 
 		vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
 		generateObstacleHash(obstacleRects, obstacleHash);
@@ -97,13 +98,12 @@ int main(int argc, char* argv[]) {
 		    planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
 		}*/
 		// AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
-		PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
-
-		auto allPaths = readAllPaths(string_format("data/map%dpaths.json", mapNum));
+		// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
 
 		// printf("%.2f\n", (double)allPaths[28]["frequency"]);
 
 		json results;
+		string plannerName;
 
 		for (auto& paths : allPaths) {
 			auto replanFrequency = (double)paths["frequency"];  // pow(preReplanFrequency, 5);
@@ -117,7 +117,23 @@ int main(int argc, char* argv[]) {
 			int replanIdx = 0;
 
 			json currentPath;
+			double currentCost = 0.0;
 			double totalReplanTime = 0.0;
+
+			auto s = paths["paths"]["move"][0]["path"][0];
+			Coord start((double)s[0], (double)s[1]);
+			SamplingPlanner* planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, &start);
+			plannerName = planner->name;
+
+			auto begin_init = chrono::high_resolution_clock::now();
+
+			while (!planner->isDoneBuilding()) {
+				planner->sample();
+			}
+
+			auto end_init = chrono::high_resolution_clock::now();
+
+			totalReplanTime += chrono::duration_cast<chrono::duration<double>>(end_init - begin_init).count();
 
 			double availableTime = (double)paths["triallength"];
 
@@ -125,6 +141,7 @@ int main(int argc, char* argv[]) {
 				if (currentTime - lastMove >= moveInterval) {
 					lastMove = currentTime;
 					currentPath = paths["paths"]["move"][moveIdx]["path"];
+					currentCost = paths["paths"]["move"][moveIdx]["cost"];
 					moveIdx++;
 
 					planner->moveStart((double)currentPath[0][0] - planner->root->coord.x(), (double)currentPath[0][1] - planner->root->coord.y());
@@ -133,6 +150,7 @@ int main(int argc, char* argv[]) {
 					lastReplan = currentTime;
 
 					currentPath = paths["paths"]["replan"][replanIdx]["path"];
+					currentCost = paths["paths"]["replan"][replanIdx]["cost"];
 					replanIdx++;
 
 					auto p = Coord((double)currentPath.back()[0], (double)currentPath.back()[1]);
@@ -143,9 +161,21 @@ int main(int argc, char* argv[]) {
 
 					auto end = chrono::high_resolution_clock::now();
 					totalReplanTime += chrono::duration_cast<chrono::duration<double>>(end - begin).count();
-				} else {
+				} else if (currentCost != 0 && planner->endNode->cumulativeCost - currentCost > 20) {
 					// iterations++;
 					// planner->sample();
+					// printf("cost: %.2f\n", planner->endNode->cumulativeCost - currentCost);
+					// printf("ocost: %.2f, cost: %.2f\n", currentCost, planner->endNode->cumulativeCost);
+
+					auto begin = chrono::high_resolution_clock::now();
+
+					planner->sample();  // code to benchmark
+
+					auto end = chrono::high_resolution_clock::now();
+					double sampleTime = chrono::duration_cast<chrono::duration<double>>(end - begin).count();
+					totalReplanTime += sampleTime;
+
+					currentTime += sampleTime;
 				}
 			}
 
@@ -154,7 +184,7 @@ int main(int argc, char* argv[]) {
 			cout << totalReplanTime << endl;
 		}
 
-		ofstream o(string_format("data/map%dresults_%s.json", mapNum, planner->name.c_str()));
+		ofstream o(string_format("data/map%dresults_%s.json", mapNum, plannerName.c_str()));
 		o << results << endl;
 		o.close();
 	}

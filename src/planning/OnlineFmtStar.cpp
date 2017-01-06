@@ -7,8 +7,8 @@
 using namespace std;
 
 OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width, int height,
-                             bool usePseudoRandom)
-    : SamplingPlanner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom) {
+                             bool usePseudoRandom, Coord *start)
+    : SamplingPlanner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom, start) {
 	this->name = "ofmtstar";
 	this->open.push(this->root);
 
@@ -21,15 +21,7 @@ OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<shared_p
 	}
 }
 
-void OnlineFmtStar::sample() {
-	if (!this->open.empty()) {
-		this->sampleAndAdd();
-	} else {
-		this->sampleWithRewire();
-	}
-
-	this->refreshBestPath();
-}
+bool OnlineFmtStar::isDoneBuilding() { return this->open.empty(); }
 
 void OnlineFmtStar::sampleAndAdd() {
 	auto bestOpenNode = this->open.top();

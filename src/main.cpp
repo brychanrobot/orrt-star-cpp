@@ -290,14 +290,14 @@ int main(int argc, char* argv[]) {
 	}
 	*/
 
-	/*SamplingPlanner* planner;
+	SamplingPlanner* planner;
 	if (useFmt) {
-	    planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
+		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, NULL);
 	} else {
-	    planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom);
-	}*/
+		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, NULL);
+	}
 	// AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
-	PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
+	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
 
 	auto lastFrame = glfwGetTime();
 	auto frameInterval = 1.0 / 30.0;
@@ -338,7 +338,7 @@ int main(int argc, char* argv[]) {
 			// printf("replan: %.5f\n", glfwGetTime() - lastReplan);
 		} else {
 			// iterations++;
-			// planner->sample();
+			planner->sample();
 		}
 
 		if (planAgain) {

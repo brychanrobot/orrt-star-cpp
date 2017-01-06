@@ -12,8 +12,8 @@
 using namespace std;
 
 OnlineRrtStar::OnlineRrtStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width, int height,
-                             bool usePseudoRandom)
-    : SamplingPlanner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom) {
+                             bool usePseudoRandom, Coord *start)
+    : SamplingPlanner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom, start) {
 	this->name = "orrtstar";
 	this->root->status = Status::Closed;
 	this->endNode->status = Status::Closed;
@@ -21,15 +21,7 @@ OnlineRrtStar::OnlineRrtStar(vector<vector<bool>> *obstacleHash, vector<shared_p
 	this->numNodes = 2;
 }
 
-void OnlineRrtStar::sample() {
-	if (this->numNodes < this->nodeAddThreshold) {
-		this->sampleAndAdd();
-	} else {
-		this->sampleWithRewire();
-	}
-
-	this->refreshBestPath();
-}
+bool OnlineRrtStar::isDoneBuilding() { return this->numNodes > this->nodeAddThreshold; }
 
 void OnlineRrtStar::sampleAndAdd() {
 	auto p = this->randomOpenAreaPoint();

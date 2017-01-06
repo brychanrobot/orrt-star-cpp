@@ -3,7 +3,12 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt
 
-planner_types = {'astar_visibility' : 'A* w/ Visibility Graph', 'astar_grid' : 'A* w/ Grid', 'prmstar' : 'PRM*'}
+planner_types = {'astar_visibility' : 'A* w/ Visibility Graph',
+	'astar_grid' : 'A* w/ Grid',
+	'prmstar' : 'PRM*',
+	'ofmtstar' : 'OFMT*',
+	'orrtstar' : 'ORRT*',
+	'rrtstar' : 'RRT*'}
 
 frequencies = None
 time_available = None
