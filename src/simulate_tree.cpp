@@ -121,8 +121,8 @@ int main(int argc, char* argv[]) {
 			double totalReplanTime = 0.0;
 
 			auto s = paths["paths"]["move"][0]["path"][0];
-			Coord start((double)s[0], (double)s[1]);
-			SamplingPlanner* planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, &start);
+			auto start = make_shared<Coord>((double)s[0], (double)s[1]);
+			SamplingPlanner* planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, start);
 			plannerName = planner->name;
 
 			auto begin_init = chrono::high_resolution_clock::now();
@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
 					currentCost = paths["paths"]["replan"][replanIdx]["cost"];
 					replanIdx++;
 
-					auto p = Coord((double)currentPath.back()[0], (double)currentPath.back()[1]);
+					Coord p((double)currentPath.back()[0], (double)currentPath.back()[1]);
 
 					auto begin = chrono::high_resolution_clock::now();
 

@@ -22,14 +22,14 @@ Rect::Rect(double tlx, double tly, double brx, double bry) {
 		maxy = tly;
 	}
 
-	this->topLeft = Coord(minx, miny);
-	this->bottomRight = Coord(maxx, maxy);
+	this->topLeft.change(minx, miny);
+	this->bottomRight.change(maxx, maxy);
 }
 
 void Rect::inflate(double dx, double dy) {
-	this->topLeft = Coord(this->topLeft.x() - dx, this->topLeft.y() - dy);
+	this->topLeft.change(this->topLeft.x() - dx, this->topLeft.y() - dy);
 
-	this->bottomRight = Coord(this->bottomRight.x() + dx, this->bottomRight.y() + dy);
+	this->bottomRight.change(this->bottomRight.x() + dx, this->bottomRight.y() + dy);
 }
 
 bool Rect::contains(Coord point) {

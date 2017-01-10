@@ -12,14 +12,14 @@
 using namespace std;
 
 SamplingPlanner::SamplingPlanner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
-                                 int height, bool usePseudoRandom, Coord *start)
+                                 int height, bool usePseudoRandom, shared_ptr<Coord> start, double percentCoverage)
     : Planner(obstacleHash, obstacleRects, width, height, usePseudoRandom) {
 	this->maxSegment = maxSegment;
 	this->rewireNeighborhood = maxSegment * 6;
-	this->nodeAddThreshold = 0.02 * width * height;
+	this->nodeAddThreshold = percentCoverage * width * height;
 
-	if (start != NULL) {
-		this->root->coord = Coord(start->x(), start->y());
+	if (start) {
+		this->root->coord.change(start->x(), start->y());
 	}
 
 	this->root->status = Status::Open;

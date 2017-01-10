@@ -9,6 +9,7 @@
 #include "planning/OnlineRrtStar.hpp"
 #include "planning/PrmStar.hpp"
 #include "planning/utils.hpp"
+#include "Waldo.hpp"
 
 using namespace std;
 
@@ -86,20 +87,25 @@ void initDisplay(int width, int height, float ratio) {
 	glLoadIdentity();
 }
 
-void drawPoint(Coord point, double radius) {
+void setColor(HSL& hsl) {
+	auto rgb = HSLToRGB(hsl);
+	glColor3d(rgb.R, rgb.G, rgb.B);
+}
+
+void drawPoint(Coord point, double radius, HSL hsl) {
 	glEnable(GL_POINT_SMOOTH);
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	glPointSize(radius);
-	glColor3d(1.0, 1.0, 0);
+	// glColor3d(1.0, 1.0, 0);
+	setColor(hsl);
 
 	glBegin(GL_POINTS);
 	glVertex2d(point.x(), point.y());
 	glEnd();
 }
 
-void drawLine(Coord start, Coord end, HSL hsl, int linewidth) {
-	auto rgb = HSLToRGB(hsl);
-	glColor3d(rgb.R, rgb.G, rgb.B);
+void drawLine(Coord start, Coord end, int linewidth, HSL hsl) {
+	setColor(hsl);
 	glLineWidth(linewidth);
 	glBegin(GL_LINES);
 	glVertex2d(start.x(), start.y());
@@ -109,7 +115,7 @@ void drawLine(Coord start, Coord end, HSL hsl, int linewidth) {
 
 void drawTree(const shared_ptr<Node>& root) {
 	for (auto child : root->children) {
-		drawLine(root->coord, child->coord, HSL(100, 1, 0.5), 1);
+		drawLine(root->coord, child->coord, 1, HSL(100, 1, 0.5));
 		drawTree(child);
 	}
 }
@@ -134,7 +140,7 @@ void drawGraphRecursive(const shared_ptr<Node>& node, set<shared_ptr<Node>>& vis
 				hsl = new HSL(360, 1, 0.5);
 		}
 
-		drawLine(node->coord, child->coord, *hsl, linewidth);
+		drawLine(node->coord, child->coord, linewidth, *hsl);
 		if (visited.find(child) == visited.end()) {
 			drawGraphRecursive(child, visited);
 		}
@@ -183,10 +189,11 @@ void drawGraph(Node* root, unordered_map<Node*, vector<Node*>> visibilityGraph) 
 }
 */
 
-void drawPath(deque<Coord>& path) {
+void drawPath(deque<Coord>& path, HSL lineHsl, HSL pointHsl) {
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(3);
-	glColor3d(0.0, 1.0, 0.2);
+	// glColor3d(0.0, 1.0, 0.2);
+	setColor(lineHsl);
 
 	glBegin(GL_LINE_STRIP);
 	for (auto point : path) {
@@ -197,12 +204,13 @@ void drawPath(deque<Coord>& path) {
 	glDisable(GL_LINE_SMOOTH);
 
 	for (auto point : path) {
-		drawPoint(point, 5);
+		drawPoint(point, 5, pointHsl);
 	}
 }
 
-void drawObstacles(vector<shared_ptr<Rect>>* obstacleRects) {
-	glColor3d(0.0, 1.0, 1.0);
+void drawObstacles(vector<shared_ptr<Rect>>* obstacleRects, HSL hsl) {
+	// glColor3d(0.0, 1.0, 0.5);
+	setColor(hsl);
 	glBegin(GL_QUADS);
 	for (auto obstacle : *obstacleRects) {
 		glVertex2d(obstacle->topLeft.x() + OBSTACLE_PADDING, obstacle->topLeft.y() + OBSTACLE_PADDING);
@@ -213,15 +221,24 @@ void drawObstacles(vector<shared_ptr<Rect>>* obstacleRects) {
 	glEnd();
 }
 
-void display(const shared_ptr<Node> root, const shared_ptr<Node>& endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects) {
-	drawObstacles(obstacleRects);
+void drawWaldos(vector<Waldo>& waldos) {
+	for (auto waldo : waldos) {
+		drawPath(waldo.currentPath, HSL(200, 1.0, 0.3), HSL(200, 1.0, 0.5));
+		drawPoint(waldo.coord(), 15, HSL(200, 1.0, 0.5));
+	}
+}
+
+void display(const shared_ptr<Node> root, const shared_ptr<Node>& endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects,
+             vector<Waldo>& waldos) {
+	drawObstacles(obstacleRects, HSL(275, 1.0, 0.5));
 	// drawTree(root);
 	// drawGraph(root, visibilityGraph);
+	drawWaldos(waldos);
 
-	drawPath(bestPath);
+	drawPath(bestPath, HSL(100, 1.0, 0.3), HSL(150, 1.0, 0.5));
 
-	drawPoint(root->coord, 20);
-	drawPoint(endNode->coord, 20);
+	drawPoint(root->coord, 20, HSL(25, 1.0, 0.5));
+	drawPoint(endNode->coord, 20, HSL(50, 1.0, 0.5));
 }
 
 int main(int argc, char* argv[]) {
@@ -232,6 +249,7 @@ int main(int argc, char* argv[]) {
 	bool useFmt = false;
 	bool usePseudoRandom = false;
 	double replanFrequency = -1;
+	int numWaldos = 0;
 
 	// clang-format off
 	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
@@ -240,7 +258,8 @@ int main(int argc, char* argv[]) {
 		("m,monitor", "Set Monitor Number", cxxopts::value(monitorNum))
 		("fmt", "Use FMT*", cxxopts::value(useFmt))
 		("p,pr", "Use pseudo-random numbers", cxxopts::value(usePseudoRandom))
-		("r,replan", "Replan frequency", cxxopts::value(replanFrequency));
+		("r,replan", "Replan frequency", cxxopts::value(replanFrequency))
+		("w,waldos", "number of Waldos", cxxopts::value(numWaldos));
 	// clang-format on
 
 	options.parse(argc, argv);
@@ -281,6 +300,8 @@ int main(int argc, char* argv[]) {
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
 	generateObstacleHash(obstacleRects, obstacleHash);
 
+	vector<Waldo> waldos;
+
 	/*
 	for (auto row: obstacleHash) {
 	    for (auto value: row) {
@@ -292,12 +313,16 @@ int main(int argc, char* argv[]) {
 
 	SamplingPlanner* planner;
 	if (useFmt) {
-		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, NULL);
+		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, nullptr);
 	} else {
-		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, NULL);
+		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, nullptr);
 	}
 	// AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
+
+	for (int w = 0; w < numWaldos; w++) {
+		waldos.push_back(Waldo(&obstacleHash, &obstacleRects, width, height));
+	}
 
 	auto lastFrame = glfwGetTime();
 	auto frameInterval = 1.0 / 30.0;
@@ -317,7 +342,7 @@ int main(int argc, char* argv[]) {
 		if (currentTime - lastFrame >= frameInterval) {
 			lastFrame = currentTime;
 			/*
-			averageIterations = (averageIterations * frames + iterations) / (frames + 1.0);
+			averageIterations = (averageIterations * frames + iterations) / (frames + 0.5);
 			printf("i: %.2f\n", averageIterations);
 			frames += 1;
 			iterations = 0;
@@ -325,10 +350,14 @@ int main(int argc, char* argv[]) {
 
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects);
+			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos);
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
+
+			for (auto& waldo : waldos) {
+				waldo.followPath();
+			}
 
 			planner->followPath();
 			planner->moveStart(currentMoves.uavX, currentMoves.uavY);

@@ -16,7 +16,7 @@ class OnlineFmtStar : public SamplingPlanner {
 
    public:
 	OnlineFmtStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
-	              int height, bool usePseudoRandom, Coord *start);
+	              int height, bool usePseudoRandom, std::shared_ptr<Coord> start, double percentCoverage = 0.02);
 
 	bool isDoneBuilding();
 };

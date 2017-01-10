@@ -103,6 +103,7 @@ int main(int argc, char* argv[]) {
 
 		// printf("%.2f\n", (double)allPaths[28]["frequency"]);
 
+		// and stuff
 		json results;
 
 		for (auto& paths : allPaths) {
@@ -135,7 +136,7 @@ int main(int argc, char* argv[]) {
 					currentPath = paths["paths"]["replan"][replanIdx]["path"];
 					replanIdx++;
 
-					auto p = Coord((double)currentPath.back()[0], (double)currentPath.back()[1]);
+					Coord p((double)currentPath.back()[0], (double)currentPath.back()[1]);
 
 					auto begin = chrono::high_resolution_clock::now();
 

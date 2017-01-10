@@ -12,19 +12,21 @@ struct Coord {
 #include <boost/geometry/geometries/geometries.hpp>
 typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> point;
 
-class Coord : public point
-{
-public:
-  Coord(){}
-  Coord(double x, double y) : point(x, y){}
+class Coord : public point {
+   public:
+	Coord() {}
+	Coord(double x, double y) : point(x, y) {}
 
-  double x()
-  {
-    return this->get<0>();
-  }
+	double x() { return this->get<0>(); }
 
-  double y()
-  {
-    return this->get<1>();
-  }
+	void x(double x) { this->set<0>(x); }
+
+	double y() { return this->get<1>(); }
+
+	void y(double y) { this->set<1>(y); }
+
+	void change(double x, double y) {
+		this->set<0>(x);
+		this->set<1>(y);
+	}
 };

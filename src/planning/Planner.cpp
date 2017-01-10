@@ -131,8 +131,7 @@ void Planner::refreshBestPath() {
 
 void Planner::followPath() {
 	if (this->bestPath.size() > 1) {
-		auto currentWaypoint = this->bestPath[1];
-		auto angle = angleBetweenCoords(this->root->coord, currentWaypoint);
+		auto angle = angleBetweenCoords(this->bestPath[0], this->bestPath[1]);
 		auto dx = this->maxTravel * cos(angle);
 		auto dy = this->maxTravel * sin(angle);
 
@@ -163,7 +162,7 @@ Coord Planner::randomOpenAreaPoint() {
 		if (this->usePseudoRandom) {
 			point = randomPoint(this->width, this->height);
 		} else {
-			point = Coord(this->haltonX.next() * this->width, this->haltonY.next() * this->height);
+			point.change(this->haltonX.next() * this->width, this->haltonY.next() * this->height);
 		}
 		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
 			return point;

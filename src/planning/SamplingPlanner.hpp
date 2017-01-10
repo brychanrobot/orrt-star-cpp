@@ -26,7 +26,7 @@ class SamplingPlanner : public Planner {
 
    public:
 	SamplingPlanner(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
-	                int height, bool usePseudoRandom, Coord *start);
+	                int height, bool usePseudoRandom, std::shared_ptr<Coord> start, double percentCoverage);
 	// virtual void sample() = 0;
 	virtual bool isDoneBuilding() = 0;
 	void sample();
