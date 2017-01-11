@@ -14,7 +14,7 @@ typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian>
 
 class Coord : public point {
    public:
-	Coord() {}
+	Coord() : point(0, 0) {}
 	Coord(double x, double y) : point(x, y) {}
 
 	double x() { return this->get<0>(); }

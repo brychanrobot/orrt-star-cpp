@@ -130,15 +130,25 @@ void Planner::refreshBestPath() {
 }
 
 void Planner::followPath() {
-	if (this->bestPath.size() > 1) {
-		auto angle = angleBetweenCoords(this->bestPath[0], this->bestPath[1]);
-		auto dx = this->maxTravel * cos(angle);
-		auto dy = this->maxTravel * sin(angle);
+	// auto distanceLeft = this->maxTravel;
+	double dx = 0, dy = 0;
+	double distanceLeft = this->maxTravel;
+	int i = 0;
+	while (this->bestPath.size() - i > 1 && distanceLeft > 0.000001) {
+		double dist = euclideanDistance(this->bestPath[0].x() + dx, this->bestPath[0].y() + dy, this->bestPath[i + 1].x(), this->bestPath[i + 1].y());
+		double travel = min(dist, distanceLeft);
+		auto angle = angleBetweenCoords(this->bestPath[i], this->bestPath[i + 1]);
+		dx += travel * cos(angle);
+		dy += travel * sin(angle);
 
-		this->moveStart(dx, dy);
-
-		this->bestPath[0] = this->root->coord;
+		distanceLeft -= travel;
+		i++;
+		// printf("travel: %.6f, left: %.6f\n", travel, distanceLeft);
 	}
+
+	// this->bestPath[0] = this->root->coord;
+	this->moveStart(dx, dy);
+	this->bestPath[0] = this->root->coord;
 }
 
 double Planner::calculatePathCost() {
@@ -170,7 +180,16 @@ Coord Planner::randomOpenAreaPoint() {
 	}
 }
 
-double Planner::getCost(shared_ptr<Node> &start, shared_ptr<Node> &end) { return this->getCost(start->coord, end->coord); }
+double Planner::getCost(shared_ptr<Node> start, shared_ptr<Node> end) {
+	/*if (start->coord == NULL) {
+	    printf("coord is null\n");
+	}*/
+	/*printf("startx: %.2f\n", start->coord.x());
+	printf("starty: %.2f\n", start->coord.y());
+	printf("endx: %.2f\n", end->coord.x());
+	printf("endy: %.2f\n", end->coord.y());*/
+	return this->getCost(start->coord, end->coord);
+}
 double Planner::getCost(Coord &start, Coord &end) { return euclideanDistance(start, end); }
 
 void Planner::getNeighbors(Coord center, double radius, vector<RtreeValue> &results) {

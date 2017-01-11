@@ -17,6 +17,7 @@ class Waldo {
 		std::shared_ptr<Coord> start = nullptr;
 		if (this->currentPath.size() > 0) {
 			start = std::make_shared<Coord>(this->currentPath[0].x(), this->currentPath[0].y());  //&this->currentPath[0];
+			printf("%.2f, %.2f\n", start->x(), start->y());
 		}
 		OnlineRrtStar planner(this->obstacleHash, this->obstacleRects, 12, this->width, this->height, true, start, 0.01);
 		while (planner.bestPath.size() == 0) {

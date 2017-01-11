@@ -30,7 +30,7 @@ class Planner {
 	Rtree rtree;
 
 	Coord randomOpenAreaPoint();
-	double getCost(std::shared_ptr<Node> &start, std::shared_ptr<Node> &end);
+	double getCost(std::shared_ptr<Node> start, std::shared_ptr<Node> end);
 	double getCost(Coord &start, Coord &end);
 
 	bool lineIntersectsObstacle(Coord &p1, Coord &p2);
