@@ -13,14 +13,16 @@ class Waldo {
 
 	unsigned int importance;
 
-	void replan() {
+	std::deque<Coord> tryReplan() {
 		std::shared_ptr<Coord> start = nullptr;
 		if (this->currentPath.size() > 0) {
 			start = std::make_shared<Coord>(this->currentPath[0].x(), this->currentPath[0].y());  //&this->currentPath[0];
-			printf("%.2f, %.2f\n", start->x(), start->y());
+			                                                                                      // printf("%.2f, %.2f\n", start->x(), start->y());
 		}
-		OnlineRrtStar planner(this->obstacleHash, this->obstacleRects, 12, this->width, this->height, true, start, 0.01);
-		while (planner.bestPath.size() == 0) {
+		OnlineRrtStar planner(this->obstacleHash, this->obstacleRects, 6, this->width, this->height, true, start, 0.02);
+
+		for (int i = 0; i < planner.nodeAddThreshold && planner.bestPath.size() == 0; i++) {
+			// printf("%d\n", i);
 			planner.sample();
 		}
 
@@ -30,7 +32,16 @@ class Waldo {
 		    this->currentPath.push_back(make_shared<Coord>(point.x(), point.y()));
 		}
 		*/
-		this->currentPath = planner.bestPath;
+		return planner.bestPath;
+	}
+
+	void replan() {
+		std::deque<Coord> path;
+		while (path.size() == 0) {
+			path = this->tryReplan();
+		}
+
+		this->currentPath = path;
 	}
 
    public:

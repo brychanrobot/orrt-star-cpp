@@ -23,7 +23,7 @@ void PrmStar::sampleRandom(vector<shared_ptr<Node>> &allNodes) {
 	for (auto j = 0; j < 0.02 * this->width * this->height; j++) {
 		auto node = make_shared<Node>(this->randomOpenAreaPoint(), shared_ptr<Node>(nullptr), -1.0);
 		allNodes.push_back(node);
-		this->rtree.insert(RtreeValue(node->coord, node));
+		this->rtree.insert(RtreeValue(node->coord.getBoostPoint(), node));
 	}
 }
 
@@ -37,7 +37,7 @@ void PrmStar::sampleGrid(vector<shared_ptr<Node>> &allNodes) {
 			if (!(*this->obstacleHash)[j][i]) {
 				auto node = make_shared<Node>(Coord(i, j), shared_ptr<Node>(nullptr), -1.0);
 				allNodes.push_back(node);
-				this->rtree.insert(RtreeValue(node->coord, node));
+				this->rtree.insert(RtreeValue(node->coord.getBoostPoint(), node));
 			}
 		}
 	}
@@ -55,8 +55,8 @@ void PrmStar::buildBaseVisibilityGraph() {
 	this->endNode->cumulativeCost = -1.0;
 	allNodes.push_back(this->endNode);
 
-	this->rtree.insert(RtreeValue(this->root->coord, this->root));
-	this->rtree.insert(RtreeValue(this->endNode->coord, this->endNode));
+	this->rtree.insert(RtreeValue(this->root->coord.getBoostPoint(), this->root));
+	this->rtree.insert(RtreeValue(this->endNode->coord.getBoostPoint(), this->endNode));
 
 	for (auto n : allNodes) {
 		vector<RtreeValue> results;
@@ -72,16 +72,16 @@ void PrmStar::buildBaseVisibilityGraph() {
 
 void PrmStar::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
-		this->rtree.remove(RtreeValue(this->root->coord, this->root));
+		this->rtree.remove(RtreeValue(this->root->coord.getBoostPoint(), this->root));
 		AStar::moveStart(dx, dy);
-		this->rtree.insert(RtreeValue(this->root->coord, this->root));
+		this->rtree.insert(RtreeValue(this->root->coord.getBoostPoint(), this->root));
 	}
 }
 
 void PrmStar::replan(Coord &newEndpoint) {
-	this->rtree.remove(RtreeValue(this->endNode->coord, this->endNode));
+	this->rtree.remove(RtreeValue(this->endNode->coord.getBoostPoint(), this->endNode));
 	Planner::replan(newEndpoint);
-	this->rtree.insert(RtreeValue(this->endNode->coord, this->endNode));
+	this->rtree.insert(RtreeValue(this->endNode->coord.getBoostPoint(), this->endNode));
 
 	for (auto neighbor : this->baseVisibilityGraph[this->root]) {
 		this->baseVisibilityGraph[neighbor].erase(this->root);

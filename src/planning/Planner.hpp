@@ -55,4 +55,6 @@ class Planner {
 	void randomReplan();
 	void followPath();
 	double calculatePathCost();
+
+	std::deque<Coord> getBestPath() { return this->bestPath; }
 };

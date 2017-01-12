@@ -23,9 +23,9 @@ SamplingPlanner::SamplingPlanner(vector<vector<bool>> *obstacleHash, vector<shar
 	}
 
 	this->root->status = Status::Open;
-	this->rtree.insert(RtreeValue(this->root->coord, this->root));
+	this->rtree.insert(RtreeValue(this->root->coord.getBoostPoint(), this->root));
 
-	this->rtree.insert(RtreeValue(this->endNode->coord, this->endNode));
+	this->rtree.insert(RtreeValue(this->endNode->coord.getBoostPoint(), this->endNode));
 }
 
 void SamplingPlanner::sample() {
@@ -62,7 +62,7 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
 			auto newRoot = make_shared<Node>(point, nullptr, 0.0);
 			newRoot->status = Status::Closed;
-			this->rtree.insert(RtreeValue(newRoot->coord, newRoot));
+			this->rtree.insert(RtreeValue(newRoot->coord.getBoostPoint(), newRoot));
 
 			auto rtr_cost = this->getCost(newRoot, this->root);
 
@@ -90,7 +90,7 @@ void SamplingPlanner::replan(Coord &newEndpoint) {
 
 shared_ptr<Node> SamplingPlanner::getNearestNeighbor(Coord &p) {
 	vector<RtreeValue> result;
-	this->rtree.query(boost::geometry::index::nearest((point)p, 1), back_inserter(result));
+	this->rtree.query(boost::geometry::index::nearest(p.getBoostPoint(), 1), back_inserter(result));
 	return result[0].second;
 }
 

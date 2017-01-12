@@ -8,25 +8,30 @@ struct Coord {
   Coord(int x, int y) : x(x), y(y) {}
 };
 */
+#include <vector>
 
 #include <boost/geometry/geometries/geometries.hpp>
 typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> point;
 
-class Coord : public point {
+class Coord {
+   private:
+	std::vector<double> c = {0, 0};
+
    public:
-	Coord() : point(0, 0) {}
-	Coord(double x, double y) : point(x, y) {}
+	Coord() {}
+	Coord(double x, double y) {
+		c[0] = x;
+		c[1] = y;
+	}
 
-	double x() { return this->get<0>(); }
+	double x() { return this->c[0]; }
 
-	void x(double x) { this->set<0>(x); }
-
-	double y() { return this->get<1>(); }
-
-	void y(double y) { this->set<1>(y); }
+	double y() { return this->c[1]; }
 
 	void change(double x, double y) {
-		this->set<0>(x);
-		this->set<1>(y);
+		this->c[0] = x;
+		this->c[1] = y;
 	}
+
+	point getBoostPoint() { return point(c[0], c[1]); }
 };

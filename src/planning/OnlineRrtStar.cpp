@@ -46,7 +46,7 @@ void OnlineRrtStar::sampleAndAdd() {
 			auto node = make_shared<Node>(p, nullptr, numeric_limits<double>::max());
 			node->status = Status::Closed;
 			bestNeighbor->addChild(node, bestCost);
-			this->rtree.insert(RtreeValue(p, node));
+			this->rtree.insert(RtreeValue(p.getBoostPoint(), node));
 			this->numNodes++;
 
 			for (unsigned long i = 0; i < neighbors.size(); i++) {

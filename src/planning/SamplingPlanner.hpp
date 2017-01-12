@@ -14,7 +14,6 @@ class SamplingPlanner : public Planner {
    protected:
 	int maxSegment;
 	int rewireNeighborhood;
-	int nodeAddThreshold;
 
 	std::shared_ptr<Node> getNearestNeighbor(Coord &point);
 	void findBestNeighbor(Coord point, std::shared_ptr<Node> &bestNeighbor, double &bestCost, std::vector<std::shared_ptr<Node>> &neighbors,
@@ -25,6 +24,8 @@ class SamplingPlanner : public Planner {
 	void sampleWithRewire();
 
    public:
+	int nodeAddThreshold;
+
 	SamplingPlanner(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
 	                int height, bool usePseudoRandom, std::shared_ptr<Coord> start, double percentCoverage);
 	// virtual void sample() = 0;

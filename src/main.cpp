@@ -242,6 +242,8 @@ void display(const shared_ptr<Node> root, const shared_ptr<Node>& endNode, deque
 }
 
 int main(int argc, char* argv[]) {
+	srand(time(0));
+
 	int width = 700;
 	int height = 700;
 	bool isFullscreen = false;
