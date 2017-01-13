@@ -13,62 +13,7 @@
 
 using namespace std;
 
-struct Moves {
-	double uavX = 0.0;
-	double uavY = 0.0;
-	double endX = 0.0;
-	double endY = 0.0;
-};
-
-const double MOVERATE = 3;
 const double OBSTACLE_PADDING = 5;
-
-bool planAgain = false;
-
-static void onKey(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	Moves* currentMoves = static_cast<Moves*>(glfwGetWindowUserPointer(window));
-
-	switch (key) {
-		case GLFW_KEY_ESCAPE:
-			glfwSetWindowShouldClose(window, GL_TRUE);
-			break;
-		case GLFW_KEY_UP:
-			if (action != GLFW_RELEASE) {
-				currentMoves->uavY = -MOVERATE;
-			} else {
-				currentMoves->uavY = 0;
-			}
-			break;
-		case GLFW_KEY_DOWN:
-			if (action != GLFW_RELEASE) {
-				currentMoves->uavY = MOVERATE;
-			} else {
-				currentMoves->uavY = 0;
-			}
-			break;
-		case GLFW_KEY_LEFT:
-			if (action != GLFW_RELEASE) {
-				currentMoves->uavX = -MOVERATE;
-			} else {
-				currentMoves->uavX = 0;
-			}
-			break;
-		case GLFW_KEY_RIGHT:
-			if (action != GLFW_RELEASE) {
-				currentMoves->uavX = MOVERATE;
-			} else {
-				currentMoves->uavX = 0;
-			}
-			break;
-		case GLFW_KEY_P:
-			if (action == GLFW_RELEASE) {
-				planAgain = true;
-			}
-			break;
-	}
-
-	// printf("key: %d\n, (%.2f, %.2f)", key, currentMoves->uavX, currentMoves->uavY);
-}
 
 void drawWaldos(vector<unique_ptr<Waldo>>& waldos) {
 	for (const auto& waldo : waldos) {
@@ -119,11 +64,6 @@ int main(int argc, char* argv[]) {
 	options.parse(argc, argv);
 
 	auto window = initWindow(isFullscreen, monitorNum, width, height);
-	glfwSetKeyCallback(window, onKey);
-
-	float ratio;
-	ratio = width / (float)height;
-	initDisplay(width, height, ratio);
 
 	vector<shared_ptr<Rect>> obstacleRects;
 	generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
@@ -145,9 +85,6 @@ int main(int argc, char* argv[]) {
 	for (int w = 0; w < numWaldos; w++) {
 		waldos.push_back(make_unique<Waldo>(&obstacleHash, &obstacleRects, width, height));
 	}
-
-	Moves currentMoves;
-	glfwSetWindowUserPointer(window, &currentMoves);
 
 	auto displayCallback = [&planner, &waldos]() { display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos); };
 
