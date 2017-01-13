@@ -1,0 +1,3 @@
+[submodule "src/planning-utils"]
+	path = src/planning-utils
+	url = git@github.com:brychanrobot/planning-utils
