@@ -5,14 +5,14 @@
 #include <stdlib.h>
 #include "OnlineFmtStar.hpp"
 #include "OnlineRrtStar.hpp"
-#include "cxxopts.hpp"
+#include "planning-utils/libs/cxxopts.hpp"
 #include "utils.hpp"
 
 using namespace std;
 
 struct Camera {
-	Coord3 pos = Coord3(0,0,0);
-	Coord3 rot = Coord3(0,0,0);
+	Coord3 pos = Coord3(0, 0, 0);
+	Coord3 rot = Coord3(0, 0, 0);
 } camera;
 
 struct Moves {
@@ -24,7 +24,6 @@ struct Moves {
 };
 
 const double PI = 3.141592654;
-
 
 const double MOVERATE = 3;
 
@@ -81,8 +80,8 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_W:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setx(-sin(camera.rot.y()*PI/180) * MOVERATE);
-				currentMoves->cam.pos.setz(cos(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setx(-sin(camera.rot.y * PI / 180) * MOVERATE);
+				currentMoves->cam.pos.setz(cos(camera.rot.y * PI / 180) * MOVERATE);
 			} else {
 				currentMoves->cam.pos.setx(0);
 				currentMoves->cam.pos.setz(0);
@@ -90,8 +89,8 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_S:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setx(sin(camera.rot.y()*PI/180) * MOVERATE);
-				currentMoves->cam.pos.setz(-cos(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setx(sin(camera.rot.y * PI / 180) * MOVERATE);
+				currentMoves->cam.pos.setz(-cos(camera.rot.y * PI / 180) * MOVERATE);
 			} else {
 				currentMoves->cam.pos.setx(0);
 				currentMoves->cam.pos.setz(0);
@@ -99,8 +98,8 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_A:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setx(cos(camera.rot.y()*PI/180) * MOVERATE);
-				currentMoves->cam.pos.setz(sin(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setx(cos(camera.rot.y * PI / 180) * MOVERATE);
+				currentMoves->cam.pos.setz(sin(camera.rot.y * PI / 180) * MOVERATE);
 			} else {
 				currentMoves->cam.pos.setx(0);
 				currentMoves->cam.pos.setz(0);
@@ -108,8 +107,8 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_D:
 			if (action != GLFW_RELEASE) {
-				currentMoves->cam.pos.setx(-cos(camera.rot.y()*PI/180) * MOVERATE);
-				currentMoves->cam.pos.setz(-sin(camera.rot.y()*PI/180) * MOVERATE);
+				currentMoves->cam.pos.setx(-cos(camera.rot.y * PI / 180) * MOVERATE);
+				currentMoves->cam.pos.setz(-sin(camera.rot.y * PI / 180) * MOVERATE);
 			} else {
 				currentMoves->cam.pos.setx(0);
 				currentMoves->cam.pos.setz(0);
@@ -188,7 +187,7 @@ void initDisplay(int width, int height, float ratio) {
 
 void drawPoint(Coord point, double radius) {
 	glPushMatrix();
-	glTranslated(point.x(), point.y(), 0);
+	glTranslated(point.x, point.y, 0);
 	glColor3d(1.0, 1.0, 0);
 	gluSphere(gluNewQuadric(), radius, 20, 20);
 	glPopMatrix();
@@ -198,7 +197,7 @@ void drawPoint(Coord point, double radius) {
 	glColor3d(1.0, 1.0, 0);
 
 	glBegin(GL_POINTS);
-	glVertex2d(point.x(), point.y());
+	glVertex2d(point.x, point.y);
 	glEnd();*/
 }
 
@@ -210,8 +209,8 @@ void drawLine(Coord start, Coord end) {
 	// glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glLineWidth(1);
 	glBegin(GL_LINES);
-	glVertex2d(start.x(), start.y());
-	glVertex2d(end.x(), end.y());
+	glVertex2d(start.x, start.y);
+	glVertex2d(end.x, end.y);
 	glEnd();
 }
 
@@ -233,7 +232,7 @@ void drawPath(deque<Coord>& path) {
 
 	glBegin(GL_LINE_STRIP);
 	for (auto point : path) {
-		glVertex2d(point.x(), point.y());
+		glVertex2d(point.x, point.y);
 	}
 	glEnd();
 
@@ -250,42 +249,42 @@ void drawObstacles(vector<shared_ptr<Rect>>* obstacleRects) {
 	for (auto obstacle : *obstacleRects) {
 		// Top
 		// glNormal3i(0,0,-1);
-		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 100);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 100);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 100);
-		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 100);
+		glVertex3d(obstacle->topLeft.x, obstacle->bottomRight.y, 100);
+		glVertex3d(obstacle->bottomRight.x, obstacle->bottomRight.y, 100);
+		glVertex3d(obstacle->bottomRight.x, obstacle->topLeft.y, 100);
+		glVertex3d(obstacle->topLeft.x, obstacle->topLeft.y, 100);
 
 		// Bottom
 		// glNormal3i(0,0,1);
-		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 0);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 0);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 0);
-		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 0);
+		glVertex3d(obstacle->topLeft.x, obstacle->topLeft.y, 0);
+		glVertex3d(obstacle->bottomRight.x, obstacle->topLeft.y, 0);
+		glVertex3d(obstacle->bottomRight.x, obstacle->bottomRight.y, 0);
+		glVertex3d(obstacle->topLeft.x, obstacle->bottomRight.y, 0);
 
 		// Back
 		// glNormal3i(1,0,0);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 100);
-		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 100);
-		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 0);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 0);
+		glVertex3d(obstacle->bottomRight.x, obstacle->bottomRight.y, 100);
+		glVertex3d(obstacle->topLeft.x, obstacle->bottomRight.y, 100);
+		glVertex3d(obstacle->topLeft.x, obstacle->bottomRight.y, 0);
+		glVertex3d(obstacle->bottomRight.x, obstacle->bottomRight.y, 0);
 
 		// Front
-		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 100);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 100);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 0);
-		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 0);
+		glVertex3d(obstacle->topLeft.x, obstacle->topLeft.y, 100);
+		glVertex3d(obstacle->bottomRight.x, obstacle->topLeft.y, 100);
+		glVertex3d(obstacle->bottomRight.x, obstacle->topLeft.y, 0);
+		glVertex3d(obstacle->topLeft.x, obstacle->topLeft.y, 0);
 
 		// Right
-		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 100);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 100);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->bottomRight.y(), 0);
-		glVertex3d(obstacle->bottomRight.x(), obstacle->topLeft.y(), 0);
+		glVertex3d(obstacle->bottomRight.x, obstacle->topLeft.y, 100);
+		glVertex3d(obstacle->bottomRight.x, obstacle->bottomRight.y, 100);
+		glVertex3d(obstacle->bottomRight.x, obstacle->bottomRight.y, 0);
+		glVertex3d(obstacle->bottomRight.x, obstacle->topLeft.y, 0);
 
 		// Left
-		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 0);
-		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 0);
-		glVertex3d(obstacle->topLeft.x(), obstacle->bottomRight.y(), 100);
-		glVertex3d(obstacle->topLeft.x(), obstacle->topLeft.y(), 100);
+		glVertex3d(obstacle->topLeft.x, obstacle->topLeft.y, 0);
+		glVertex3d(obstacle->topLeft.x, obstacle->bottomRight.y, 0);
+		glVertex3d(obstacle->topLeft.x, obstacle->bottomRight.y, 100);
+		glVertex3d(obstacle->topLeft.x, obstacle->topLeft.y, 100);
 	}
 	glEnd();
 }
@@ -301,9 +300,9 @@ void placeCamera(Camera cam) {
 	glLoadIdentity();
 
 	GLfloat light_position[] = {500.0, 200.0, 120.0, 1.0};
-	// rotate(cam.rot.x(), cos(radians(cam.rot.y())),0,sin(radians(cam.rot.y()))) //Translate to c++ later
+	// rotate(cam.rot.x, cos(radians(cam.rot.y())),0,sin(radians(cam.rot.y()))) //Translate to c++ later
 	glRotatef(cam.rot.y(), 0, 1, 0);
-	glTranslatef(cam.pos.x(), cam.pos.y(), cam.pos.z());
+	glTranslatef(cam.pos.x, cam.pos.y, cam.pos.z());
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	// glMatrixMode(GL_PROJECTION);
 }
@@ -406,7 +405,7 @@ int main(int argc, char* argv[]) {
 	glfwSetWindowUserPointer(window, &currentMoves);
 
 	// Camera cam;
-	camera.pos = Coord3(-width/2, -height/2, -1600);
+	camera.pos = Coord3(-width / 2, -height / 2, -1600);
 	// glfwSetWindowUserPointer(window, &cam);
 
 	while (!glfwWindowShouldClose(window)) {
@@ -420,14 +419,14 @@ int main(int argc, char* argv[]) {
 			iterations = 0;
 			//*/
 			// beginFrame = glfwGetTime();
-			camera.pos.setx(camera.pos.x()+currentMoves.cam.pos.x());
-			camera.pos.sety(camera.pos.y()+currentMoves.cam.pos.y());
-			camera.pos.setz(camera.pos.z()+currentMoves.cam.pos.z());
-			camera.rot.setx(camera.rot.x()+currentMoves.cam.rot.x());
-			camera.rot.sety(camera.rot.y()+currentMoves.cam.rot.y());
-			camera.rot.setz(camera.rot.z()+currentMoves.cam.rot.z());
+			camera.pos.setx(camera.pos.x + currentMoves.cam.pos.x);
+			camera.pos.sety(camera.pos.y + currentMoves.cam.pos.y);
+			camera.pos.setz(camera.pos.z() + currentMoves.cam.pos.z());
+			camera.rot.setx(camera.rot.x + currentMoves.cam.rot.x);
+			camera.rot.sety(camera.rot.y + currentMoves.cam.rot.y());
+			camera.rot.setz(camera.rot.z() + currentMoves.cam.rot.z());
 
-			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, camera);
 
 			glfwSwapBuffers(window);

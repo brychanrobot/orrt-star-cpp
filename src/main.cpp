@@ -1,15 +1,15 @@
-#include <GLFW/glfw3.h>
+
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <set>
-#include "color.hpp"
-#include "cxxopts.hpp"
+#include "planning-utils/libs/cxxopts.hpp"
 #include "planning/AStar.hpp"
 #include "planning/OnlineFmtStar.hpp"
 #include "planning/OnlineRrtStar.hpp"
 #include "planning/PrmStar.hpp"
-#include "planning/utils.hpp"
+#include "planning-utils/utils.hpp"
 #include "Waldo.hpp"
+#include "planning-utils/display.hpp"
 
 using namespace std;
 
@@ -24,8 +24,6 @@ const double MOVERATE = 3;
 const double OBSTACLE_PADDING = 5;
 
 bool planAgain = false;
-
-static void onError(int error, const char* description) { fputs(description, stderr); }
 
 static void onKey(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	Moves* currentMoves = static_cast<Moves*>(glfwGetWindowUserPointer(window));
@@ -72,165 +70,19 @@ static void onKey(GLFWwindow* window, int key, int scancode, int action, int mod
 	// printf("key: %d\n, (%.2f, %.2f)", key, currentMoves->uavX, currentMoves->uavY);
 }
 
-void initDisplay(int width, int height, float ratio) {
-	glViewport(0, 0, width, height);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, width, 0, height, -1.f, 1.f);
-	glScalef(1, -1, 1);
-	glTranslatef(0, -height, 0);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_DEPTH_TEST);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-}
-
-void setColor(HSL& hsl) {
-	auto rgb = HSLToRGB(hsl);
-	glColor3d(rgb.R, rgb.G, rgb.B);
-}
-
-void drawPoint(Coord point, double radius, HSL hsl) {
-	glEnable(GL_POINT_SMOOTH);
-	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-	glPointSize(radius);
-	// glColor3d(1.0, 1.0, 0);
-	setColor(hsl);
-
-	glBegin(GL_POINTS);
-	glVertex2d(point.x(), point.y());
-	glEnd();
-}
-
-void drawLine(Coord start, Coord end, int linewidth, HSL hsl) {
-	setColor(hsl);
-	glLineWidth(linewidth);
-	glBegin(GL_LINES);
-	glVertex2d(start.x(), start.y());
-	glVertex2d(end.x(), end.y());
-	glEnd();
-}
-
-void drawTree(const shared_ptr<Node>& root) {
-	for (auto child : root->children) {
-		drawLine(root->coord, child->coord, 1, HSL(100, 1, 0.5));
-		drawTree(child);
-	}
-}
-
-void drawGraphRecursive(const shared_ptr<Node>& node, set<shared_ptr<Node>>& visited) {
-	visited.insert(node);
-	for (auto child : node->children) {
-		HSL* hsl;
-		int linewidth = 3;
-		switch (child->status) {
-			case Status::Unvisited:
-				hsl = new HSL(100, 1, 0.5);
-				linewidth = 1;
-				break;
-			case Status::Open:
-				hsl = new HSL(50, 1, 0.5);
-				break;
-			case Status::Closed:
-				hsl = new HSL(250, 1, 0.5);
-				break;
-			default:
-				hsl = new HSL(360, 1, 0.5);
+void drawWaldos(vector<unique_ptr<Waldo>>& waldos) {
+	for (const auto& waldo : waldos) {
+		if (waldo->replanMtx.try_lock()) {
+			drawPath(waldo->currentPath, HSL(200, 1.0, 0.3), HSL(200, 1.0, 0.5));
+			drawPoint(waldo->coord(), 15, HSL(200, 1.0, 0.5));
+			waldo->replanMtx.unlock();
 		}
-
-		drawLine(node->coord, child->coord, linewidth, *hsl);
-		if (visited.find(child) == visited.end()) {
-			drawGraphRecursive(child, visited);
-		}
-	}
-}
-
-/*
-void drawGraphIterative(set<Node*>& visited, unordered_map<Node*, vector<Node*>> visibilityGraph) {
-    for (auto kv_pair : visibilityGraph) {
-        auto parent = kv_pair.first;
-
-        if (visited.find(parent) != visited.end()) {
-            continue;
-        }
-
-        for (auto child : kv_pair.second) {
-            HSL* hsl;
-            int linewidth = 3;
-            switch (child->status) {
-                case Status::Unvisited:
-                    hsl = new HSL(100, 1, 0.5);
-                    linewidth = 1;
-                    break;
-                case Status::Open:
-                    hsl = new HSL(50, 1, 0.5);
-                    linewidth = 1;
-                    break;
-                case Status::Closed:
-                    hsl = new HSL(250, 1, 0.5);
-                    break;
-                default:
-                    hsl = new HSL(360, 1, 0.5);
-            }
-
-            if (child->status == Status::Closed) {
-                drawLine(parent->coord, child->coord, *hsl, linewidth);
-            }
-        }
-    }
-}
-
-void drawGraph(Node* root, unordered_map<Node*, vector<Node*>> visibilityGraph) {
-    set<Node*> visited;
-    // drawGraphRecursive(root, visited);
-    drawGraphIterative(visited, visibilityGraph);
-}
-*/
-
-void drawPath(deque<Coord>& path, HSL lineHsl, HSL pointHsl) {
-	glEnable(GL_LINE_SMOOTH);
-	glLineWidth(3);
-	// glColor3d(0.0, 1.0, 0.2);
-	setColor(lineHsl);
-
-	glBegin(GL_LINE_STRIP);
-	for (auto point : path) {
-		glVertex2d(point.x(), point.y());
-	}
-	glEnd();
-
-	glDisable(GL_LINE_SMOOTH);
-
-	for (auto point : path) {
-		drawPoint(point, 5, pointHsl);
-	}
-}
-
-void drawObstacles(vector<shared_ptr<Rect>>* obstacleRects, HSL hsl) {
-	// glColor3d(0.0, 1.0, 0.5);
-	setColor(hsl);
-	glBegin(GL_QUADS);
-	for (auto obstacle : *obstacleRects) {
-		glVertex2d(obstacle->topLeft.x() + OBSTACLE_PADDING, obstacle->topLeft.y() + OBSTACLE_PADDING);
-		glVertex2d(obstacle->bottomRight.x() - OBSTACLE_PADDING, obstacle->topLeft.y() + OBSTACLE_PADDING);
-		glVertex2d(obstacle->bottomRight.x() - OBSTACLE_PADDING, obstacle->bottomRight.y() - OBSTACLE_PADDING);
-		glVertex2d(obstacle->topLeft.x() + OBSTACLE_PADDING, obstacle->bottomRight.y() - OBSTACLE_PADDING);
-	}
-	glEnd();
-}
-
-void drawWaldos(vector<Waldo>& waldos) {
-	for (auto waldo : waldos) {
-		drawPath(waldo.currentPath, HSL(200, 1.0, 0.3), HSL(200, 1.0, 0.5));
-		drawPoint(waldo.coord(), 15, HSL(200, 1.0, 0.5));
 	}
 }
 
 void display(const shared_ptr<Node> root, const shared_ptr<Node>& endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects,
-             vector<Waldo>& waldos) {
-	drawObstacles(obstacleRects, HSL(275, 1.0, 0.5));
+             vector<unique_ptr<Waldo>>& waldos) {
+	drawObstacles(obstacleRects, OBSTACLE_PADDING, HSL(275, 1.0, 0.5));
 	// drawTree(root);
 	// drawGraph(root, visibilityGraph);
 	drawWaldos(waldos);
@@ -266,33 +118,10 @@ int main(int argc, char* argv[]) {
 
 	options.parse(argc, argv);
 
-	GLFWwindow* window;
-	glfwSetErrorCallback(onError);
-	if (!glfwInit()) exit(EXIT_FAILURE);
-
-	GLFWmonitor* monitor = NULL;
-	// if (options["fullscreen"].as<bool>()) {
-
-	if (isFullscreen) {
-		int count;
-		GLFWmonitor** monitors = glfwGetMonitors(&count);
-		monitor = monitors[monitorNum];
-		auto vidMode = glfwGetVideoMode(monitor);
-		width = vidMode->width;
-		height = vidMode->height;
-	}
-
-	window = glfwCreateWindow(width, height, "Simple example", monitor, NULL);
-	if (!window) {
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-	glfwMakeContextCurrent(window);
+	auto window = initWindow(isFullscreen, monitorNum, width, height);
 	glfwSetKeyCallback(window, onKey);
 
 	float ratio;
-	// int width, height;
-	// glfwGetFramebufferSize(window, &width, &height);
 	ratio = width / (float)height;
 	initDisplay(width, height, ratio);
 
@@ -302,16 +131,7 @@ int main(int argc, char* argv[]) {
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
 	generateObstacleHash(obstacleRects, obstacleHash);
 
-	vector<Waldo> waldos;
-
-	/*
-	for (auto row: obstacleHash) {
-	    for (auto value: row) {
-	        printf("%d", value ? 1 : 0);
-	    }
-	    printf("\n");
-	}
-	*/
+	vector<unique_ptr<Waldo>> waldos;
 
 	SamplingPlanner* planner;
 	if (useFmt) {
@@ -323,61 +143,36 @@ int main(int argc, char* argv[]) {
 	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
 
 	for (int w = 0; w < numWaldos; w++) {
-		waldos.push_back(Waldo(&obstacleHash, &obstacleRects, width, height));
+		waldos.push_back(make_unique<Waldo>(&obstacleHash, &obstacleRects, width, height));
 	}
-
-	auto lastFrame = glfwGetTime();
-	auto frameInterval = 1.0 / 30.0;
-
-	auto lastReplan = glfwGetTime();
-	auto replanInterval = 1.0 / replanFrequency;
-	/*auto iterations = 0;
-	auto frames = 0;
-	double averageIterations = 0;*/
-	printf("%.2f\n", replanInterval);
 
 	Moves currentMoves;
 	glfwSetWindowUserPointer(window, &currentMoves);
 
-	while (!glfwWindowShouldClose(window)) {
+	auto displayCallback = [&planner, &waldos]() { display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos); };
+
+	auto lastReplan = glfwGetTime();
+	auto lastMove = glfwGetTime();
+	auto replanInterval = 1.0 / replanFrequency;
+	auto moveInterval = 1.0 / 30.0;
+
+	auto remainderCallback = [&planner, &waldos, &replanInterval, &moveInterval, &lastReplan, &lastMove]() {
 		auto currentTime = glfwGetTime();
-		if (currentTime - lastFrame >= frameInterval) {
-			lastFrame = currentTime;
-			/*
-			averageIterations = (averageIterations * frames + iterations) / (frames + 0.5);
-			printf("i: %.2f\n", averageIterations);
-			frames += 1;
-			iterations = 0;
-			*/
+		if (currentTime - lastMove >= moveInterval) {
+			lastMove = currentTime;
 
-			glClear(GL_COLOR_BUFFER_BIT);
-
-			display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos);
-
-			glfwSwapBuffers(window);
-			glfwPollEvents();
-
-			for (auto& waldo : waldos) {
-				waldo.followPath();
+			for (const auto& waldo : waldos) {
+				waldo->followPath();
 			}
 
 			planner->followPath();
-			planner->moveStart(currentMoves.uavX, currentMoves.uavY);
-		} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
+		} else if (replanInterval != -1 && currentTime - lastReplan >= replanInterval) {
 			lastReplan = currentTime;
 			planner->randomReplan();
-			// printf("replan: %.5f\n", glfwGetTime() - lastReplan);
 		} else {
-			// iterations++;
 			planner->sample();
 		}
+	};
 
-		if (planAgain) {
-			// planner->plan();
-			planAgain = false;
-		}
-	}
-	glfwDestroyWindow(window);
-	glfwTerminate();
-	exit(EXIT_SUCCESS);
+	displayLoop(window, 30.0, displayCallback, remainderCallback);
 }

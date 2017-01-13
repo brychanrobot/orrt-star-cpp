@@ -1,6 +1,6 @@
 #include "PrmStar.hpp"
 
-#include "../geom/utils.hpp"
+#include "../planning-utils/geom/utils.hpp"
 
 using namespace std;
 

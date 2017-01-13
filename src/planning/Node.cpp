@@ -38,7 +38,7 @@ void Node::updateCumulativeCost(double newCumulativeCost) {
 
 void Node::printChildren() {
 	for (const auto& child : this->children) {
-		printf("(%.2f, %.2f) ", child->coord.x(), child->coord.y());
+		printf("(%.2f, %.2f) ", child->coord.x, child->coord.y);
 	}
 	printf("\n");
 }

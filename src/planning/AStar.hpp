@@ -3,7 +3,7 @@
 #include <set>
 #include <unordered_map>
 
-#include "../geom/Coord.hpp"
+#include "../planning-utils/geom/Coord.hpp"
 #include "Planner.hpp"
 
 class AStar : public Planner {

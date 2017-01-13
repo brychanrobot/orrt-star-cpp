@@ -2,9 +2,9 @@
 #include <fstream>
 #include <iostream>
 #include <set>
-#include "cxxopts.hpp"
+#include "planning-utils/libs/cxxopts.hpp"
 #include "planning/AStar.hpp"
-#include "planning/utils.hpp"
+#include "planning-utils/utils.hpp"
 
 using namespace std;
 
@@ -35,8 +35,8 @@ void saveMapRects(string filename, vector<shared_ptr<Rect>> rects) {
 	ofstream f(filename, std::ofstream::out);
 	f << "[";
 	for (uint r = 0; r < rects.size(); r++) {
-		f << "[[" << rects[r]->topLeft.x() << "," << rects[r]->topLeft.y() << "],[";
-		f << rects[r]->bottomRight.x() << "," << rects[r]->bottomRight.y() << "]]";
+		f << "[[" << rects[r]->topLeft.x << "," << rects[r]->topLeft.y << "],[";
+		f << rects[r]->bottomRight.x << "," << rects[r]->bottomRight.y << "]]";
 		if (r != rects.size() - 1) {
 			f << ", ";
 		}
@@ -52,14 +52,14 @@ void appendPath(string filename, Coord& start, Coord& end, deque<Coord>& path) {
 		f << ", ";
 	}
 
-	f << "[[" << start.x() << "," << start.y() << "], [" << end.x() << "," << end.y() << "], [";
+	f << "[[" << start.x << "," << start.y << "], [" << end.x << "," << end.y << "], [";
 	for (uint c = 0; c < path.size(); c++) {
 		if (c == 0) {
 			f << "[";
 		} else {
 			f << ",[";
 		}
-		f << path[c].x() << "," << path[c].y() << "]";
+		f << path[c].x << "," << path[c].y << "]";
 	}
 	// f.seekp(2, ios_base::end);
 	// f << "\b";

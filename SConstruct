@@ -12,7 +12,7 @@ if int(debug):
 env.VariantDir('build', 'src', duplicate=0)
 
 objects = [
-	env.Object('build/geom/Rect.cpp'),
+	env.Object('build/planning-utils/geom/Rect.cpp'),
 
 	env.Object('build/planning/Node.cpp'),
 

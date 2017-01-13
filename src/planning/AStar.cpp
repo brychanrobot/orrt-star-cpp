@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <queue>
 
-#include "../geom/utils.hpp"
+#include "../planning-utils/geom/utils.hpp"
 
 using namespace std;
 
@@ -126,9 +126,9 @@ void AStar::plan() {
 
 void AStar::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
-		Coord point(clamp(this->root->coord.x() + dx, 0, this->width - 1), clamp(this->root->coord.y() + dy, 0, this->height - 1));
+		Coord point(clamp(this->root->coord.x + dx, 0, this->width - 1), clamp(this->root->coord.y + dy, 0, this->height - 1));
 
-		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
+		if (!this->obstacleHash->at((int)point.y).at((int)point.x)) {
 			this->root->coord = point;
 
 			this->bestPath[0] = point;

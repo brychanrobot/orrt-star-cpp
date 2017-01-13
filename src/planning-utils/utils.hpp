@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <cmath>
 // #include <math.h>
-#include "../geom/Rect.hpp"
-#include "../geom/utils.hpp"
+#include "geom/Rect.hpp"
+#include "geom/utils.hpp"
 
 bool hasIntersection(Rect& rect, std::vector<std::shared_ptr<Rect>>& obstacles) {
 	for (const auto& obstacle : obstacles) {
@@ -37,8 +37,8 @@ void generateObstacleRects(int width, int height, int count, std::vector<std::sh
 
 void generateObstacleHash(std::vector<std::shared_ptr<Rect>>& obstacleRects, std::vector<std::vector<bool>>& obstacleHash) {
 	for (const auto& obstacle : obstacleRects) {
-		for (int r = obstacle->topLeft.y(); r < obstacle->bottomRight.y(); r++) {
-			for (int c = obstacle->topLeft.x(); c < obstacle->bottomRight.x(); c++) {
+		for (int r = obstacle->topLeft.y; r < obstacle->bottomRight.y; r++) {
+			for (int c = obstacle->topLeft.x; c < obstacle->bottomRight.x; c++) {
 				obstacleHash[r][c] = true;
 			}
 		}

@@ -4,3 +4,4 @@ ColumnLimit: 150
 IndentWidth: 4
 TabWidth: 4
 UseTab: ForIndentation
+SortIncludes: true

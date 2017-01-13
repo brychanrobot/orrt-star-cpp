@@ -3,13 +3,13 @@
 #include <chrono>
 #include <fstream>
 #include <set>
-#include "cxxopts.hpp"
-#include "json.hpp"
+#include "planning-utils/libs/cxxopts.hpp"
+#include "planning-utils/libs/json.hpp"
 #include "planning/AStar.hpp"
 #include "planning/OnlineFmtStar.hpp"
 #include "planning/OnlineRrtStar.hpp"
 #include "planning/PrmStar.hpp"
-#include "planning/utils.hpp"
+#include "planning-utils/utils.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -53,7 +53,7 @@ void readMap(string filename, int& width, int& height, vector<shared_ptr<Rect>>&
 	for (auto& r : m["obstacles"]) {
 		auto rect = make_shared<Rect>(r[0][0], r[0][1], r[1][0], r[1][1]);
 		obstacleRects.push_back(rect);
-		// printf("[[%.2f, %.2f], [%.2f, %.2f]]\n", rect->topLeft.x(), rect->topLeft.y(), rect->bottomRight.x(), rect->bottomRight.y());
+		// printf("[[%.2f, %.2f], [%.2f, %.2f]]\n", rect->topLeft.x, rect->topLeft.y, rect->bottomRight.x, rect->bottomRight.y);
 	}
 }
 
@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
 					currentCost = paths["paths"]["move"][moveIdx]["cost"];
 					moveIdx++;
 
-					planner->moveStart((double)currentPath[0][0] - planner->root->coord.x(), (double)currentPath[0][1] - planner->root->coord.y());
+					planner->moveStart((double)currentPath[0][0] - planner->root->coord.x, (double)currentPath[0][1] - planner->root->coord.y);
 
 				} else if (replanFrequency != -1 && currentTime - lastReplan >= replanInterval) {
 					lastReplan = currentTime;

@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <cmath>
 #include <cstdlib>
-#include "../geom/Coord.hpp"
-#include "../geom/utils.hpp"
+#include "../planning-utils/geom/Coord.hpp"
+#include "../planning-utils/geom/utils.hpp"
 
 //#include <boost/geometry.hpp>
 //#include <boost/geometry/geometries/geometries.hpp>
@@ -30,13 +30,13 @@ void OnlineRrtStar::sampleAndAdd() {
 
 	if (dist > this->maxSegment) {
 		auto angle = angleBetweenCoords(nn->coord, p);
-		auto x = this->maxSegment * cos(angle) + nn->coord.x();
-		auto y = this->maxSegment * sin(angle) + nn->coord.y();
+		auto x = this->maxSegment * cos(angle) + nn->coord.x;
+		auto y = this->maxSegment * sin(angle) + nn->coord.y;
 
 		p.change(x, y);
 	}
 
-	if (!(*this->obstacleHash)[(int)p.y()][(int)p.x()]) {
+	if (!(*this->obstacleHash)[(int)p.y][(int)p.x]) {
 		vector<shared_ptr<Node>> neighbors;
 		vector<double> neighborCosts;
 		shared_ptr<Node> bestNeighbor;

@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <fstream>
 #include <set>
-#include "cxxopts.hpp"
-#include "json.hpp"
+#include "planning-utils/libs/cxxopts.hpp"
+#include "planning-utils/libs/json.hpp"
 #include "planning/AStar.hpp"
 #include "planning/OnlineFmtStar.hpp"
 #include "planning/OnlineRrtStar.hpp"
 #include "planning/PrmStar.hpp"
-#include "planning/utils.hpp"
+#include "planning-utils/utils.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -47,7 +47,7 @@ void saveMap(string filename, int width, int height, vector<shared_ptr<Rect>>& o
 	m["width"] = width;
 
 	for (auto& rect : obstacleRects) {
-		json r = {{rect->topLeft.x(), rect->topLeft.y()}, {rect->bottomRight.x(), rect->bottomRight.y()}};
+		json r = {{rect->topLeft.x, rect->topLeft.y}, {rect->bottomRight.x, rect->bottomRight.y}};
 		m["obstacles"].push_back(r);
 	}
 
@@ -58,7 +58,7 @@ json jsonifyPath(deque<Coord>& path, double cost) {
 	json p;
 
 	for (auto& point : path) {
-		p["path"].push_back({point.x(), point.y()});
+		p["path"].push_back({point.x, point.y});
 	}
 
 	p["cost"] = cost;

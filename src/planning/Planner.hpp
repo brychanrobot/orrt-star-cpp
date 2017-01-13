@@ -7,8 +7,8 @@
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-#include "../geom/Coord.hpp"
-#include "../geom/Rect.hpp"
+#include "../planning-utils/geom/Coord.hpp"
+#include "../planning-utils/geom/Rect.hpp"
 #include "Halton.hpp"
 #include "Node.hpp"
 

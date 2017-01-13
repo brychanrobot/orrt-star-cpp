@@ -6,8 +6,8 @@
 #include <limits>
 #include <vector>
 
-#include "../geom/Coord.hpp"
-#include "../geom/utils.hpp"
+#include "../planning-utils/geom/Coord.hpp"
+#include "../planning-utils/geom/utils.hpp"
 
 using namespace std;
 
@@ -19,7 +19,7 @@ SamplingPlanner::SamplingPlanner(vector<vector<bool>> *obstacleHash, vector<shar
 	this->nodeAddThreshold = percentCoverage * width * height;
 
 	if (start) {
-		this->root->coord.change(start->x(), start->y());
+		this->root->coord.change(start->x, start->y);
 	}
 
 	this->root->status = Status::Open;
@@ -56,10 +56,10 @@ void SamplingPlanner::sampleWithRewire() {
 
 void SamplingPlanner::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
-		Coord point(clamp(this->root->coord.x() + dx, 0, this->width - 1), clamp(this->root->coord.y() + dy, 0, this->height - 1));
+		Coord point(clamp(this->root->coord.x + dx, 0, this->width - 1), clamp(this->root->coord.y + dy, 0, this->height - 1));
 
-		// printf("clamped point %.2f, %.2f\n", point.x(), point.y());
-		if (!this->obstacleHash->at((int)point.y()).at((int)point.x())) {
+		// printf("clamped point %.2f, %.2f\n", point.x, point.y);
+		if (!this->obstacleHash->at((int)point.y).at((int)point.x)) {
 			auto newRoot = make_shared<Node>(point, nullptr, 0.0);
 			newRoot->status = Status::Closed;
 			this->rtree.insert(RtreeValue(newRoot->coord.getBoostPoint(), newRoot));
@@ -77,6 +77,18 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 				if (neighbor != newRoot && neighbor->status == Status::Closed && !this->lineIntersectsObstacle(newRoot->coord, neighbor->coord)) {
 					auto cost = this->getCost(newRoot, neighbor);
 					neighbor->rewire(newRoot, cost);
+				}
+			}
+
+			for (auto neighbor_tuple : neighbor_tuples) {
+				auto neighbor = neighbor_tuple.second;
+				if (neighbor != newRoot && neighbor->status == Status::Closed && !this->lineIntersectsObstacle(newRoot->coord, neighbor->coord)) {
+					// auto cost = this->getCost(newRoot, neighbor);
+					// neighbor->rewire(newRoot, cost);
+					if (neighbor->children.size() == 0) {
+						neighbor->parent->removeChild(neighbor);
+						this->rtree.remove(RtreeValue(neighbor->coord.getBoostPoint(), neighbor));
+					}
 				}
 			}
 		}

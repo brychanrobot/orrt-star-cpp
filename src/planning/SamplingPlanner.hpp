@@ -3,8 +3,8 @@
 #include "Planner.hpp"
 /*#include <vector>
 
-#include "../geom/Coord.hpp"
-#include "../geom/Rect.hpp"*/
+#include "../planning-utils/geom/Coord.hpp"
+#include "../planning-utils/geom/Rect.hpp"*/
 #include "Halton.hpp"
 #include "Node.hpp"
 

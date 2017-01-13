@@ -15,23 +15,25 @@ typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian>
 
 class Coord {
    private:
-	std::vector<double> c = {0, 0};
 
    public:
+	double x;
+	double y;
+
 	Coord() {}
 	Coord(double x, double y) {
-		c[0] = x;
-		c[1] = y;
+		this->x = x;
+		this->y = y;
 	}
 
-	double x() { return this->c[0]; }
+	// double x() { return this->c[0]; }
 
-	double y() { return this->c[1]; }
+	// double y() { return this->c[1]; }
 
 	void change(double x, double y) {
-		this->c[0] = x;
-		this->c[1] = y;
+		this->x = x;
+		this->y = y;
 	}
 
-	point getBoostPoint() { return point(c[0], c[1]); }
+	point getBoostPoint() { return point(this->x, this->y); }
 };
