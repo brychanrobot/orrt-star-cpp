@@ -40,8 +40,8 @@ void SamplingPlanner::sample() {
 
 void SamplingPlanner::sampleWithRewire() {
 	auto point = this->randomOpenAreaPoint();
-	vector<shared_ptr<Node>> neighbors;
-	shared_ptr<Node> bestNeighbor;
+	vector<shared_ptr<RrtNode>> neighbors;
+	shared_ptr<RrtNode> bestNeighbor;
 	this->findBestNeighborWithoutCost(point, bestNeighbor, neighbors);
 	for (auto neighbor : neighbors) {
 		if (neighbor->status == Status::Closed && neighbor != bestNeighbor) {
@@ -60,7 +60,7 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 
 		// printf("clamped point %.2f, %.2f\n", point.x, point.y);
 		if (!this->obstacleHash->at((int)point.y).at((int)point.x)) {
-			auto newRoot = make_shared<Node>(point, nullptr, 0.0);
+			auto newRoot = make_shared<RrtNode>(point, nullptr, 0.0);
 			newRoot->status = Status::Closed;
 			this->rtree.insert(RtreeValue(newRoot->coord.getBoostPoint(), newRoot));
 
@@ -100,13 +100,13 @@ void SamplingPlanner::replan(Coord &newEndpoint) {
 	this->refreshBestPath();
 }
 
-shared_ptr<Node> SamplingPlanner::getNearestNeighbor(Coord &p) {
+shared_ptr<RrtNode> SamplingPlanner::getNearestNeighbor(Coord &p) {
 	vector<RtreeValue> result;
 	this->rtree.query(boost::geometry::index::nearest(p.getBoostPoint(), 1), back_inserter(result));
 	return result[0].second;
 }
 
-void SamplingPlanner::findBestNeighborWithoutCost(Coord point, shared_ptr<Node> &bestNeighbor, vector<shared_ptr<Node>> &neighbors) {
+void SamplingPlanner::findBestNeighborWithoutCost(Coord point, shared_ptr<RrtNode> &bestNeighbor, vector<shared_ptr<RrtNode>> &neighbors) {
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
 
@@ -125,7 +125,7 @@ void SamplingPlanner::findBestNeighborWithoutCost(Coord point, shared_ptr<Node> 
 	}
 }
 
-void SamplingPlanner::findBestNeighbor(Coord point, shared_ptr<Node> &bestNeighbor, double &bestCost, vector<shared_ptr<Node>> &neighbors,
+void SamplingPlanner::findBestNeighbor(Coord point, shared_ptr<RrtNode> &bestNeighbor, double &bestCost, vector<shared_ptr<RrtNode>> &neighbors,
                                        vector<double> &neighborCosts) {
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);

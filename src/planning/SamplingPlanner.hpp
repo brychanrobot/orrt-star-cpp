@@ -6,7 +6,7 @@
 #include "../planning-utils/geom/Coord.hpp"
 #include "../planning-utils/geom/Rect.hpp"*/
 #include "Halton.hpp"
-#include "Node.hpp"
+#include "RrtNode.hpp"
 
 // template<typename Params>;
 
@@ -15,10 +15,10 @@ class SamplingPlanner : public Planner {
 	int maxSegment;
 	int rewireNeighborhood;
 
-	std::shared_ptr<Node> getNearestNeighbor(Coord &point);
-	void findBestNeighbor(Coord point, std::shared_ptr<Node> &bestNeighbor, double &bestCost, std::vector<std::shared_ptr<Node>> &neighbors,
+	std::shared_ptr<RrtNode> getNearestNeighbor(Coord &point);
+	void findBestNeighbor(Coord point, std::shared_ptr<RrtNode> &bestNeighbor, double &bestCost, std::vector<std::shared_ptr<RrtNode>> &neighbors,
 	                      std::vector<double> &neighborCosts);
-	void findBestNeighborWithoutCost(Coord point, std::shared_ptr<Node> &bestNeighbor, std::vector<std::shared_ptr<Node>> &neighbors);
+	void findBestNeighborWithoutCost(Coord point, std::shared_ptr<RrtNode> &bestNeighbor, std::vector<std::shared_ptr<RrtNode>> &neighbors);
 
 	virtual void sampleAndAdd() = 0;
 	void sampleWithRewire();

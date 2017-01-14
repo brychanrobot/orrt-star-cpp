@@ -214,7 +214,7 @@ void drawLine(Coord start, Coord end) {
 	glEnd();
 }
 
-void drawTree(Node* root) {
+void drawTree(RrtNode* root) {
 	for (auto child : root->children) {
 		drawLine(root->coord, child->coord);
 		drawTree(child);
@@ -307,7 +307,7 @@ void placeCamera(Camera cam) {
 	// glMatrixMode(GL_PROJECTION);
 }
 
-void display(Node* root, Node* endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects, Camera& cam) {
+void display(RrtNode* root, RrtNode* endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects, Camera& cam) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	placeCamera(cam);
 

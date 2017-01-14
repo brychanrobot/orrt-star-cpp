@@ -15,7 +15,7 @@ OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<shared_p
 	for (int n = 0; n < this->nodeAddThreshold; n++) {
 		auto point = this->randomOpenAreaPoint();
 
-		auto node = make_shared<Node>(point, nullptr, numeric_limits<double>::max());
+		auto node = make_shared<RrtNode>(point, nullptr, numeric_limits<double>::max());
 
 		this->rtree.insert(RtreeValue(point.getBoostPoint(), node));
 	}
@@ -33,7 +33,7 @@ void OnlineFmtStar::sampleAndAdd() {
 	for (auto neighbor_tuple : neighbors) {
 		auto neighbor = neighbor_tuple.second;
 		if (neighbor->status == Status::Unvisited) {
-			shared_ptr<Node> bestParent;
+			shared_ptr<RrtNode> bestParent;
 			double bestCost;
 			findBestOpenNeighbor(neighbor, bestParent, bestCost);
 			if (bestParent && !this->lineIntersectsObstacle(neighbor->coord, bestParent->coord)) {
@@ -50,7 +50,7 @@ void OnlineFmtStar::sampleAndAdd() {
 	bestOpenNode->status = Status::Closed;
 }
 
-void OnlineFmtStar::findBestOpenNeighbor(shared_ptr<Node> &node, shared_ptr<Node> &bestNeighbor, double &bestCost) {
+void OnlineFmtStar::findBestOpenNeighbor(shared_ptr<RrtNode> &node, shared_ptr<RrtNode> &bestNeighbor, double &bestCost) {
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(node->coord, this->rewireNeighborhood, neighbor_tuples);
 

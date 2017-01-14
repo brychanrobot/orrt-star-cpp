@@ -8,8 +8,8 @@ class PrmStar : public AStar {
    protected:
 	void buildBaseVisibilityGraph();
 
-	void sampleRandom(std::vector<std::shared_ptr<Node>> &allNodes);
-	void sampleGrid(std::vector<std::shared_ptr<Node>> &allNodes);
+	void sampleRandom(std::vector<std::shared_ptr<RrtNode>> &allNodes);
+	void sampleGrid(std::vector<std::shared_ptr<RrtNode>> &allNodes);
 
 	GraphType graphType;
 

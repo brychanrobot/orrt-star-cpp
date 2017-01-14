@@ -8,7 +8,7 @@
 
 class AStar : public Planner {
    protected:
-	std::unordered_map<std::shared_ptr<Node>, std::set<std::shared_ptr<Node>>> baseVisibilityGraph;
+	std::unordered_map<std::shared_ptr<RrtNode>, std::set<std::shared_ptr<RrtNode>>> baseVisibilityGraph;
 	void plan();
 	virtual void buildBaseVisibilityGraph();
 	int dx;

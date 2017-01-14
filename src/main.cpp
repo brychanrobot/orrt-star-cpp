@@ -7,9 +7,9 @@
 #include "planning/OnlineFmtStar.hpp"
 #include "planning/OnlineRrtStar.hpp"
 #include "planning/PrmStar.hpp"
+#include "planning-utils/display.hpp"
 #include "planning-utils/utils.hpp"
 #include "Waldo.hpp"
-#include "planning-utils/display.hpp"
 
 using namespace std;
 
@@ -18,14 +18,14 @@ const double OBSTACLE_PADDING = 5;
 void drawWaldos(vector<unique_ptr<Waldo>>& waldos) {
 	for (const auto& waldo : waldos) {
 		if (waldo->replanMtx.try_lock()) {
-			drawPath(waldo->currentPath, HSL(200, 1.0, 0.3), HSL(200, 1.0, 0.5));
+			// drawPath(waldo->currentPath, HSL(200, 1.0, 0.3), HSL(200, 1.0, 0.5));
 			drawPoint(waldo->coord(), 15, HSL(200, 1.0, 0.5));
 			waldo->replanMtx.unlock();
 		}
 	}
 }
 
-void display(const shared_ptr<Node> root, const shared_ptr<Node>& endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects,
+void display(const shared_ptr<RrtNode> root, const shared_ptr<RrtNode>& endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects,
              vector<unique_ptr<Waldo>>& waldos) {
 	drawObstacles(obstacleRects, OBSTACLE_PADDING, HSL(275, 1.0, 0.5));
 	// drawTree(root);
@@ -34,6 +34,7 @@ void display(const shared_ptr<Node> root, const shared_ptr<Node>& endNode, deque
 
 	drawPath(bestPath, HSL(100, 1.0, 0.3), HSL(150, 1.0, 0.5));
 
+	// printf("%.2f, %.2f\n", root->coord.x, root->coord.y);
 	drawPoint(root->coord, 20, HSL(25, 1.0, 0.5));
 	drawPoint(endNode->coord, 20, HSL(50, 1.0, 0.5));
 }

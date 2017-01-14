@@ -8,9 +8,9 @@
 
 class OnlineFmtStar : public SamplingPlanner {
    private:
-	std::priority_queue<std::shared_ptr<Node>> open;
+	std::priority_queue<std::shared_ptr<RrtNode>> open;
 
-	void findBestOpenNeighbor(std::shared_ptr<Node> &node, std::shared_ptr<Node> &bestNeighbor, double &bestCost);
+	void findBestOpenNeighbor(std::shared_ptr<RrtNode> &node, std::shared_ptr<RrtNode> &bestNeighbor, double &bestCost);
 
 	void sampleAndAdd();
 

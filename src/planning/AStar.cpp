@@ -41,12 +41,12 @@ AStar::AStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obsta
 AStar::~AStar() {}
 
 void AStar::buildBaseVisibilityGraph() {
-	vector<shared_ptr<Node>> allNodes;
+	vector<shared_ptr<RrtNode>> allNodes;
 	for (auto obstacleRect : *this->obstacleRects) {
 		vector<Coord> points;
 		obstacleRect->getPoints(points);
 		for (auto point : points) {
-			allNodes.push_back(make_shared<Node>(point, shared_ptr<Node>(nullptr), -1.0));
+			allNodes.push_back(make_shared<RrtNode>(point, shared_ptr<RrtNode>(nullptr), -1.0));
 		}
 	}
 
@@ -67,7 +67,7 @@ void AStar::buildBaseVisibilityGraph() {
 
 /*
 void AStar::buildBaseVisibilityGraph() {
-    vector<shared_ptr<Node>> allNodes;
+    vector<shared_ptr<RrtNode>> allNodes;
     auto ratio = this->width / (double)this->height;
     this->dx = width / 100;
     this->dy = height / (100 * ratio);
@@ -75,7 +75,7 @@ void AStar::buildBaseVisibilityGraph() {
     for (int i = this->dx / 2; i < width; i += this->dx) {
         for (int j = this->dy / 2; j < height; j += this->dy) {
             if (!(*this->obstacleHash)[j][i]) {
-                auto node = make_shared<Node>(Coord(i, j), shared_ptr<Node>(nullptr), -1.0);
+                auto node = make_shared<RrtNode>(Coord(i, j), shared_ptr<RrtNode>(nullptr), -1.0);
                 allNodes.push_back(node);
                 this->rtree.insert(RtreeValue(node->coord, node));
             }
@@ -100,7 +100,7 @@ void AStar::buildBaseVisibilityGraph() {
 */
 
 void AStar::plan() {
-	PriorityQueue<shared_ptr<Node>, double> frontier;
+	PriorityQueue<shared_ptr<RrtNode>, double> frontier;
 	frontier.put(this->root, 0.0);
 
 	while (!frontier.empty()) {

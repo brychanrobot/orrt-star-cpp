@@ -37,13 +37,13 @@ void OnlineRrtStar::sampleAndAdd() {
 	}
 
 	if (!(*this->obstacleHash)[(int)p.y][(int)p.x]) {
-		vector<shared_ptr<Node>> neighbors;
+		vector<shared_ptr<RrtNode>> neighbors;
 		vector<double> neighborCosts;
-		shared_ptr<Node> bestNeighbor;
+		shared_ptr<RrtNode> bestNeighbor;
 		double bestCost;
 		this->findBestNeighbor(p, bestNeighbor, bestCost, neighbors, neighborCosts);
 		if (bestNeighbor && bestNeighbor->status == Status::Closed && !this->lineIntersectsObstacle(p, bestNeighbor->coord)) {
-			auto node = make_shared<Node>(p, nullptr, numeric_limits<double>::max());
+			auto node = make_shared<RrtNode>(p, nullptr, numeric_limits<double>::max());
 			node->status = Status::Closed;
 			bestNeighbor->addChild(node, bestCost);
 			this->rtree.insert(RtreeValue(p.getBoostPoint(), node));

@@ -14,7 +14,7 @@ env.VariantDir('build', 'src', duplicate=0)
 objects = [
 	env.Object('build/planning-utils/geom/Rect.cpp'),
 
-	env.Object('build/planning/Node.cpp'),
+	env.Object('build/planning/RrtNode.cpp'),
 
 	env.Object('build/planning/Planner.cpp'),
 	env.Object('build/planning/AStar.cpp'),

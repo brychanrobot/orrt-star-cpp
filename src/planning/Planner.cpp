@@ -8,6 +8,7 @@
 
 #include "../planning-utils/geom/Coord.hpp"
 #include "../planning-utils/geom/utils.hpp"
+#include "../planning-utils/utils.hpp"
 
 using namespace std;
 
@@ -30,9 +31,9 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *o
 		endPoint = this->randomOpenAreaPoint();
 	} while (euclideanDistance(startPoint, endPoint) < width / 2.0);
 
-	this->root = make_shared<Node>(startPoint, shared_ptr<Node>(nullptr), 0.0);
+	this->root = make_shared<RrtNode>(startPoint, shared_ptr<RrtNode>(nullptr), 0.0);
 
-	this->endNode = make_shared<Node>(endPoint, shared_ptr<Node>(nullptr), std::numeric_limits<double>::max() / 2.0);
+	this->endNode = make_shared<RrtNode>(endPoint, shared_ptr<RrtNode>(nullptr), std::numeric_limits<double>::max() / 2.0);
 }
 
 Planner::~Planner() {
@@ -52,61 +53,7 @@ Planner::~Planner() {
 	// printf("destructed planner\n");
 }
 
-bool Planner::lineIntersectsObstacle(Coord &p1, Coord &p2) {
-	auto dx = p2.x - p1.x;
-	auto dy = p2.y - p1.y;
-
-	if (p1.x < 0 || p1.y < 0 || p2.x < 0 || p2.y < 0) {
-		return true;
-	}
-
-	/*
-	auto m = 20000.0;  // a big number for vertical slope
-
-	if (abs(dx) > 0.0001) {
-	    m = dy / dx;
-	}
-	*/
-	auto m = clamp(dy / dx, -20000, 20000);
-
-	// printf("m: %f\n", m);
-
-	auto b = -m * p1.x + p1.y;
-
-	if (abs(m) != 20000) {
-		auto minX = std::min(p1.x, p2.x);
-		auto maxX = std::max(p1.x, p2.x);
-
-		for (int ix = minX; ix <= maxX; ix++) {
-			auto y = m * ix + b;
-			// printf("[%.2f, %.2f]:[%.2f, %.2f] %.3f, (%d, %f)\n", p1.x, p1.y, p2.x, p2.y, m, ix, y);
-			// printf("h: [%.2f, %.2f]:[%.2f, %.2f] --------dx: %f m: %f, b: %.2f, (%d, %.2f)\n", p1.x, p1.y, p2.x, p2.y, dx, m, b, ix, y);
-			// printf("%.2d, %.2d\n", (int)y, ix);
-
-			// printf("%.2f, %.2f : %d\n", p1.x, p2.x, ix);
-			if (y > 0 && y < this->height && (*this->obstacleHash)[(int)y][ix]) {
-				// printf("returning true\n");
-				return true;
-			}
-		}
-	}
-
-	if (abs(m) != 0) {
-		auto minY = std::min(p1.y, p2.y);
-		auto maxY = std::max(p1.y, p2.y);
-
-		for (int iy = minY; iy < maxY; iy++) {
-			auto x = (iy - b) / m;
-			// printf("v: [%.2f, %.2f]:[%.2f, %.2f] --------dx: %f m: %f, b: %.2f, (%.2f, %d)\n", p1.x, p1.y, p2.x, p2.y, dx, m, b, x, iy);
-			if (x > 0 && x < this->width && (*this->obstacleHash)[iy][(int)x]) {
-				// printf("returning true\n");
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
+bool Planner::lineIntersectsObstacle(Coord &p1, Coord &p2) { return lineIntersectsObstacles(p1, p2, this->obstacleHash, this->width, this->height); }
 
 void Planner::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
@@ -121,7 +68,7 @@ void Planner::moveStart(double dx, double dy) {
 void Planner::refreshBestPath() {
 	if (this->endNode->parent) {
 		this->bestPath.clear();
-		auto currentNode = this->endNode;
+		auto currentNode = static_pointer_cast<Node>(this->endNode);
 		while (currentNode) {
 			this->bestPath.push_front(currentNode->coord);
 			currentNode = currentNode->parent;
@@ -180,7 +127,7 @@ Coord Planner::randomOpenAreaPoint() {
 	}
 }
 
-double Planner::getCost(shared_ptr<Node> start, shared_ptr<Node> end) {
+double Planner::getCost(shared_ptr<RrtNode> start, shared_ptr<RrtNode> end) {
 	/*if (start->coord == NULL) {
 	    printf("coord is null\n");
 	}*/

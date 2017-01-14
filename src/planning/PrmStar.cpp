@@ -19,15 +19,15 @@ PrmStar::PrmStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *o
 
 PrmStar::~PrmStar() {}
 
-void PrmStar::sampleRandom(vector<shared_ptr<Node>> &allNodes) {
+void PrmStar::sampleRandom(vector<shared_ptr<RrtNode>> &allNodes) {
 	for (auto j = 0; j < 0.02 * this->width * this->height; j++) {
-		auto node = make_shared<Node>(this->randomOpenAreaPoint(), shared_ptr<Node>(nullptr), -1.0);
+		auto node = make_shared<RrtNode>(this->randomOpenAreaPoint(), shared_ptr<RrtNode>(nullptr), -1.0);
 		allNodes.push_back(node);
 		this->rtree.insert(RtreeValue(node->coord.getBoostPoint(), node));
 	}
 }
 
-void PrmStar::sampleGrid(vector<shared_ptr<Node>> &allNodes) {
+void PrmStar::sampleGrid(vector<shared_ptr<RrtNode>> &allNodes) {
 	auto ratio = this->width / (double)this->height;
 	this->dx = width / 100;
 	this->dy = height / (100 * ratio);
@@ -35,7 +35,7 @@ void PrmStar::sampleGrid(vector<shared_ptr<Node>> &allNodes) {
 	for (int i = this->dx / 2; i < width; i += this->dx) {
 		for (int j = this->dy / 2; j < height; j += this->dy) {
 			if (!(*this->obstacleHash)[j][i]) {
-				auto node = make_shared<Node>(Coord(i, j), shared_ptr<Node>(nullptr), -1.0);
+				auto node = make_shared<RrtNode>(Coord(i, j), shared_ptr<RrtNode>(nullptr), -1.0);
 				allNodes.push_back(node);
 				this->rtree.insert(RtreeValue(node->coord.getBoostPoint(), node));
 			}
@@ -44,7 +44,7 @@ void PrmStar::sampleGrid(vector<shared_ptr<Node>> &allNodes) {
 }
 
 void PrmStar::buildBaseVisibilityGraph() {
-	vector<shared_ptr<Node>> allNodes;
+	vector<shared_ptr<RrtNode>> allNodes;
 	if (this->graphType == GraphType::Random) {
 		this->sampleRandom(allNodes);
 	} else {
