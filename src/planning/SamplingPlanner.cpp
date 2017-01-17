@@ -59,7 +59,7 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 		Coord point(clamp(this->root->coord.x + dx, 0, this->width - 1), clamp(this->root->coord.y + dy, 0, this->height - 1));
 
 		// printf("clamped point %.2f, %.2f\n", point.x, point.y);
-		if (!this->obstacleHash->at((int)point.y).at((int)point.x)) {
+		if (!this->obstacleHash->at((int)point.y).at((int)point.x) || true) {
 			auto newRoot = make_shared<RrtNode>(point, nullptr, 0.0);
 			newRoot->status = Status::Closed;
 			this->rtree.insert(RtreeValue(newRoot->coord.getBoostPoint(), newRoot));
@@ -80,14 +80,19 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 				}
 			}
 
+			int numRemoved = 0;
+
 			for (auto neighbor_tuple : neighbor_tuples) {
 				auto neighbor = neighbor_tuple.second;
 				if (neighbor != newRoot && neighbor->status == Status::Closed && !this->lineIntersectsObstacle(newRoot->coord, neighbor->coord)) {
 					// auto cost = this->getCost(newRoot, neighbor);
 					// neighbor->rewire(newRoot, cost);
-					if (neighbor->children.size() == 0) {
+					if (neighbor->children.size() == 0 && euclideanDistance(newRoot->coord, neighbor->coord) < 5) {
 						neighbor->parent->removeChild(neighbor);
 						this->rtree.remove(RtreeValue(neighbor->coord.getBoostPoint(), neighbor));
+						if (++numRemoved > 0) {
+							return;
+						}
 					}
 				}
 			}

@@ -14,29 +14,37 @@
 using namespace std;
 
 const double OBSTACLE_PADDING = 5;
+const double VIEW_RADIUS = 100;
 
 void drawWaldos(vector<unique_ptr<Waldo>>& waldos) {
 	for (const auto& waldo : waldos) {
 		if (waldo->replanMtx.try_lock()) {
 			// drawPath(waldo->currentPath, HSL(200, 1.0, 0.3), HSL(200, 1.0, 0.5));
-			drawPoint(waldo->coord(), 15, HSL(200, 1.0, 0.5));
+			if (waldo->distanceToUav < VIEW_RADIUS) {
+				drawHollowCircle(waldo->coord(), 7, HSL(0, 1.0, 1.0));
+			}
+			drawPoint(waldo->coord(), 7, HSL(100 + 100 * waldo->importance, 1.0, 0.3));
 			waldo->replanMtx.unlock();
 		}
 	}
 }
 
 void display(const shared_ptr<RrtNode> root, const shared_ptr<RrtNode>& endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects,
-             vector<unique_ptr<Waldo>>& waldos) {
-	drawObstacles(obstacleRects, OBSTACLE_PADDING, HSL(275, 1.0, 0.5));
-	// drawTree(root);
-	// drawGraph(root, visibilityGraph);
-	drawWaldos(waldos);
+             vector<unique_ptr<Waldo>>& waldos, bool shouldDrawTree) {
+	drawPoint(root->coord, 10, HSL(25, 1.0, 0.5));
+	drawSolidCircle(root->coord, VIEW_RADIUS, HSL(25, 1.0, 0.5), 0.2);
+	drawHollowCircle(root->coord, VIEW_RADIUS, HSL(25, 1.0, 0.5));
+
+	drawPoint(endNode->coord, 10, HSL(50, 1.0, 0.5));
 
 	drawPath(bestPath, HSL(100, 1.0, 0.3), HSL(150, 1.0, 0.5));
 
-	// printf("%.2f, %.2f\n", root->coord.x, root->coord.y);
-	drawPoint(root->coord, 20, HSL(25, 1.0, 0.5));
-	drawPoint(endNode->coord, 20, HSL(50, 1.0, 0.5));
+	drawWaldos(waldos);
+
+	drawObstacles(obstacleRects, OBSTACLE_PADDING, HSL(275, 1.0, 0.5));
+	if (shouldDrawTree) {
+		drawTree(root, HSL(325, 1.0, 0.2));
+	}
 }
 
 int main(int argc, char* argv[]) {
@@ -50,6 +58,7 @@ int main(int argc, char* argv[]) {
 	bool usePseudoRandom = false;
 	double replanFrequency = -1;
 	int numWaldos = 0;
+	bool shouldDrawTree = false;
 
 	// clang-format off
 	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
@@ -59,7 +68,8 @@ int main(int argc, char* argv[]) {
 		("fmt", "Use FMT*", cxxopts::value(useFmt))
 		("p,pr", "Use pseudo-random numbers", cxxopts::value(usePseudoRandom))
 		("r,replan", "Replan frequency", cxxopts::value(replanFrequency))
-		("w,waldos", "number of Waldos", cxxopts::value(numWaldos));
+		("w,waldos", "number of Waldos", cxxopts::value(numWaldos))
+		("t,tree", "draw tree", cxxopts::value(shouldDrawTree));
 	// clang-format on
 
 	options.parse(argc, argv);
@@ -87,27 +97,67 @@ int main(int argc, char* argv[]) {
 		waldos.push_back(make_unique<Waldo>(&obstacleHash, &obstacleRects, width, height));
 	}
 
-	auto displayCallback = [&planner, &waldos]() { display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos); };
+	auto displayCallback = [&planner, &waldos, shouldDrawTree]() {
+		display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos, shouldDrawTree);
+	};
 
 	auto lastReplan = glfwGetTime();
 	auto lastMove = glfwGetTime();
 	auto replanInterval = 1.0 / replanFrequency;
 	auto moveInterval = 1.0 / 30.0;
 
-	auto remainderCallback = [&planner, &waldos, &replanInterval, &moveInterval, &lastReplan, &lastMove]() {
+	auto remainderCallback = [&planner, &waldos, &replanInterval, &moveInterval, &lastReplan, &lastMove, width, height]() {
 		auto currentTime = glfwGetTime();
 		if (currentTime - lastMove >= moveInterval) {
 			lastMove = currentTime;
 
+			vector<vector<int>> waldoVotes(height / 10, vector<int>(width / 10, 0));
+
 			for (const auto& waldo : waldos) {
 				waldo->followPath();
+				waldo->distanceToUav = euclideanDistance(planner->root->coord, waldo->coord());
+
+				if (waldo->distanceToUav < VIEW_RADIUS) {
+					for (int dx = -VIEW_RADIUS; dx < VIEW_RADIUS; dx += 10) {
+						for (int dy = -VIEW_RADIUS; dy < VIEW_RADIUS; dy += 10) {
+							int x = waldo->coord().x + dx;
+							int y = waldo->coord().y + dy;
+							double dist = sqrt(dx * dx + dy * dy);
+							if (x > 0 && x < width && y > 0 && y < height) {
+								waldoVotes[y / 10][x / 10] += waldo->importance * (VIEW_RADIUS - dist);
+							}
+						}
+					}
+				}
 			}
+
+			/*auto loc = max_element(waldoVotes.begin(), waldoVotes.end()) - waldoVotes.begin();
+			printf("%lu\n", loc);
+			auto end = Coord((loc % width) * 10, (loc / height) * 10);
+			*/
+			auto bestScore = 0;
+			auto bestEnd = Coord(0, 0);
+			for (int y = 0; y < height / 10; y++) {
+				for (int x = 0; x < width / 10; x++) {
+					if (waldoVotes[y][x] > bestScore) {
+						bestEnd.x = x * 10;
+						bestEnd.y = y * 10;
+
+						bestScore = waldoVotes[y][x];
+					}
+					// printf("%d ", waldoVotes[y][x]);
+				}
+				// printf("\n");
+			}
+
+			planner->replan(bestEnd);
 
 			planner->followPath();
 		} else if (replanInterval != -1 && currentTime - lastReplan >= replanInterval) {
 			lastReplan = currentTime;
 			planner->randomReplan();
 		} else {
+			// printf("sampling\n");
 			planner->sample();
 		}
 	};
