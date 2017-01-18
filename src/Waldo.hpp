@@ -14,7 +14,8 @@ class Waldo {
 	double maxTravel = 1;
 	std::thread replanThread;
 
-	const unsigned int NUM_IMPORTANCE_LEVELS = 3;
+	// const unsigned int NUM_IMPORTANCE_LEVELS = 3;
+	const std::vector<int> IMPORTANCE_PORTIONS = {90, 5, 5};
 
 	std::deque<Coord> tryReplan() {
 		std::shared_ptr<Coord> start = nullptr;
@@ -58,7 +59,7 @@ class Waldo {
    public:
 	std::mutex replanMtx;
 	std::deque<Coord> currentPath;
-	unsigned int importance;
+	unsigned int importance = 0;
 	double distanceToUav = 0.0;
 
 	Waldo(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height) {
@@ -67,7 +68,16 @@ class Waldo {
 		this->width = width;
 		this->height = height;
 
-		this->importance = rand() % NUM_IMPORTANCE_LEVELS;
+		auto totalImportance = std::accumulate(IMPORTANCE_PORTIONS.begin(), IMPORTANCE_PORTIONS.end(), 0);
+		// printf("%d\n", totalImportance);
+		int preImportance = rand() % totalImportance;
+		for (unsigned int i = 0; i < IMPORTANCE_PORTIONS.size(); i++) {
+			preImportance -= IMPORTANCE_PORTIONS[i];
+			if (preImportance < 0) {
+				this->importance = i;
+				break;
+			}
+		}
 
 		this->replan();
 	}

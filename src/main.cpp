@@ -20,7 +20,7 @@ void drawWaldos(vector<unique_ptr<Waldo>>& waldos) {
 	for (const auto& waldo : waldos) {
 		if (waldo->replanMtx.try_lock()) {
 			// drawPath(waldo->currentPath, HSL(200, 1.0, 0.3), HSL(200, 1.0, 0.5));
-			if (waldo->distanceToUav < VIEW_RADIUS) {
+			if (waldo->importance > 0 && waldo->distanceToUav < VIEW_RADIUS) {
 				drawHollowCircle(waldo->coord(), 7, HSL(0, 1.0, 1.0));
 			}
 			drawPoint(waldo->coord(), 7, HSL(100 + 100 * waldo->importance, 1.0, 0.3));
@@ -31,7 +31,7 @@ void drawWaldos(vector<unique_ptr<Waldo>>& waldos) {
 
 void display(const shared_ptr<RrtNode> root, const shared_ptr<RrtNode>& endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects,
              vector<unique_ptr<Waldo>>& waldos, bool shouldDrawTree) {
-	drawPoint(root->coord, 10, HSL(25, 1.0, 0.5));
+	// drawPoint(root->coord, 10, HSL(25, 1.0, 0.5));
 	drawSolidCircle(root->coord, VIEW_RADIUS, HSL(25, 1.0, 0.5), 0.2);
 	drawHollowCircle(root->coord, VIEW_RADIUS, HSL(25, 1.0, 0.5));
 
@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
 	auto replanInterval = 1.0 / replanFrequency;
 	auto moveInterval = 1.0 / 30.0;
 
-	auto remainderCallback = [&planner, &waldos, &replanInterval, &moveInterval, &lastReplan, &lastMove, width, height]() {
+	auto remainderCallback = [&obstacleHash, &planner, &waldos, &replanInterval, &moveInterval, &lastReplan, &lastMove, width, height]() {
 		auto currentTime = glfwGetTime();
 		if (currentTime - lastMove >= moveInterval) {
 			lastMove = currentTime;
@@ -117,14 +117,15 @@ int main(int argc, char* argv[]) {
 				waldo->followPath();
 				waldo->distanceToUav = euclideanDistance(planner->root->coord, waldo->coord());
 
-				if (waldo->distanceToUav < VIEW_RADIUS) {
+				if (waldo->importance > 0 && waldo->distanceToUav < VIEW_RADIUS &&
+				    !lineIntersectsObstacles(waldo->coord(), planner->root->coord, &obstacleHash, width, height)) {
 					for (int dx = -VIEW_RADIUS; dx < VIEW_RADIUS; dx += 10) {
 						for (int dy = -VIEW_RADIUS; dy < VIEW_RADIUS; dy += 10) {
 							int x = waldo->coord().x + dx;
 							int y = waldo->coord().y + dy;
 							double dist = sqrt(dx * dx + dy * dy);
 							if (x > 0 && x < width && y > 0 && y < height) {
-								waldoVotes[y / 10][x / 10] += waldo->importance * (VIEW_RADIUS - dist);
+								waldoVotes[y / 10][x / 10] += std::max(0.0, (10 + waldo->importance) * (VIEW_RADIUS - dist));
 							}
 						}
 					}
