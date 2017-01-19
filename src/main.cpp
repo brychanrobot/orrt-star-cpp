@@ -58,6 +58,7 @@ int main(int argc, char* argv[]) {
 	bool usePseudoRandom = false;
 	double replanFrequency = -1;
 	int numWaldos = 0;
+	int waldoHistorySize = 20;
 	bool shouldDrawTree = false;
 
 	// clang-format off
@@ -83,6 +84,12 @@ int main(int argc, char* argv[]) {
 	generateObstacleHash(obstacleRects, obstacleHash);
 
 	vector<unique_ptr<Waldo>> waldos;
+	vector<vector<vector<double>>> waldoVelocities(numWaldos, vector<vector<double>>(waldoHistorySize, vector<double>(2, 0.0)));
+	int waldoHistoryPos = 0;
+
+	for (int w = 0; w < numWaldos; w++) {
+		waldos.push_back(make_unique<Waldo>(&obstacleHash, &obstacleRects, width, height));
+	}
 
 	SamplingPlanner* planner;
 	if (useFmt) {
@@ -93,10 +100,6 @@ int main(int argc, char* argv[]) {
 	// AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
 
-	for (int w = 0; w < numWaldos; w++) {
-		waldos.push_back(make_unique<Waldo>(&obstacleHash, &obstacleRects, width, height));
-	}
-
 	auto displayCallback = [&planner, &waldos, shouldDrawTree]() {
 		display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos, shouldDrawTree);
 	};
@@ -106,7 +109,8 @@ int main(int argc, char* argv[]) {
 	auto replanInterval = 1.0 / replanFrequency;
 	auto moveInterval = 1.0 / 30.0;
 
-	auto remainderCallback = [&obstacleHash, &planner, &waldos, &replanInterval, &moveInterval, &lastReplan, &lastMove, width, height]() {
+	auto remainderCallback = [&obstacleHash, &planner, &waldos, &replanInterval, &moveInterval, &lastReplan, &lastMove, width, height,
+	                          &waldoHistoryPos, waldoHistorySize]() {
 		auto currentTime = glfwGetTime();
 		if (currentTime - lastMove >= moveInterval) {
 			lastMove = currentTime;
@@ -114,7 +118,10 @@ int main(int argc, char* argv[]) {
 			vector<vector<int>> waldoVotes(height / 10, vector<int>(width / 10, 0));
 
 			for (const auto& waldo : waldos) {
+				// auto lastCoord = waldo->coord();
 				waldo->followPath();
+				// auto currentCoord = waldo->coord();
+
 				waldo->distanceToUav = euclideanDistance(planner->root->coord, waldo->coord());
 
 				if (waldo->importance > 0 && waldo->distanceToUav < VIEW_RADIUS &&
@@ -131,6 +138,8 @@ int main(int argc, char* argv[]) {
 					}
 				}
 			}
+
+			waldoHistoryPos = (waldoHistoryPos + 1) % waldoHistorySize;
 
 			/*auto loc = max_element(waldoVotes.begin(), waldoVotes.end()) - waldoVotes.begin();
 			printf("%lu\n", loc);
