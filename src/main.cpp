@@ -23,7 +23,16 @@ void drawWaldos(vector<unique_ptr<Waldo>>& waldos) {
 			if (waldo->importance > 0 && waldo->distanceToUav < VIEW_RADIUS) {
 				drawHollowCircle(waldo->coord(), 7, HSL(0, 1.0, 1.0));
 			}
-			drawPoint(waldo->coord(), 7, HSL(100 + 100 * waldo->importance, 1.0, 0.3));
+
+			/*
+			if (waldo->importance > 0) {
+			    auto future = waldo->predictFutureFromVelocity(60);
+			    drawPoint(future, 4, HSL(25, 1.0, 0.5));
+			    drawLine(waldo->coord(), future, 1, HSL(5, 1.0, 0.5));
+			}
+			*/
+
+			drawSolidCircle(waldo->coord(), 7, HSL(100 + 100 * waldo->importance, 1.0, 0.3));
 			waldo->replanMtx.unlock();
 		}
 	}
@@ -35,13 +44,13 @@ void display(const shared_ptr<RrtNode> root, const shared_ptr<RrtNode>& endNode,
 	drawSolidCircle(root->coord, VIEW_RADIUS, HSL(25, 1.0, 0.5), 0.2);
 	drawHollowCircle(root->coord, VIEW_RADIUS, HSL(25, 1.0, 0.5));
 
-	drawPoint(endNode->coord, 10, HSL(50, 1.0, 0.5));
+	drawPoint(endNode->coord, 4, HSL(50, 1.0, 0.5));
 
 	drawPath(bestPath, HSL(100, 1.0, 0.3), HSL(150, 1.0, 0.5));
 
 	drawWaldos(waldos);
 
-	drawObstacles(obstacleRects, OBSTACLE_PADDING, HSL(275, 1.0, 0.5));
+	drawObstacles(obstacleRects, OBSTACLE_PADDING, HSL(0, 0.01, 0.4));
 	if (shouldDrawTree) {
 		drawTree(root, HSL(325, 1.0, 0.2));
 	}
@@ -60,6 +69,7 @@ int main(int argc, char* argv[]) {
 	int numWaldos = 0;
 	int waldoHistorySize = 20;
 	bool shouldDrawTree = false;
+	int voteCellSize = 2;
 
 	// clang-format off
 	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
@@ -84,11 +94,9 @@ int main(int argc, char* argv[]) {
 	generateObstacleHash(obstacleRects, obstacleHash);
 
 	vector<unique_ptr<Waldo>> waldos;
-	vector<vector<vector<double>>> waldoVelocities(numWaldos, vector<vector<double>>(waldoHistorySize, vector<double>(2, 0.0)));
-	int waldoHistoryPos = 0;
 
 	for (int w = 0; w < numWaldos; w++) {
-		waldos.push_back(make_unique<Waldo>(&obstacleHash, &obstacleRects, width, height));
+		waldos.push_back(make_unique<Waldo>(&obstacleHash, &obstacleRects, width, height, waldoHistorySize));
 	}
 
 	SamplingPlanner* planner;
@@ -110,36 +118,40 @@ int main(int argc, char* argv[]) {
 	auto moveInterval = 1.0 / 30.0;
 
 	auto remainderCallback = [&obstacleHash, &planner, &waldos, &replanInterval, &moveInterval, &lastReplan, &lastMove, width, height,
-	                          &waldoHistoryPos, waldoHistorySize]() {
+	                          voteCellSize]() {
 		auto currentTime = glfwGetTime();
 		if (currentTime - lastMove >= moveInterval) {
 			lastMove = currentTime;
 
-			vector<vector<int>> waldoVotes(height / 10, vector<int>(width / 10, 0));
+			vector<vector<int>> waldoVotes(height / voteCellSize, vector<int>(width / voteCellSize, 0));
 
 			for (const auto& waldo : waldos) {
-				// auto lastCoord = waldo->coord();
 				waldo->followPath();
-				// auto currentCoord = waldo->coord();
 
 				waldo->distanceToUav = euclideanDistance(planner->root->coord, waldo->coord());
 
-				if (waldo->importance > 0 && waldo->distanceToUav < VIEW_RADIUS &&
-				    !lineIntersectsObstacles(waldo->coord(), planner->root->coord, &obstacleHash, width, height)) {
-					for (int dx = -VIEW_RADIUS; dx < VIEW_RADIUS; dx += 10) {
-						for (int dy = -VIEW_RADIUS; dy < VIEW_RADIUS; dy += 10) {
-							int x = waldo->coord().x + dx;
-							int y = waldo->coord().y + dy;
-							double dist = sqrt(dx * dx + dy * dy);
-							if (x > 0 && x < width && y > 0 && y < height) {
-								waldoVotes[y / 10][x / 10] += std::max(0.0, (10 + waldo->importance) * (VIEW_RADIUS - dist));
+				if (waldo->importance > 0 && waldo->distanceToUav < VIEW_RADIUS) {
+					if (!lineIntersectsObstacles(waldo->coord(), planner->root->coord, &obstacleHash, width, height)) {
+						vector<Coord> predictedCoords{
+						    // waldo->predictFutureFromRandWalk(60),
+						    waldo->predictFutureFromVelocity(60), waldo->coord(),
+						};
+						for (const auto& coord : predictedCoords) {
+							for (int dx = -VIEW_RADIUS; dx < VIEW_RADIUS; dx += voteCellSize) {
+								for (int dy = -VIEW_RADIUS; dy < VIEW_RADIUS; dy += voteCellSize) {
+									int x = coord.x + dx;
+									int y = coord.y + dy;
+									double dist = sqrt(dx * dx + dy * dy);
+									if (x > 0 && x < width && y > 0 && y < height) {
+										waldoVotes[y / voteCellSize][x / voteCellSize] +=
+										    std::max(0.0, (10 + waldo->importance) * (VIEW_RADIUS - dist));
+									}
+								}
 							}
 						}
 					}
 				}
 			}
-
-			waldoHistoryPos = (waldoHistoryPos + 1) % waldoHistorySize;
 
 			/*auto loc = max_element(waldoVotes.begin(), waldoVotes.end()) - waldoVotes.begin();
 			printf("%lu\n", loc);
@@ -147,11 +159,11 @@ int main(int argc, char* argv[]) {
 			*/
 			auto bestScore = 0;
 			auto bestEnd = Coord(0, 0);
-			for (int y = 0; y < height / 10; y++) {
-				for (int x = 0; x < width / 10; x++) {
+			for (int y = 0; y < height / voteCellSize; y++) {
+				for (int x = 0; x < width / voteCellSize; x++) {
 					if (waldoVotes[y][x] > bestScore) {
-						bestEnd.x = x * 10;
-						bestEnd.y = y * 10;
+						bestEnd.x = x * voteCellSize;
+						bestEnd.y = y * voteCellSize;
 
 						bestScore = waldoVotes[y][x];
 					}

@@ -22,7 +22,7 @@ class Planner {
 	int height;
 	int mapArea;
 	std::vector<std::vector<bool>> *obstacleHash;
-	double maxTravel = 2;
+	double maxTravel = 1.5;
 
 	HaltonSampler haltonX;
 	HaltonSampler haltonY;

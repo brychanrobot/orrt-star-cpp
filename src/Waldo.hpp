@@ -13,9 +13,12 @@ class Waldo {
 	std::vector<std::shared_ptr<Rect>> *obstacleRects;
 	double maxTravel = 1;
 	std::thread replanThread;
+	int velocityHistorySize = 0;
+	std::vector<std::vector<double>> velocityHistory;
+	int velocityHistoryIndex = 0;
 
 	// const unsigned int NUM_IMPORTANCE_LEVELS = 3;
-	const std::vector<int> IMPORTANCE_PORTIONS = {90, 5, 5};
+	const std::vector<int> IMPORTANCE_PORTIONS = {0, 5, 5};
 
 	std::deque<Coord> tryReplan() {
 		std::shared_ptr<Coord> start = nullptr;
@@ -62,11 +65,16 @@ class Waldo {
 	unsigned int importance = 0;
 	double distanceToUav = 0.0;
 
-	Waldo(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height) {
+	Waldo(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height,
+	      int velocityHistorySize) {
 		this->obstacleHash = obstacleHash;
 		this->obstacleRects = obstacleRects;
 		this->width = width;
 		this->height = height;
+		this->velocityHistorySize = velocityHistorySize;
+
+		this->velocityHistory = std::vector<std::vector<double>>{std::vector<double>(this->velocityHistorySize, 0.0),
+		                                                         std::vector<double>(this->velocityHistorySize, 0.0)};
 
 		auto totalImportance = std::accumulate(IMPORTANCE_PORTIONS.begin(), IMPORTANCE_PORTIONS.end(), 0);
 		// printf("%d\n", totalImportance);
@@ -89,13 +97,52 @@ class Waldo {
 		}
 
 		if (euclideanDistance(this->currentPath[0], this->currentPath[1]) <= this->maxTravel) {
+			this->velocityHistory[0][velocityHistoryIndex] = this->currentPath[1].x - this->currentPath[0].x;
+			this->velocityHistory[1][velocityHistoryIndex] = this->currentPath[1].y - this->currentPath[0].y;
+
 			this->currentPath.pop_front();
 		} else {
 			auto angle = angleBetweenCoords(this->currentPath[0], this->currentPath[1]);
-			auto dx = this->maxTravel * cos(angle);
-			auto dy = this->maxTravel * sin(angle);
+			auto travel = this->maxTravel * randDouble(0.6, 1.0);
+			auto dx = travel * cos(angle);
+			auto dy = travel * sin(angle);
 			this->currentPath[0].change(this->currentPath[0].x + dx, this->currentPath[0].y + dy);
+
+			this->velocityHistory[0][velocityHistoryIndex] = dx;
+			this->velocityHistory[1][velocityHistoryIndex] = dy;
 		}
+
+		this->velocityHistoryIndex = (this->velocityHistoryIndex + 1) % this->velocityHistorySize;
+	}
+
+	Coord predictFutureFromVelocity(int numTimesteps) {
+		auto dx = std::accumulate(this->velocityHistory[0].begin(), this->velocityHistory[0].end(), 0.0) / this->velocityHistorySize;
+		auto dy = std::accumulate(this->velocityHistory[1].begin(), this->velocityHistory[1].end(), 0.0) / this->velocityHistorySize;
+
+		return Coord(this->coord().x + dx * numTimesteps, this->coord().y + dy * numTimesteps);
+	}
+
+	Coord predictFutureFromRandWalk(int numTimesteps) {
+		auto x = this->coord().x;
+		auto y = this->coord().y;
+
+		for (int t = 0; t < numTimesteps; t++) {
+			auto dx = randDouble(-0.5 * this->maxTravel, 0.5 * this->maxTravel);
+			auto dy = randDouble(-0.5 * this->maxTravel, 0.5 * this->maxTravel);
+			// printf("%.4f, %.4f\n", dx, dy);
+
+			int potX = x + dx;
+			int potY = y + dy;
+
+			/*if (!(*this->obstacleHash)[potY][potX]) {
+			    x = potX;
+			    y = potY;
+			}*/
+			x = potX;
+			y = potY;
+		}
+
+		return Coord(x, y);
 	}
 
 	Coord coord() { return this->currentPath.front(); }
