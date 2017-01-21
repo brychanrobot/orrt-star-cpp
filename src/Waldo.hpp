@@ -1,5 +1,6 @@
 #pragma once
 
+#include <numeric>
 #include <thread>
 #include <mutex>
 #include "planning/OnlineRrtStar.hpp"
