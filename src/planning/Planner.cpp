@@ -127,16 +127,7 @@ Coord Planner::randomOpenAreaPoint() {
 	}
 }
 
-double Planner::getCost(shared_ptr<RrtNode> start, shared_ptr<RrtNode> end) {
-	/*if (start->coord == NULL) {
-	    printf("coord is null\n");
-	}*/
-	/*printf("startx: %.2f\n", start->coord.x);
-	printf("starty: %.2f\n", start->coord.y);
-	printf("endx: %.2f\n", end->coord.x);
-	printf("endy: %.2f\n", end->coord.y);*/
-	return this->getCost(start->coord, end->coord);
-}
+double Planner::getCost(shared_ptr<RrtNode> start, shared_ptr<RrtNode> end) { return this->getCost(start->coord, end->coord); }
 double Planner::getCost(Coord &start, Coord &end) { return euclideanDistance(start, end); }
 
 void Planner::getNeighbors(Coord center, double radius, vector<RtreeValue> &results) {

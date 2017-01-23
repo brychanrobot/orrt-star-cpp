@@ -128,19 +128,19 @@ class Waldo {
 		auto y = this->coord().y;
 
 		for (int t = 0; t < numTimesteps; t++) {
-			auto dx = randDouble(-0.5 * this->maxTravel, 0.5 * this->maxTravel);
-			auto dy = randDouble(-0.5 * this->maxTravel, 0.5 * this->maxTravel);
-			// printf("%.4f, %.4f\n", dx, dy);
+			auto center = Coord(0, 0);
+			auto vectorEnd = Coord(this->velocityHistory[0][this->velocityHistoryIndex], this->velocityHistory[1][this->velocityHistoryIndex]);
+			auto heading = angleBetweenCoords(center, vectorEnd);
 
-			int potX = x + dx;
-			int potY = y + dy;
+			auto angle = randDouble(heading - 1, heading + 1);
 
-			/*if (!(*this->obstacleHash)[potY][potX]) {
-			    x = potX;
-			    y = potY;
-			}*/
-			x = potX;
-			y = potY;
+			auto potX = x + this->maxTravel * cos(angle);
+			auto potY = y + this->maxTravel * sin(angle);
+
+			if (!(*this->obstacleHash)[potY][potX]) {
+				x = potX;
+				y = potY;
+			}
 		}
 
 		return Coord(x, y);
