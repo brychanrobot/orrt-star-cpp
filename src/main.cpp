@@ -64,12 +64,14 @@ int main(int argc, char* argv[]) {
 	bool isFullscreen = false;
 	int monitorNum = 0;
 	bool useFmt = false;
-	bool usePseudoRandom = false;
+	bool useHalton = false;
 	double replanFrequency = -1;
 	int numWaldos = 0;
 	int waldoHistorySize = 20;
 	bool shouldDrawTree = false;
 	int voteCellSize = 2;
+	int trialLength = -1;
+	int numObstacles = 10;
 
 	// clang-format off
 	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
@@ -77,10 +79,12 @@ int main(int argc, char* argv[]) {
 		("f,fullscreen", "Enable Fullscreen", cxxopts::value(isFullscreen))
 		("m,monitor", "Set Monitor Number", cxxopts::value(monitorNum))
 		("fmt", "Use FMT*", cxxopts::value(useFmt))
-		("p,pr", "Use pseudo-random numbers", cxxopts::value(usePseudoRandom))
+		("h,halton", "Use a halton sequence for random numbers", cxxopts::value(useHalton))
 		("r,replan", "Replan frequency", cxxopts::value(replanFrequency))
 		("w,waldos", "number of Waldos", cxxopts::value(numWaldos))
-		("t,tree", "draw tree", cxxopts::value(shouldDrawTree));
+		("t,tree", "draw tree", cxxopts::value(shouldDrawTree))
+		("l,length", "trial length", cxxopts::value(trialLength))
+		("o,obstacles", "number of obstacles", cxxopts::value(numObstacles));
 	// clang-format on
 
 	options.parse(argc, argv);
@@ -88,7 +92,7 @@ int main(int argc, char* argv[]) {
 	auto window = initWindow(isFullscreen, monitorNum, width, height);
 
 	vector<shared_ptr<Rect>> obstacleRects;
-	generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
+	generateObstacleRects(width, height, numObstacles, obstacleRects, OBSTACLE_PADDING);
 
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
 	generateObstacleHash(obstacleRects, obstacleHash);
@@ -101,9 +105,9 @@ int main(int argc, char* argv[]) {
 
 	SamplingPlanner* planner;
 	if (useFmt) {
-		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, nullptr);
+		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, !useHalton, nullptr);
 	} else {
-		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, usePseudoRandom, nullptr);
+		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, !useHalton, nullptr);
 	}
 	// AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
@@ -112,16 +116,24 @@ int main(int argc, char* argv[]) {
 		display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos, shouldDrawTree);
 	};
 
+	auto startTime = glfwGetTime();
 	auto lastReplan = glfwGetTime();
 	auto lastMove = glfwGetTime();
 	auto replanInterval = 1.0 / replanFrequency;
 	auto moveInterval = 1.0 / 30.0;
+	auto score = 0.0;
 
-	auto remainderCallback = [&obstacleHash, &planner, &waldos, &replanInterval, &moveInterval, &lastReplan, &lastMove, width, height,
-	                          voteCellSize]() {
+	auto remainderCallback = [&obstacleHash, &planner, &waldos, &replanInterval, &moveInterval, &trialLength, &startTime, &lastReplan, &lastMove,
+	                          width, height, voteCellSize, &score, window]() {
 		auto currentTime = glfwGetTime();
-		if (currentTime - lastMove >= moveInterval) {
+
+		if (trialLength != -1 && currentTime - startTime >= trialLength) {
+			printf("%.2f\n", score);
+			close(window);
+		} else if (currentTime - lastMove >= moveInterval) {
 			lastMove = currentTime;
+			// printf("%.2f\r", score);
+			fflush(stdout);
 
 			vector<vector<int>> waldoVotes(height / voteCellSize, vector<int>(width / voteCellSize, 0));
 
@@ -132,6 +144,7 @@ int main(int argc, char* argv[]) {
 
 				if (waldo->importance > 0 && waldo->distanceToUav < VIEW_RADIUS) {
 					if (!lineIntersectsObstacles(waldo->coord(), planner->root->coord, &obstacleHash, width, height)) {
+						score += waldo->importance;
 						vector<Coord> predictedCoords{
 						    // waldo->predictFutureFromRandWalk(60),
 						    waldo->predictFutureFromVelocity(60), waldo->coord(),
@@ -172,7 +185,11 @@ int main(int argc, char* argv[]) {
 				// printf("\n");
 			}
 
-			planner->replan(bestEnd);
+			if (bestEnd.x == 0.0 && bestEnd.y == 0.0) {
+				planner->randomReplan();
+			} else {
+				planner->replan(bestEnd);
+			}
 
 			planner->followPath();
 		} else if (replanInterval != -1 && currentTime - lastReplan >= replanInterval) {
