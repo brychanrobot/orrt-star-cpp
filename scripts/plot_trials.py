@@ -4,11 +4,16 @@ import matplotlib.pyplot as plt
 
 j = json.load(open('scripts/fullTrials.json', 'r'))
 
-obst = []
-ave_score = []
-for t in j[-1]['results']:
-	obst.append(t['obstacles'])
-	ave_score.append(np.mean(t['scores']))
+for scenario in j[-1:]:
+	obst = []
+	ave_score = []
+	for t in scenario['results']:
+		obst.append(t['obstacles'])
+		ave_score.append(np.mean(t['scores']))
 
-plt.plot(obst, ave_score)
+	plt.plot(obst, ave_score, label=scenario['scenario'])
+	plt.xticks(obst, map(str, obst))
+plt.xlabel('# obstacles')
+plt.ylabel('average score')
+plt.legend()
 plt.show()
