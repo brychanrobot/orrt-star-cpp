@@ -9,7 +9,7 @@ for obstacles in [5, 10, 15, 20]:
 		procs = []
 		for j in range(4):
 			time.sleep(0.1) # allow for different random number generation
-			procs.append(subprocess.Popen(['build/main', '-w', '15' , '-l', '180', '-o', str(obstacles)], stdout=subprocess.PIPE))
+			procs.append(subprocess.Popen(['build/main', '-w', '15' , '-l', '180', '-o', str(obstacles), '--fmt'], stdout=subprocess.PIPE))
 
 		for proc in procs:
 			proc.wait()
