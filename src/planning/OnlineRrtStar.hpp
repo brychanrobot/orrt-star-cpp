@@ -6,8 +6,6 @@
 
 class OnlineRrtStar : public SamplingPlanner {
    private:
-	long numNodes;
-
 	void sampleAndAdd();
 
    public:

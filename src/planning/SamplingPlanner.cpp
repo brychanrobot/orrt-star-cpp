@@ -111,6 +111,23 @@ shared_ptr<RrtNode> SamplingPlanner::getNearestNeighbor(Coord &p) {
 	return result[0].second;
 }
 
+shared_ptr<RrtNode> SamplingPlanner::getNearestNeighbor(shared_ptr<Node> n) {
+	vector<RtreeValue> result;
+	this->rtree.query(boost::geometry::index::nearest(n->coord.getBoostPoint(), 2), back_inserter(result));
+	/*if (result[0].second != n) {
+	    return result[0].second;
+	} else {
+	    return result[1].second;
+	}*/
+	// printf("%.2f, %.2f\n", euclideanDistance(n->coord, result[0].second->coord), euclideanDistance(n->coord, result[1].second->coord));
+	/*for (auto r : result) {
+	    printf("%.2f, ", euclideanDistance(n->coord, r.second->coord));
+	}
+	printf("\n");*/
+
+	return result[0].second != n ? result[0].second : result[1].second;
+}
+
 void SamplingPlanner::findBestNeighborWithoutCost(Coord point, shared_ptr<RrtNode> &bestNeighbor, vector<shared_ptr<RrtNode>> &neighbors) {
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
@@ -149,4 +166,19 @@ void SamplingPlanner::findBestNeighbor(Coord point, shared_ptr<RrtNode> &bestNei
 			bestNeighbor = neighbor;
 		}
 	}
+}
+
+double SamplingPlanner::calculateTotalEntropy() { return (1.0 / this->numNodes) * calculateParticleEntropy(this->root) + log(2) + exp(1.0); }
+
+double SamplingPlanner::calculateParticleEntropy(shared_ptr<Node> r) {
+	auto n = this->getNearestNeighbor(r);
+	auto dist = euclideanDistance(r->coord, n->coord);
+	double entropy = dist != 0.0 ? log(this->numNodes * dist) : 1.0;
+	// printf("e: %.2f, d: %.2f, t: %d\n", entropy, dist, this->nodeAddThreshold);
+
+	for (auto child : r->children) {
+		entropy += calculateParticleEntropy(child);
+	}
+
+	return entropy;
 }

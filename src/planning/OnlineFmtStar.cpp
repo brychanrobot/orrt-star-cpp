@@ -18,6 +18,7 @@ OnlineFmtStar::OnlineFmtStar(vector<vector<bool>> *obstacleHash, vector<shared_p
 		auto node = make_shared<RrtNode>(point, nullptr, numeric_limits<double>::max());
 
 		this->rtree.insert(RtreeValue(point.getBoostPoint(), node));
+		this->numNodes++;
 	}
 }
 

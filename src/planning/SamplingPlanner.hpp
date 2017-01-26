@@ -14,11 +14,14 @@ class SamplingPlanner : public Planner {
    protected:
 	int maxSegment;
 	int rewireNeighborhood;
+	long numNodes;
 
 	std::shared_ptr<RrtNode> getNearestNeighbor(Coord &point);
+	std::shared_ptr<RrtNode> getNearestNeighbor(std::shared_ptr<Node> n);
 	void findBestNeighbor(Coord point, std::shared_ptr<RrtNode> &bestNeighbor, double &bestCost, std::vector<std::shared_ptr<RrtNode>> &neighbors,
 	                      std::vector<double> &neighborCosts);
 	void findBestNeighborWithoutCost(Coord point, std::shared_ptr<RrtNode> &bestNeighbor, std::vector<std::shared_ptr<RrtNode>> &neighbors);
+	double calculateParticleEntropy(std::shared_ptr<Node> r);
 
 	virtual void sampleAndAdd() = 0;
 	void sampleWithRewire();
@@ -33,4 +36,5 @@ class SamplingPlanner : public Planner {
 	void sample();
 	void moveStart(double dx, double dy);
 	void replan(Coord &newEndpoint);
+	double calculateTotalEntropy();
 };

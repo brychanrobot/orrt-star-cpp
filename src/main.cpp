@@ -2,14 +2,14 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <set>
+#include "Waldo.hpp"
+#include "planning-utils/display.hpp"
 #include "planning-utils/libs/cxxopts.hpp"
+#include "planning-utils/utils.hpp"
 #include "planning/AStar.hpp"
 #include "planning/OnlineFmtStar.hpp"
 #include "planning/OnlineRrtStar.hpp"
 #include "planning/PrmStar.hpp"
-#include "planning-utils/display.hpp"
-#include "planning-utils/utils.hpp"
-#include "Waldo.hpp"
 
 using namespace std;
 
@@ -129,6 +129,7 @@ int main(int argc, char* argv[]) {
 
 		if (trialLength != -1 && currentTime - startTime >= trialLength) {
 			printf("%.2f\n", score);
+			printf("%.6f\n", planner->calculateTotalEntropy());
 			close(window);
 		} else if (currentTime - lastMove >= moveInterval) {
 			lastMove = currentTime;
@@ -147,7 +148,8 @@ int main(int argc, char* argv[]) {
 						score += waldo->importance;
 						vector<Coord> predictedCoords{
 						    // waldo->predictFutureFromRandWalk(60),
-						    waldo->predictFutureFromVelocity(60), waldo->coord(),
+						    waldo->predictFutureFromVelocity(60),
+						    // waldo->coord(),
 						};
 						for (const auto& coord : predictedCoords) {
 							for (int dx = -VIEW_RADIUS; dx < VIEW_RADIUS; dx += voteCellSize) {

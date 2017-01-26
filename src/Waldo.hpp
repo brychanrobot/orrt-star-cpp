@@ -1,8 +1,10 @@
 #pragma once
 
+#include <mutex>
 #include <numeric>
 #include <thread>
-#include <mutex>
+#include "planning-utils/geom/utils.hpp"
+#include "planning-utils/utils.hpp"
 #include "planning/OnlineRrtStar.hpp"
 
 class Waldo {
