@@ -14,7 +14,7 @@ class SamplingPlanner : public Planner {
    protected:
 	int maxSegment;
 	int rewireNeighborhood;
-	long numNodes;
+	double pruneRadius;
 
 	std::shared_ptr<RrtNode> getNearestNeighbor(Coord &point);
 	std::shared_ptr<RrtNode> getNearestNeighbor(std::shared_ptr<Node> n);
@@ -28,9 +28,10 @@ class SamplingPlanner : public Planner {
 
    public:
 	int nodeAddThreshold;
+	long numNodes = 0;
 
 	SamplingPlanner(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
-	                int height, bool usePseudoRandom, std::shared_ptr<Coord> start, double percentCoverage);
+	                int height, bool usePseudoRandom, std::shared_ptr<Coord> start, double pruneRadius, double percentCoverage);
 	// virtual void sample() = 0;
 	virtual bool isDoneBuilding() = 0;
 	void sample();

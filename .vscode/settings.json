@@ -2,6 +2,8 @@
 	"files.associations": {
 		"SConstruct": "python",
 		"vector": "cpp",
-		"functional": "cpp"
+		"functional": "cpp",
+		"*hppfstream": "cpp",
+		"fstream": "cpp"
 	}
 }

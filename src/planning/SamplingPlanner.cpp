@@ -12,11 +12,12 @@
 using namespace std;
 
 SamplingPlanner::SamplingPlanner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
-                                 int height, bool usePseudoRandom, shared_ptr<Coord> start, double percentCoverage)
+                                 int height, bool usePseudoRandom, shared_ptr<Coord> start, double pruneRadius, double percentCoverage)
     : Planner(obstacleHash, obstacleRects, width, height, usePseudoRandom) {
 	this->maxSegment = maxSegment;
 	this->rewireNeighborhood = maxSegment * 6;
 	this->nodeAddThreshold = percentCoverage * width * height;
+	this->pruneRadius = pruneRadius;
 
 	if (start) {
 		this->root->coord.change(start->x, start->y);
@@ -63,6 +64,7 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 			auto newRoot = make_shared<RrtNode>(point, nullptr, 0.0);
 			newRoot->status = Status::Closed;
 			this->rtree.insert(RtreeValue(newRoot->coord.getBoostPoint(), newRoot));
+			this->numNodes++;
 
 			auto rtr_cost = this->getCost(newRoot, this->root);
 
@@ -87,10 +89,11 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 				if (neighbor != newRoot && neighbor->status == Status::Closed && !this->lineIntersectsObstacle(newRoot->coord, neighbor->coord)) {
 					// auto cost = this->getCost(newRoot, neighbor);
 					// neighbor->rewire(newRoot, cost);
-					if (neighbor->children.size() == 0 && euclideanDistance(newRoot->coord, neighbor->coord) < 5) {
+					if (neighbor->children.size() == 0 && euclideanDistance(newRoot->coord, neighbor->coord) < this->pruneRadius) {
 						neighbor->parent->removeChild(neighbor);
 						this->rtree.remove(RtreeValue(neighbor->coord.getBoostPoint(), neighbor));
-						if (++numRemoved > 0) {
+						this->numNodes--;
+						if (this->numNodes <= this->nodeAddThreshold) {  //++numRemoved > 0) {
 							return;
 						}
 					}
@@ -174,7 +177,7 @@ double SamplingPlanner::calculateParticleEntropy(shared_ptr<Node> r) {
 	auto n = this->getNearestNeighbor(r);
 	auto dist = euclideanDistance(r->coord, n->coord);
 	double entropy = dist != 0.0 ? log(this->numNodes * dist) : 1.0;
-	// printf("e: %.2f, d: %.2f, t: %d\n", entropy, dist, this->nodeAddThreshold);
+	// printf("e: %.2f, d: %.2f, t: %ld\n", entropy, dist, this->numNodes);
 
 	for (auto child : r->children) {
 		entropy += calculateParticleEntropy(child);

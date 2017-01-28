@@ -1,0 +1,1097 @@
+[
+	{
+		"radius": 6,
+		"results": [
+			{
+				"entropy": 13.610178,
+				"nodes": 9801,
+				"threshold": 9800,
+				"time": 2.22
+			},
+			{
+				"entropy": 13.595008,
+				"nodes": 9814,
+				"threshold": 9800,
+				"time": 32.22
+			},
+			{
+				"entropy": 13.573565,
+				"nodes": 9812,
+				"threshold": 9800,
+				"time": 62.22
+			},
+			{
+				"entropy": 13.579147,
+				"nodes": 9819,
+				"threshold": 9800,
+				"time": 92.22
+			},
+			{
+				"entropy": 13.583502,
+				"nodes": 9854,
+				"threshold": 9800,
+				"time": 122.22
+			},
+			{
+				"entropy": 13.583226,
+				"nodes": 9847,
+				"threshold": 9800,
+				"time": 152.22
+			},
+			{
+				"entropy": 13.579687,
+				"nodes": 9829,
+				"threshold": 9800,
+				"time": 182.22
+			},
+			{
+				"entropy": 13.578590,
+				"nodes": 9846,
+				"threshold": 9800,
+				"time": 212.22
+			},
+			{
+				"entropy": 13.587076,
+				"nodes": 9859,
+				"threshold": 9800,
+				"time": 242.22
+			},
+			{
+				"entropy": 13.585190,
+				"nodes": 9851,
+				"threshold": 9800,
+				"time": 272.22
+			},
+			{
+				"entropy": 13.581013,
+				"nodes": 9817,
+				"threshold": 9800,
+				"time": 302.22
+			},
+			{
+				"entropy": 13.574450,
+				"nodes": 9815,
+				"threshold": 9800,
+				"time": 332.22
+			},
+			{
+				"entropy": 13.572425,
+				"nodes": 9805,
+				"threshold": 9800,
+				"time": 362.22
+			},
+			{
+				"entropy": 13.568222,
+				"nodes": 9825,
+				"threshold": 9800,
+				"time": 392.22
+			},
+			{
+				"entropy": 13.573361,
+				"nodes": 9830,
+				"threshold": 9800,
+				"time": 422.22
+			},
+			{
+				"entropy": 13.570130,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 452.22
+			},
+			{
+				"entropy": 13.569780,
+				"nodes": 9827,
+				"threshold": 9800,
+				"time": 482.22
+			},
+			{
+				"entropy": 13.565452,
+				"nodes": 9828,
+				"threshold": 9800,
+				"time": 512.22
+			},
+			{
+				"entropy": 13.559482,
+				"nodes": 9814,
+				"threshold": 9800,
+				"time": 542.22
+			},
+			{
+				"entropy": 13.549927,
+				"nodes": 9806,
+				"threshold": 9800,
+				"time": 572.22
+			},
+			{
+				"entropy": 13.545561,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 602.22
+			},
+			{
+				"entropy": 13.538460,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 632.22
+			},
+			{
+				"entropy": 13.535533,
+				"nodes": 9824,
+				"threshold": 9800,
+				"time": 662.22
+			},
+			{
+				"entropy": 13.541402,
+				"nodes": 9820,
+				"threshold": 9800,
+				"time": 692.22
+			},
+			{
+				"entropy": 13.538925,
+				"nodes": 9815,
+				"threshold": 9800,
+				"time": 722.22
+			},
+			{
+				"entropy": 13.531220,
+				"nodes": 9860,
+				"threshold": 9800,
+				"time": 752.22
+			},
+			{
+				"entropy": 13.531984,
+				"nodes": 9881,
+				"threshold": 9800,
+				"time": 782.22
+			},
+			{
+				"entropy": 13.514129,
+				"nodes": 9877,
+				"threshold": 9800,
+				"time": 812.22
+			},
+			{
+				"entropy": 13.512699,
+				"nodes": 9909,
+				"threshold": 9800,
+				"time": 842.22
+			},
+			{
+				"entropy": 13.509037,
+				"nodes": 9891,
+				"threshold": 9800,
+				"time": 872.22
+			},
+			{
+				"entropy": 13.504234,
+				"nodes": 9884,
+				"threshold": 9800,
+				"time": 902.22
+			},
+			{
+				"entropy": 13.503790,
+				"nodes": 9882,
+				"threshold": 9800,
+				"time": 932.22
+			},
+			{
+				"entropy": 13.509644,
+				"nodes": 9834,
+				"threshold": 9800,
+				"time": 962.22
+			},
+			{
+				"entropy": 13.499887,
+				"nodes": 9827,
+				"threshold": 9800,
+				"time": 992.22
+			},
+			{
+				"entropy": 13.500802,
+				"nodes": 9816,
+				"threshold": 9800,
+				"time": 1022.22
+			},
+			{
+				"entropy": 13.498962,
+				"nodes": 9814,
+				"threshold": 9800,
+				"time": 1052.22
+			},
+			{
+				"entropy": 13.507605,
+				"nodes": 9864,
+				"threshold": 9800,
+				"time": 1082.22
+			},
+			{
+				"entropy": 13.501353,
+				"nodes": 9849,
+				"threshold": 9800,
+				"time": 1112.22
+			},
+			{
+				"entropy": 13.497184,
+				"nodes": 9835,
+				"threshold": 9800,
+				"time": 1142.22
+			},
+			{
+				"entropy": 13.495998,
+				"nodes": 9825,
+				"threshold": 9800,
+				"time": 1172.22
+			},
+			{
+				"entropy": 13.484127,
+				"nodes": 9856,
+				"threshold": 9800,
+				"time": 1202.22
+			},
+			{
+				"entropy": 13.491442,
+				"nodes": 9843,
+				"threshold": 9800,
+				"time": 1232.22
+			},
+			{
+				"entropy": 13.484165,
+				"nodes": 9834,
+				"threshold": 9800,
+				"time": 1262.22
+			},
+			{
+				"entropy": 13.486160,
+				"nodes": 9832,
+				"threshold": 9800,
+				"time": 1292.22
+			},
+			{
+				"entropy": 13.485568,
+				"nodes": 9843,
+				"threshold": 9800,
+				"time": 1322.22
+			},
+			{
+				"entropy": 13.485021,
+				"nodes": 9860,
+				"threshold": 9800,
+				"time": 1352.22
+			},
+			{
+				"entropy": 13.477207,
+				"nodes": 9836,
+				"threshold": 9800,
+				"time": 1382.22
+			},
+			{
+				"entropy": 13.478345,
+				"nodes": 9866,
+				"threshold": 9800,
+				"time": 1412.22
+			},
+			{
+				"entropy": 13.477155,
+				"nodes": 9842,
+				"threshold": 9800,
+				"time": 1442.22
+			},
+			{
+				"entropy": 13.475085,
+				"nodes": 9838,
+				"threshold": 9800,
+				"time": 1472.22
+			},
+			{
+				"entropy": 13.469543,
+				"nodes": 9839,
+				"threshold": 9800,
+				"time": 1502.22
+			},
+			{
+				"entropy": 13.476315,
+				"nodes": 9810,
+				"threshold": 9800,
+				"time": 1532.22
+			},
+			{
+				"entropy": 13.484170,
+				"nodes": 9818,
+				"threshold": 9800,
+				"time": 1562.22
+			},
+			{
+				"entropy": 13.485174,
+				"nodes": 9834,
+				"threshold": 9800,
+				"time": 1592.22
+			},
+			{
+				"entropy": 13.486913,
+				"nodes": 9859,
+				"threshold": 9800,
+				"time": 1622.22
+			},
+			{
+				"entropy": 13.488359,
+				"nodes": 9883,
+				"threshold": 9800,
+				"time": 1652.22
+			},
+			{
+				"entropy": 13.492431,
+				"nodes": 9877,
+				"threshold": 9800,
+				"time": 1682.22
+			},
+			{
+				"entropy": 13.494443,
+				"nodes": 9855,
+				"threshold": 9800,
+				"time": 1712.22
+			},
+			{
+				"entropy": 13.494625,
+				"nodes": 9846,
+				"threshold": 9800,
+				"time": 1742.22
+			},
+			{
+				"entropy": 13.486918,
+				"nodes": 9813,
+				"threshold": 9800,
+				"time": 1772.22
+			}
+		]
+	},
+	{
+		"radius": 7,
+		"results": [
+			{
+				"entropy": 13.593940,
+				"nodes": 9804,
+				"threshold": 9800,
+				"time": 2.18
+			},
+			{
+				"entropy": 13.581282,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 32.18
+			},
+			{
+				"entropy": 13.571910,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 62.18
+			},
+			{
+				"entropy": 13.562807,
+				"nodes": 9806,
+				"threshold": 9800,
+				"time": 92.18
+			},
+			{
+				"entropy": 13.555545,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 122.18
+			},
+			{
+				"entropy": 13.541270,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 152.18
+			},
+			{
+				"entropy": 13.542050,
+				"nodes": 9802,
+				"threshold": 9800,
+				"time": 182.18
+			},
+			{
+				"entropy": 13.531177,
+				"nodes": 9803,
+				"threshold": 9800,
+				"time": 212.18
+			},
+			{
+				"entropy": 13.521564,
+				"nodes": 9802,
+				"threshold": 9800,
+				"time": 242.18
+			},
+			{
+				"entropy": 13.511376,
+				"nodes": 9801,
+				"threshold": 9800,
+				"time": 272.18
+			},
+			{
+				"entropy": 13.502797,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 302.18
+			},
+			{
+				"entropy": 13.495001,
+				"nodes": 9801,
+				"threshold": 9800,
+				"time": 332.18
+			},
+			{
+				"entropy": 13.485235,
+				"nodes": 9802,
+				"threshold": 9800,
+				"time": 362.18
+			},
+			{
+				"entropy": 13.473550,
+				"nodes": 9808,
+				"threshold": 9800,
+				"time": 392.18
+			},
+			{
+				"entropy": 13.470386,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 422.18
+			},
+			{
+				"entropy": 13.460777,
+				"nodes": 9810,
+				"threshold": 9800,
+				"time": 452.18
+			},
+			{
+				"entropy": 13.455824,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 482.18
+			},
+			{
+				"entropy": 13.443178,
+				"nodes": 9803,
+				"threshold": 9800,
+				"time": 512.18
+			},
+			{
+				"entropy": 13.435551,
+				"nodes": 9803,
+				"threshold": 9800,
+				"time": 542.18
+			},
+			{
+				"entropy": 13.427774,
+				"nodes": 9803,
+				"threshold": 9800,
+				"time": 572.18
+			},
+			{
+				"entropy": 13.418117,
+				"nodes": 9801,
+				"threshold": 9800,
+				"time": 602.18
+			},
+			{
+				"entropy": 13.411597,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 632.18
+			},
+			{
+				"entropy": 13.400161,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 662.18
+			},
+			{
+				"entropy": 13.390406,
+				"nodes": 9802,
+				"threshold": 9800,
+				"time": 692.18
+			},
+			{
+				"entropy": 13.388258,
+				"nodes": 9807,
+				"threshold": 9800,
+				"time": 722.18
+			},
+			{
+				"entropy": 13.383255,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 752.18
+			},
+			{
+				"entropy": 13.373807,
+				"nodes": 9807,
+				"threshold": 9800,
+				"time": 782.18
+			},
+			{
+				"entropy": 13.371872,
+				"nodes": 9805,
+				"threshold": 9800,
+				"time": 812.18
+			},
+			{
+				"entropy": 13.358893,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 842.18
+			},
+			{
+				"entropy": 13.347468,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 872.18
+			},
+			{
+				"entropy": 13.341344,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 902.18
+			},
+			{
+				"entropy": 13.336182,
+				"nodes": 9801,
+				"threshold": 9800,
+				"time": 932.18
+			},
+			{
+				"entropy": 13.336369,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 962.19
+			},
+			{
+				"entropy": 13.323078,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 992.19
+			},
+			{
+				"entropy": 13.321900,
+				"nodes": 9802,
+				"threshold": 9800,
+				"time": 1022.19
+			},
+			{
+				"entropy": 13.318935,
+				"nodes": 9801,
+				"threshold": 9800,
+				"time": 1052.19
+			},
+			{
+				"entropy": 13.310335,
+				"nodes": 9801,
+				"threshold": 9800,
+				"time": 1082.19
+			},
+			{
+				"entropy": 13.307579,
+				"nodes": 9801,
+				"threshold": 9800,
+				"time": 1112.19
+			},
+			{
+				"entropy": 13.292006,
+				"nodes": 9802,
+				"threshold": 9800,
+				"time": 1142.19
+			},
+			{
+				"entropy": 13.309196,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1172.19
+			},
+			{
+				"entropy": 13.296071,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1202.19
+			},
+			{
+				"entropy": 13.294143,
+				"nodes": 9803,
+				"threshold": 9800,
+				"time": 1232.19
+			},
+			{
+				"entropy": 13.299896,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1262.19
+			},
+			{
+				"entropy": 13.296199,
+				"nodes": 9809,
+				"threshold": 9800,
+				"time": 1292.19
+			},
+			{
+				"entropy": 13.297350,
+				"nodes": 9802,
+				"threshold": 9800,
+				"time": 1322.19
+			},
+			{
+				"entropy": 13.287287,
+				"nodes": 9803,
+				"threshold": 9800,
+				"time": 1352.19
+			},
+			{
+				"entropy": 13.274987,
+				"nodes": 9803,
+				"threshold": 9800,
+				"time": 1382.19
+			},
+			{
+				"entropy": 13.277005,
+				"nodes": 9809,
+				"threshold": 9800,
+				"time": 1412.19
+			},
+			{
+				"entropy": 13.276742,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1442.19
+			},
+			{
+				"entropy": 13.279633,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1472.19
+			},
+			{
+				"entropy": 13.286854,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1502.19
+			},
+			{
+				"entropy": 13.284186,
+				"nodes": 9804,
+				"threshold": 9800,
+				"time": 1532.19
+			},
+			{
+				"entropy": 13.287235,
+				"nodes": 9815,
+				"threshold": 9800,
+				"time": 1562.19
+			},
+			{
+				"entropy": 13.284242,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1592.19
+			},
+			{
+				"entropy": 13.272688,
+				"nodes": 9811,
+				"threshold": 9800,
+				"time": 1622.19
+			},
+			{
+				"entropy": 13.268859,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1652.19
+			},
+			{
+				"entropy": 13.275375,
+				"nodes": 9804,
+				"threshold": 9800,
+				"time": 1682.19
+			},
+			{
+				"entropy": 13.276388,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1712.19
+			},
+			{
+				"entropy": 13.273675,
+				"nodes": 9803,
+				"threshold": 9800,
+				"time": 1742.19
+			},
+			{
+				"entropy": 13.276903,
+				"nodes": 9801,
+				"threshold": 9800,
+				"time": 1772.19
+			}
+		]
+	},
+	{
+		"radius": 30,
+		"results": [
+			{
+				"entropy": 13.576873,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 2.17
+			},
+			{
+				"entropy": 13.491732,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 32.17
+			},
+			{
+				"entropy": 13.389283,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 62.17
+			},
+			{
+				"entropy": 13.317003,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 92.17
+			},
+			{
+				"entropy": 13.215098,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 122.17
+			},
+			{
+				"entropy": 13.094371,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 152.17
+			},
+			{
+				"entropy": 13.017759,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 182.17
+			},
+			{
+				"entropy": 12.982590,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 212.17
+			},
+			{
+				"entropy": 12.985625,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 242.17
+			},
+			{
+				"entropy": 12.996529,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 272.17
+			},
+			{
+				"entropy": 12.894654,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 302.17
+			},
+			{
+				"entropy": 12.879220,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 332.17
+			},
+			{
+				"entropy": 12.729277,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 362.17
+			},
+			{
+				"entropy": 12.658894,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 392.17
+			},
+			{
+				"entropy": 12.576256,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 422.17
+			},
+			{
+				"entropy": 12.493881,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 452.17
+			},
+			{
+				"entropy": 12.468931,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 482.17
+			},
+			{
+				"entropy": 12.487312,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 512.17
+			},
+			{
+				"entropy": 12.444185,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 542.17
+			},
+			{
+				"entropy": 12.398259,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 572.17
+			},
+			{
+				"entropy": 12.399144,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 602.17
+			},
+			{
+				"entropy": 12.346911,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 632.17
+			},
+			{
+				"entropy": 12.309080,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 662.17
+			},
+			{
+				"entropy": 12.279855,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 692.17
+			},
+			{
+				"entropy": 12.239749,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 722.17
+			},
+			{
+				"entropy": 12.216846,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 752.17
+			},
+			{
+				"entropy": 12.279114,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 782.17
+			},
+			{
+				"entropy": 12.259918,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 812.17
+			},
+			{
+				"entropy": 12.221448,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 842.17
+			},
+			{
+				"entropy": 12.139404,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 872.17
+			},
+			{
+				"entropy": 12.048653,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 902.17
+			},
+			{
+				"entropy": 11.967097,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 932.17
+			},
+			{
+				"entropy": 11.920243,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 962.17
+			},
+			{
+				"entropy": 11.868796,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 992.17
+			},
+			{
+				"entropy": 11.774874,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1022.17
+			},
+			{
+				"entropy": 11.764464,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1052.17
+			},
+			{
+				"entropy": 11.725661,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1082.17
+			},
+			{
+				"entropy": 11.701818,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1112.17
+			},
+			{
+				"entropy": 11.584024,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1142.17
+			},
+			{
+				"entropy": 11.594352,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1172.17
+			},
+			{
+				"entropy": 11.576582,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1202.17
+			},
+			{
+				"entropy": 11.552734,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1232.17
+			},
+			{
+				"entropy": 11.512400,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1262.17
+			},
+			{
+				"entropy": 11.479439,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1292.17
+			},
+			{
+				"entropy": 11.512519,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1322.17
+			},
+			{
+				"entropy": 11.490713,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1352.17
+			},
+			{
+				"entropy": 11.497982,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1382.17
+			},
+			{
+				"entropy": 11.454074,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1412.17
+			},
+			{
+				"entropy": 11.475843,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1442.17
+			},
+			{
+				"entropy": 11.453447,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1472.17
+			},
+			{
+				"entropy": 11.344336,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1502.17
+			},
+			{
+				"entropy": 11.317612,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1532.17
+			},
+			{
+				"entropy": 11.278820,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1562.17
+			},
+			{
+				"entropy": 11.275691,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1592.17
+			},
+			{
+				"entropy": 11.333482,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1622.17
+			},
+			{
+				"entropy": 11.305385,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1652.17
+			},
+			{
+				"entropy": 11.283765,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1682.17
+			},
+			{
+				"entropy": 11.298421,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1712.17
+			},
+			{
+				"entropy": 11.355874,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1742.17
+			},
+			{
+				"entropy": 11.415232,
+				"nodes": 9800,
+				"threshold": 9800,
+				"time": 1772.17
+			}
+		]
+	}
+]

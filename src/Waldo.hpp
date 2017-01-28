@@ -29,7 +29,7 @@ class Waldo {
 			start = std::make_shared<Coord>(this->currentPath[0].x, this->currentPath[0].y);  //&this->currentPath[0];
 			                                                                                  // printf("%.2f, %.2f\n", start->x, start->y);
 		}
-		OnlineRrtStar planner(this->obstacleHash, this->obstacleRects, 12, this->width, this->height, true, start, 0.01);
+		OnlineRrtStar planner(this->obstacleHash, this->obstacleRects, 12, this->width, this->height, true, start, 5, 0.01);
 
 		for (int i = 0; i < planner.nodeAddThreshold && planner.bestPath.size() == 0; i++) {
 			// printf("%d\n", i);
@@ -136,8 +136,8 @@ class Waldo {
 
 			auto angle = randDouble(heading - 1, heading + 1);
 
-			auto potX = x + this->maxTravel * cos(angle);
-			auto potY = y + this->maxTravel * sin(angle);
+			auto potX = clamp(x + this->maxTravel * cos(angle), 0, this->width - 1);
+			auto potY = clamp(y + this->maxTravel * sin(angle), 0, this->height - 1);
 
 			if (!(*this->obstacleHash)[potY][potX]) {
 				x = potX;

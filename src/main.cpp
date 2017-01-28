@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
 	int voteCellSize = 2;
 	int trialLength = -1;
 	int numObstacles = 10;
+	double pruneRadius = 5;
 
 	// clang-format off
 	cxxopts::Options options("OnlineRRT*", "A cool program for cool things");
@@ -84,7 +85,8 @@ int main(int argc, char* argv[]) {
 		("w,waldos", "number of Waldos", cxxopts::value(numWaldos))
 		("t,tree", "draw tree", cxxopts::value(shouldDrawTree))
 		("l,length", "trial length", cxxopts::value(trialLength))
-		("o,obstacles", "number of obstacles", cxxopts::value(numObstacles));
+		("o,obstacles", "number of obstacles", cxxopts::value(numObstacles))
+		("p,pruneRadius", "radius for online pruning", cxxopts::value(pruneRadius));
 	// clang-format on
 
 	options.parse(argc, argv);
@@ -105,9 +107,9 @@ int main(int argc, char* argv[]) {
 
 	SamplingPlanner* planner;
 	if (useFmt) {
-		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, !useHalton, nullptr);
+		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, !useHalton, nullptr, pruneRadius);
 	} else {
-		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, !useHalton, nullptr);
+		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, !useHalton, nullptr, pruneRadius);
 	}
 	// AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
@@ -119,22 +121,20 @@ int main(int argc, char* argv[]) {
 	auto startTime = glfwGetTime();
 	auto lastReplan = glfwGetTime();
 	auto lastMove = glfwGetTime();
+	auto lastPrint = glfwGetTime() - 28;
 	auto replanInterval = 1.0 / replanFrequency;
 	auto moveInterval = 1.0 / 30.0;
 	auto score = 0.0;
 
 	auto remainderCallback = [&obstacleHash, &planner, &waldos, &replanInterval, &moveInterval, &trialLength, &startTime, &lastReplan, &lastMove,
-	                          width, height, voteCellSize, &score, window]() {
+	                          width, height, voteCellSize, &score, window, &lastPrint]() {
 		auto currentTime = glfwGetTime();
 
 		if (trialLength != -1 && currentTime - startTime >= trialLength) {
-			printf("%.2f\n", score);
-			printf("%.6f\n", planner->calculateTotalEntropy());
+			// printf("%.2f\n", score);
 			close(window);
 		} else if (currentTime - lastMove >= moveInterval) {
 			lastMove = currentTime;
-			// printf("%.2f\r", score);
-			fflush(stdout);
 
 			vector<vector<int>> waldoVotes(height / voteCellSize, vector<int>(width / voteCellSize, 0));
 
@@ -148,8 +148,7 @@ int main(int argc, char* argv[]) {
 						score += waldo->importance;
 						vector<Coord> predictedCoords{
 						    // waldo->predictFutureFromRandWalk(60),
-						    waldo->predictFutureFromVelocity(60),
-						    // waldo->coord(),
+						    waldo->predictFutureFromVelocity(60), waldo->coord(),
 						};
 						for (const auto& coord : predictedCoords) {
 							for (int dx = -VIEW_RADIUS; dx < VIEW_RADIUS; dx += voteCellSize) {
@@ -197,6 +196,11 @@ int main(int argc, char* argv[]) {
 		} else if (replanInterval != -1 && currentTime - lastReplan >= replanInterval) {
 			lastReplan = currentTime;
 			planner->randomReplan();
+		} else if (currentTime - lastPrint >= 30) {
+			lastPrint = currentTime;
+
+			printf("{\"entropy\": %.6f, \"nodes\": %ld, \"threshold\": %d, \"time\": %.2f}\n", planner->calculateTotalEntropy(), planner->numNodes,
+			       planner->nodeAddThreshold, currentTime);
 		} else {
 			// printf("sampling\n");
 			planner->sample();
