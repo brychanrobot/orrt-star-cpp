@@ -59,7 +59,6 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
 		Coord point(clamp(this->root->coord.x + dx, 0, this->width - 1), clamp(this->root->coord.y + dy, 0, this->height - 1));
 
-		// printf("clamped point %.2f, %.2f\n", point.x, point.y);
 		if (!this->obstacleHash->at((int)point.y).at((int)point.x) || true) {
 			auto newRoot = make_shared<RrtNode>(point, nullptr, 0.0);
 			newRoot->status = Status::Closed;
@@ -82,13 +81,9 @@ void SamplingPlanner::moveStart(double dx, double dy) {
 				}
 			}
 
-			int numRemoved = 0;
-
 			for (auto neighbor_tuple : neighbor_tuples) {
 				auto neighbor = neighbor_tuple.second;
 				if (neighbor != newRoot && neighbor->status == Status::Closed && !this->lineIntersectsObstacle(newRoot->coord, neighbor->coord)) {
-					// auto cost = this->getCost(newRoot, neighbor);
-					// neighbor->rewire(newRoot, cost);
 					if (neighbor->children.size() == 0 && euclideanDistance(newRoot->coord, neighbor->coord) < this->pruneRadius) {
 						neighbor->parent->removeChild(neighbor);
 						this->rtree.remove(RtreeValue(neighbor->coord.getBoostPoint(), neighbor));
@@ -117,16 +112,6 @@ shared_ptr<RrtNode> SamplingPlanner::getNearestNeighbor(Coord &p) {
 shared_ptr<RrtNode> SamplingPlanner::getNearestNeighbor(shared_ptr<Node> n) {
 	vector<RtreeValue> result;
 	this->rtree.query(boost::geometry::index::nearest(n->coord.getBoostPoint(), 2), back_inserter(result));
-	/*if (result[0].second != n) {
-	    return result[0].second;
-	} else {
-	    return result[1].second;
-	}*/
-	// printf("%.2f, %.2f\n", euclideanDistance(n->coord, result[0].second->coord), euclideanDistance(n->coord, result[1].second->coord));
-	/*for (auto r : result) {
-	    printf("%.2f, ", euclideanDistance(n->coord, r.second->coord));
-	}
-	printf("\n");*/
 
 	return result[0].second != n ? result[0].second : result[1].second;
 }
@@ -135,15 +120,12 @@ void SamplingPlanner::findBestNeighborWithoutCost(Coord point, shared_ptr<RrtNod
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
 
-	double bestCumulativeCost = 9999999999999999;  /// std::numeric_limits<double>::max();
-	// double bestCost = std::numeric_limits<double>::max();
+	double bestCumulativeCost = 9999999999999999;
 
 	for (auto neighbor_tuple : neighbor_tuples) {
 		auto neighbor = neighbor_tuple.second;
 		neighbors.push_back(neighbor);
-		// auto cost = this->getCost(neighbor, node);
 		if (neighbor->status == Status::Closed && neighbor->cumulativeCost < bestCumulativeCost) {
-			// bestCost = cost;
 			bestCumulativeCost = neighbor->cumulativeCost;
 			bestNeighbor = neighbor;
 		}
@@ -155,8 +137,7 @@ void SamplingPlanner::findBestNeighbor(Coord point, shared_ptr<RrtNode> &bestNei
 	vector<RtreeValue> neighbor_tuples;
 	this->getNeighbors(point, this->rewireNeighborhood, neighbor_tuples);
 
-	double bestCumulativeCost = 999999999999999;  // std::numeric_limits<double>::max();
-	// double bestCost = std::numeric_limits<double>::max();
+	double bestCumulativeCost = 999999999999999;
 
 	for (auto neighbor_tuple : neighbor_tuples) {
 		auto neighbor = neighbor_tuple.second;
@@ -177,7 +158,6 @@ double SamplingPlanner::calculateParticleEntropy(shared_ptr<Node> r) {
 	auto n = this->getNearestNeighbor(r);
 	auto dist = euclideanDistance(r->coord, n->coord);
 	double entropy = dist != 0.0 ? log(this->numNodes * dist) : 1.0;
-	// printf("e: %.2f, d: %.2f, t: %ld\n", entropy, dist, this->numNodes);
 
 	for (auto child : r->children) {
 		entropy += calculateParticleEntropy(child);

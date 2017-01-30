@@ -4,6 +4,7 @@
 		"vector": "cpp",
 		"functional": "cpp",
 		"*hppfstream": "cpp",
-		"fstream": "cpp"
+		"fstream": "cpp",
+		"cmath": "cpp"
 	}
 }
