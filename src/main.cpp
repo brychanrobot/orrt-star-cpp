@@ -114,8 +114,13 @@ int main(int argc, char* argv[]) {
 	// AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
 
-	auto displayCallback = [&planner, &waldos, shouldDrawTree]() {
+	auto displayCallback = [&planner, &waldos, shouldDrawTree, window]() {
 		display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos, shouldDrawTree);
+
+		/*Coord center;
+		glfwGetCursorPos(window, &center.x, &center.y);
+		auto polygon = planner->calculateVisibilityPolygon(center);
+		drawPolygon(center, polygon, HSL(320, 1.0, 0.5));*/
 	};
 
 	auto startTime = glfwGetTime();

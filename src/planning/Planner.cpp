@@ -10,6 +10,9 @@
 #include "../planning-utils/geom/utils.hpp"
 #include "../planning-utils/utils.hpp"
 
+#include "../planning-utils/visibility/loadMap.hpp"
+#include "../planning-utils/visibility/visibility.hpp"
+
 using namespace std;
 
 Planner::Planner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom)
@@ -32,8 +35,9 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *o
 	} while (euclideanDistance(startPoint, endPoint) < width / 2.0);
 
 	this->root = make_shared<RrtNode>(startPoint, shared_ptr<RrtNode>(nullptr), 0.0);
-
 	this->endNode = make_shared<RrtNode>(endPoint, shared_ptr<RrtNode>(nullptr), std::numeric_limits<double>::max() / 2.0);
+
+	//loadMap(Rect(Coord(0, 0), Coord(width, height)), this->obstacleRects, this->segments, this->endpoints);
 }
 
 Planner::~Planner() {
@@ -134,3 +138,5 @@ void Planner::getNeighbors(Coord center, double radius, vector<RtreeValue> &resu
 	box query_box(point(center.x - radius, center.y - radius), point(center.x + radius, center.y + radius));
 	this->rtree.query(boost::geometry::index::intersects(query_box), back_inserter(results));
 }
+
+vector<Coord> Planner::calculateVisibilityPolygon(Coord origin) { return calculateVisibility(origin, this->segments, this->endpoints); }

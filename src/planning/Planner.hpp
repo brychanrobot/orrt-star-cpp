@@ -9,6 +9,8 @@
 
 #include "../planning-utils/geom/Coord.hpp"
 #include "../planning-utils/geom/Rect.hpp"
+#include "../planning-utils/visibility/EndPoint.hpp"
+#include "../planning-utils/visibility/Segment.hpp"
 #include "Halton.hpp"
 #include "RrtNode.hpp"
 
@@ -28,6 +30,9 @@ class Planner {
 	HaltonSampler haltonY;
 
 	Rtree rtree;
+
+	std::vector<std::shared_ptr<Segment>> segments;
+	std::vector<std::shared_ptr<EndPoint>> endpoints;
 
 	Coord randomOpenAreaPoint();
 	double getCost(std::shared_ptr<RrtNode> start, std::shared_ptr<RrtNode> end);
@@ -57,4 +62,6 @@ class Planner {
 	double calculatePathCost();
 
 	std::deque<Coord> getBestPath() { return this->bestPath; }
+
+	std::vector<Coord> calculateVisibilityPolygon(Coord origin);
 };
