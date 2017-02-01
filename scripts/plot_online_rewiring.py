@@ -13,4 +13,21 @@ for spot in j:
 plt.xlabel('time (s)')
 plt.ylabel('entropy')
 plt.legend(loc='lower left')
+
+
+
+plt.figure()
+
+final_entropies = []
+radii = []
+
+for spot in j:
+	results = spot['results']
+	radii.append(spot['radius'])
+	final_entropies.append(results[-1]['entropy'])
+
+plt.plot(radii, final_entropies)
+plt.xlabel('radius')
+plt.ylabel('entropy')
+
 plt.show()
