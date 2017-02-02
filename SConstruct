@@ -8,6 +8,8 @@ env=Environment(CXXFLAGS='-Wall -march=native -std=c++14', LIBS=libs)
 debug = ARGUMENTS.get('debug', 0)
 if int(debug):
 	env.Append(CCFLAGS = '-g')
+else:
+	env.Append(CCFLAGS = '-O3')
 
 env.VariantDir('build', 'src', duplicate=0)
 
