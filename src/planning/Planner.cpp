@@ -37,7 +37,7 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *o
 	this->root = make_shared<RrtNode>(startPoint, shared_ptr<RrtNode>(nullptr), 0.0);
 	this->endNode = make_shared<RrtNode>(endPoint, shared_ptr<RrtNode>(nullptr), std::numeric_limits<double>::max() / 2.0);
 
-	//loadMap(Rect(Coord(0, 0), Coord(width, height)), this->obstacleRects, this->segments, this->endpoints);
+	loadMap(make_shared<Rect>(Coord(0, 0), Coord(width, height)), this->obstacleRects, this->segments, this->endpoints);
 }
 
 Planner::~Planner() {

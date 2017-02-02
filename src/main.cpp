@@ -117,10 +117,14 @@ int main(int argc, char* argv[]) {
 	auto displayCallback = [&planner, &waldos, shouldDrawTree, window]() {
 		display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos, shouldDrawTree);
 
-		/*Coord center;
-		glfwGetCursorPos(window, &center.x, &center.y);
+		Coord center(50.0, 25.0);
+		// glfwGetCursorPos(window, &center.x, &center.y);
 		auto polygon = planner->calculateVisibilityPolygon(center);
-		drawPolygon(center, polygon, HSL(320, 1.0, 0.5));*/
+		for (const auto& p : polygon) {
+			printf("[%.2f, %.2f], ", p.x, p.y);
+		}
+		printf("\n");
+		drawPolygon(center, polygon, HSL(320, 1.0, 0.5));
 	};
 
 	auto startTime = glfwGetTime();
