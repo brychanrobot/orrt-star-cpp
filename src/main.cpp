@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
 		auto currentTime = glfwGetTime();
 
 		if (trialLength != -1 && currentTime - startTime >= trialLength) {
-			// printf("%.2f\n", score);
+			printf("%.2f\n", score);
 			close(window);
 		} else if (currentTime - lastMove >= moveInterval) {
 			lastMove = currentTime;
@@ -204,8 +204,8 @@ int main(int argc, char* argv[]) {
 		} else if (currentTime - lastPrint >= 30) {
 			lastPrint = currentTime;
 
-			printf("{\"entropy\": %.6f, \"nodes\": %ld, \"threshold\": %d, \"time\": %.2f}\n", planner->calculateTotalEntropy(), planner->numNodes,
-			       planner->nodeAddThreshold, currentTime);
+			// printf("{\"entropy\": %.6f, \"nodes\": %ld, \"threshold\": %d, \"time\": %.2f}\n", planner->calculateTotalEntropy(), planner->numNodes,
+			//       planner->nodeAddThreshold, currentTime);
 		} else {
 			// printf("sampling\n");
 			planner->sample();

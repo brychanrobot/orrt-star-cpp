@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 j = json.load(open('scripts/fullTrials.json', 'r'))
 
-for scenario in j[-5:]:
+for scenario in j[-6:]:
 	obst = []
 	ave_score = []
 	for t in scenario['results']:
