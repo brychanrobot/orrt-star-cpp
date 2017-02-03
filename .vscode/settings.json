@@ -31,6 +31,15 @@
 		"clocale": "cpp",
 		"*hpp*hpp*hpp*hppvector": "cpp",
 		"string": "cpp",
-		"deque": "cpp"
+		"deque": "cpp",
+		"*hpp*hpp*hpparray": "cpp",
+		"*hpp*hppstring": "cpp",
+		"*hppthread": "cpp",
+		"*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*hbitset": "cpp",
+		"bitset": "cpp",
+		"*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpputility": "cpp",
+		"*hsystem_error": "cpp",
+		"system_error": "cpp",
+		"tuple": "cpp"
 	}
 }

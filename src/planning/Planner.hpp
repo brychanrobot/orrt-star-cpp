@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/geometry.hpp>
@@ -22,9 +23,11 @@ class Planner {
    protected:
 	int width;
 	int height;
-	int mapArea;
+	double mapArea;
+	double obstacleArea;
 	std::vector<std::vector<bool>> *obstacleHash;
 	double maxTravel = 1.5;
+	std::unordered_map<Coord, double> unseenAreaMap;
 
 	HaltonSampler haltonX;
 	HaltonSampler haltonY;
@@ -35,6 +38,9 @@ class Planner {
 	std::vector<std::shared_ptr<EndPoint>> endpoints;
 
 	Coord randomOpenAreaPoint();
+	double getViewArea(Coord &point);
+	double getUnseenArea(Coord &point);
+	double getEdgeUnseenArea(Coord &start, Coord &end, double dist);
 	double getCost(std::shared_ptr<RrtNode> start, std::shared_ptr<RrtNode> end);
 	double getCost(Coord &start, Coord &end);
 
@@ -51,6 +57,9 @@ class Planner {
 	std::deque<Coord> bestPath;
 	bool usePseudoRandom;
 	std::string name = "unset";
+
+	const double distanceK = 1.0;
+	double unseenAreaK = 100.0;
 
 	Planner(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height,
 	        bool usePseudoRandom);

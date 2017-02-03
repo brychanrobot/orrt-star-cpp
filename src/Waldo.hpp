@@ -30,6 +30,7 @@ class Waldo {
 			                                                                                  // printf("%.2f, %.2f\n", start->x, start->y);
 		}
 		OnlineRrtStar planner(this->obstacleHash, this->obstacleRects, 12, this->width, this->height, true, start, 5, 0.01);
+		planner.unseenAreaK = 0.0;
 
 		for (int i = 0; i < planner.nodeAddThreshold && planner.bestPath.size() == 0; i++) {
 			// printf("%d\n", i);

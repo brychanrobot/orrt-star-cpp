@@ -37,7 +37,7 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *o
 	this->root = make_shared<RrtNode>(startPoint, shared_ptr<RrtNode>(nullptr), 0.0);
 	this->endNode = make_shared<RrtNode>(endPoint, shared_ptr<RrtNode>(nullptr), std::numeric_limits<double>::max() / 2.0);
 
-	loadMap(make_shared<Rect>(Coord(0, 0), Coord(width, height)), this->obstacleRects, this->segments, this->endpoints);
+	loadMap(make_shared<Rect>(Coord(-1, -1), Coord(width + 1, height + 1)), this->obstacleRects, this->segments, this->endpoints);
 }
 
 Planner::~Planner() {
@@ -131,8 +131,38 @@ Coord Planner::randomOpenAreaPoint() {
 	}
 }
 
+double Planner::getViewArea(Coord &point) {
+	auto polygon = calculateVisibilityPolygon(point);
+	return getPolygonArea(polygon);
+}
+
+double Planner::getUnseenArea(Coord &point) {
+	auto value = this->unseenAreaMap[point];
+
+	if (value == 0.0) {
+		value = (this->mapArea - this->obstacleArea - this->getViewArea(point)) / (this->mapArea + this->obstacleArea);
+		this->unseenAreaMap[point] = value;
+	}
+
+	return value;
+}
+
+double Planner::getEdgeUnseenArea(Coord &start, Coord &end, double dist) {
+	auto a1 = this->getUnseenArea(start);
+	auto a2 = this->getUnseenArea(end);
+
+	auto unseenArea = ((a1 + a2) / 2.0) * dist;
+
+	return clamp(unseenArea, 0, 1.0);
+}
+
 double Planner::getCost(shared_ptr<RrtNode> start, shared_ptr<RrtNode> end) { return this->getCost(start->coord, end->coord); }
-double Planner::getCost(Coord &start, Coord &end) { return euclideanDistance(start, end); }
+double Planner::getCost(Coord &start, Coord &end) {
+	double d = euclideanDistance(start, end);
+	double unseenArea = this->unseenAreaK > 0 ? this->getEdgeUnseenArea(start, end, d) : 0.0;
+
+	return d * this->distanceK + unseenArea * this->unseenAreaK;
+}
 
 void Planner::getNeighbors(Coord center, double radius, vector<RtreeValue> &results) {
 	box query_box(point(center.x - radius, center.y - radius), point(center.x + radius, center.y + radius));
