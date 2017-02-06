@@ -1,5 +1,5 @@
 
-libs= ['m', 'GL', 'GLU', 'glfw', 'glut',
+libs= ['m', 'GL', 'GLU', 'glfw',
 'X11', 'Xrandr', 'Xinerama', 'Xi', 'Xxf86vm', 'Xcursor',
 'pthread', 'dl', 'boost_system']
 

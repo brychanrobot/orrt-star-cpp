@@ -38,17 +38,17 @@ class Planner {
 	std::vector<std::shared_ptr<EndPoint>> endpoints;
 
 	Coord randomOpenAreaPoint();
-	double getViewArea(Coord &point);
-	double getUnseenArea(Coord &point);
-	double getEdgeUnseenArea(Coord &start, Coord &end, double dist);
+	double getViewArea(Coord point);
+	double getUnseenArea(Coord point);
+	double getEdgeUnseenArea(Coord start, Coord end, double dist);
 	double getCost(std::shared_ptr<RrtNode> start, std::shared_ptr<RrtNode> end);
-	double getCost(Coord &start, Coord &end);
+	double getCost(Coord start, Coord end);
 
-	bool lineIntersectsObstacle(Coord &p1, Coord &p2);
+	bool lineIntersectsObstacle(Coord p1, Coord p2);
 
 	void refreshBestPath();
 
-	void getNeighbors(Coord center, double radius, std::vector<RtreeValue> &results);
+	void getNeighbors(Coord &center, double radius, std::vector<RtreeValue> &results);
 
    public:
 	std::shared_ptr<RrtNode> root;

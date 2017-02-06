@@ -57,7 +57,7 @@ Planner::~Planner() {
 	// printf("destructed planner\n");
 }
 
-bool Planner::lineIntersectsObstacle(Coord &p1, Coord &p2) { return lineIntersectsObstacles(p1, p2, this->obstacleHash, this->width, this->height); }
+bool Planner::lineIntersectsObstacle(Coord p1, Coord p2) { return lineIntersectsObstacles(p1, p2, this->obstacleHash, this->width, this->height); }
 
 void Planner::moveStart(double dx, double dy) {
 	if (dx != 0 || dy != 0) {
@@ -131,12 +131,12 @@ Coord Planner::randomOpenAreaPoint() {
 	}
 }
 
-double Planner::getViewArea(Coord &point) {
+double Planner::getViewArea(Coord point) {
 	auto polygon = calculateVisibilityPolygon(point);
 	return getPolygonArea(polygon);
 }
 
-double Planner::getUnseenArea(Coord &point) {
+double Planner::getUnseenArea(Coord point) {
 	auto value = this->unseenAreaMap[point];
 
 	if (value == 0.0) {
@@ -147,7 +147,7 @@ double Planner::getUnseenArea(Coord &point) {
 	return value;
 }
 
-double Planner::getEdgeUnseenArea(Coord &start, Coord &end, double dist) {
+double Planner::getEdgeUnseenArea(Coord start, Coord end, double dist) {
 	auto a1 = this->getUnseenArea(start);
 	auto a2 = this->getUnseenArea(end);
 
@@ -157,14 +157,14 @@ double Planner::getEdgeUnseenArea(Coord &start, Coord &end, double dist) {
 }
 
 double Planner::getCost(shared_ptr<RrtNode> start, shared_ptr<RrtNode> end) { return this->getCost(start->coord, end->coord); }
-double Planner::getCost(Coord &start, Coord &end) {
+double Planner::getCost(Coord start, Coord end) {
 	double d = euclideanDistance(start, end);
 	double unseenArea = this->unseenAreaK > 0 ? this->getEdgeUnseenArea(start, end, d) : 0.0;
 
 	return d * this->distanceK + unseenArea * this->unseenAreaK;
 }
 
-void Planner::getNeighbors(Coord center, double radius, vector<RtreeValue> &results) {
+void Planner::getNeighbors(Coord &center, double radius, vector<RtreeValue> &results) {
 	box query_box(point(center.x - radius, center.y - radius), point(center.x + radius, center.y + radius));
 	this->rtree.query(boost::geometry::index::intersects(query_box), back_inserter(results));
 }

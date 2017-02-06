@@ -6,7 +6,7 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceRoot}/build/main",
-			"args": ["-o", "15", "-w", "10", "-t", "--fmt"],
+			"args": ["-o", "15", "-w", "30", "-t", "--fmt"],
 			"stopAtEntry": false,
 			"cwd": "${workspaceRoot}",
 			"environment": [],
