@@ -40,6 +40,9 @@
 		"*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpputility": "cpp",
 		"*hsystem_error": "cpp",
 		"system_error": "cpp",
-		"tuple": "cpp"
+		"tuple": "cpp",
+		"*hpp*hpp*hpp*hppinitializer_list": "cpp",
+		"unordered_map": "cpp",
+		"unordered_set": "cpp"
 	}
 }

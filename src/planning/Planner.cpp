@@ -147,11 +147,24 @@ double Planner::getUnseenArea(Coord point) {
 	return value;
 }
 
+bool printOne = true;
+
 double Planner::getEdgeUnseenArea(Coord start, Coord end, double dist) {
 	auto a1 = this->getUnseenArea(start);
 	auto a2 = this->getUnseenArea(end);
 
 	auto unseenArea = ((a1 + a2) / 2.0) * dist;
+
+	if (unseenArea > 1.0 && printOne) {
+		auto polygon = this->calculateVisibilityPolygon(start);
+		for (auto p : polygon) {
+			printf("[%.0f, %.0f], ", p.x, p.y);
+		}
+		printf("\n");
+		printOne = false;
+		this->badCenter = start;
+		this->badPolygon = polygon;
+	}
 
 	return clamp(unseenArea, 0, 1.0);
 }

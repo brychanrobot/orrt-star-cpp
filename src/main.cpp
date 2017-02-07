@@ -115,14 +115,18 @@ int main(int argc, char* argv[]) {
 	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
 
 	auto displayCallback = [&planner, &waldos, shouldDrawTree, window]() {
-		display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos, shouldDrawTree);
-
-		Coord center(50.0, 25.0);
+		/*Coord center(50.0, 25.0);
 		glfwGetCursorPos(window, &center.x, &center.y);
 		center.x = clamp(center.x, 3, 697);
 		center.y = clamp(center.y, 3, 697);
 		auto polygon = planner->calculateVisibilityPolygon(center);
-		drawPolygon(center, polygon, HSL(320, 1.0, 0.5), 0.2);
+		drawPolygon(center, polygon, HSL(320, 1.0, 0.5), 0.2);*/
+		if (planner->badPolygon.size() > 0) {
+			drawPoint(planner->badCenter, 20, HSL(320, 1.0, 0.5));
+			drawPolygon(planner->badCenter, planner->badPolygon, HSL(320, 1.0, 0.5), 0.2);
+		}
+
+		display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos, shouldDrawTree);
 	};
 
 	auto startTime = glfwGetTime();
