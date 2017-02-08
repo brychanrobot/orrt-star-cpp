@@ -370,7 +370,7 @@ int main(int argc, char* argv[]) {
 	ratio = width / (float)height;
 	initDisplay(width, height, ratio);
 
-	vector<shared_ptr<Rect>> obstacleRects;
+	shared_ptr<vector<shared_ptr<Rect>>> obstacleRects;
 	generateObstacleRects(width, height, 10, obstacleRects);
 
 	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));

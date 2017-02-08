@@ -15,7 +15,7 @@ class AStar : public Planner {
 	int dy;
 
    public:
-	AStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height,
+	AStar(std::shared_ptr<std::vector<std::vector<bool>>> obstacleHash, std::shared_ptr<std::vector<std::shared_ptr<Rect>>> obstacleRects, int width, int height,
 	      bool usePseudoRandom, bool initialize = true);
 	~AStar();
 	virtual void moveStart(double dx, double dy);

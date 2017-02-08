@@ -4,7 +4,7 @@
 
 using namespace std;
 
-PrmStar::PrmStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom,
+PrmStar::PrmStar(shared_ptr<vector<vector<bool>>> obstacleHash, shared_ptr<vector<shared_ptr<Rect>>> obstacleRects, int width, int height, bool usePseudoRandom,
                  GraphType graphType)
     : AStar(obstacleHash, obstacleRects, width, height, usePseudoRandom, false) {
 	if (graphType == GraphType::Random) {

@@ -1,10 +1,10 @@
-
 libs= ['m', 'GL', 'GLU', 'glfw',
 'X11', 'Xrandr', 'Xinerama', 'Xi', 'Xxf86vm', 'Xcursor',
 'pthread', 'dl', 'boost_system']
 
 
 env=Environment(CXXFLAGS='-Wall -march=native -std=c++14', LIBS=libs)
+
 debug = ARGUMENTS.get('debug', 0)
 if int(debug):
 	env.Append(CCFLAGS = '-g')

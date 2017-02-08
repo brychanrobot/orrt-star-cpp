@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
 	bool usePseudoRandom = true;
 
 	AStar* planner = NULL;
-	vector<shared_ptr<Rect>> obstacleRects;
+	shared_ptr<vector<shared_ptr<Rect>>> obstacleRects;
 	vector<vector<bool>> obstacleHash;
 
 	for (int mapNum = 0; mapNum < 1000; mapNum++) {

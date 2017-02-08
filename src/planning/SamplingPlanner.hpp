@@ -30,7 +30,7 @@ class SamplingPlanner : public Planner {
 	int nodeAddThreshold;
 	long numNodes = 0;
 
-	SamplingPlanner(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
+	SamplingPlanner(std::shared_ptr<std::vector<std::vector<bool>>> obstacleHash, std::shared_ptr<std::vector<std::shared_ptr<Rect>>> obstacleRects, double maxSegment, int width,
 	                int height, bool usePseudoRandom, std::shared_ptr<Coord> start, double pruneRadius, double percentCoverage);
 	// virtual void sample() = 0;
 	virtual bool isDoneBuilding() = 0;

@@ -14,7 +14,7 @@ class PrmStar : public AStar {
 	GraphType graphType;
 
    public:
-	PrmStar(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height,
+	PrmStar(std::shared_ptr<std::vector<std::vector<bool>>> obstacleHash, std::shared_ptr<std::vector<std::shared_ptr<Rect>>> obstacleRects, int width, int height,
 	        bool usePseudoRandom, GraphType graphType);
 	~PrmStar();
 

@@ -15,7 +15,7 @@
 
 using namespace std;
 
-Planner::Planner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, int width, int height, bool usePseudoRandom)
+Planner::Planner(shared_ptr<vector<vector<bool>>> obstacleHash, shared_ptr<vector<shared_ptr<Rect>>> obstacleRects, int width, int height, bool usePseudoRandom)
     : haltonX(19), haltonY(31), rtree() {
 	// srand(time(NULL));  // initialize the random number generator so it happens
 

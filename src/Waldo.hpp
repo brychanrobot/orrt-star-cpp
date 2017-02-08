@@ -11,9 +11,8 @@ class Waldo {
    private:
 	int width;
 	int height;
-	int mapArea;
-	std::vector<std::vector<bool>> *obstacleHash;
-	std::vector<std::shared_ptr<Rect>> *obstacleRects;
+	std::shared_ptr<std::vector<std::vector<bool>>> obstacleHash;
+	std::shared_ptr<std::vector<std::shared_ptr<Rect>>> obstacleRects;
 	double maxTravel = 1;
 	std::thread replanThread;
 	int velocityHistorySize = 0;
@@ -69,7 +68,7 @@ class Waldo {
 	unsigned int importance = 0;
 	double distanceToUav = 0.0;
 
-	Waldo(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height,
+	Waldo(std::shared_ptr<std::vector<std::vector<bool>>> obstacleHash, std::shared_ptr<std::vector<std::shared_ptr<Rect>>> obstacleRects, int width, int height,
 	      int velocityHistorySize) {
 		this->obstacleHash = obstacleHash;
 		this->obstacleRects = obstacleRects;

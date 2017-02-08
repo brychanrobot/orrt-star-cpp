@@ -44,6 +44,9 @@
 		"*hpp*hpp*hpp*hppinitializer_list": "cpp",
 		"unordered_map": "cpp",
 		"unordered_set": "cpp",
-		"*hpp*hppcomplex": "cpp"
+		"*hpp*hppcomplex": "cpp",
+		"*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hppcstdarg": "cpp",
+		"*hrandom": "cpp",
+		"random": "cpp"
 	}
 }

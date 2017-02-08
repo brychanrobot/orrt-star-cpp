@@ -11,7 +11,7 @@
 
 using namespace std;
 
-OnlineRrtStar::OnlineRrtStar(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width, int height,
+OnlineRrtStar::OnlineRrtStar(shared_ptr<vector<vector<bool>>> obstacleHash, shared_ptr<vector<shared_ptr<Rect>>> obstacleRects, double maxSegment, int width, int height,
                              bool usePseudoRandom, shared_ptr<Coord> start, double pruneRadius, double percentCoverage)
     : SamplingPlanner(obstacleHash, obstacleRects, maxSegment, width, height, usePseudoRandom, start, pruneRadius, percentCoverage) {
 	this->name = "orrtstar";

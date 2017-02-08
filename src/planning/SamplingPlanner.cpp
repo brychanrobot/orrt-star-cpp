@@ -11,7 +11,7 @@
 
 using namespace std;
 
-SamplingPlanner::SamplingPlanner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *obstacleRects, double maxSegment, int width,
+SamplingPlanner::SamplingPlanner(shared_ptr<vector<vector<bool>>> obstacleHash, shared_ptr<vector<shared_ptr<Rect>>> obstacleRects, double maxSegment, int width,
                                  int height, bool usePseudoRandom, shared_ptr<Coord> start, double pruneRadius, double percentCoverage)
     : Planner(obstacleHash, obstacleRects, width, height, usePseudoRandom) {
 	this->maxSegment = maxSegment;

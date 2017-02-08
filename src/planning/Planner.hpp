@@ -25,7 +25,7 @@ class Planner {
 	int height;
 	double mapArea;
 	double obstacleArea;
-	std::vector<std::vector<bool>> *obstacleHash;
+	std::shared_ptr<std::vector<std::vector<bool>>> obstacleHash;
 	double maxTravel = 1.5;
 	std::unordered_map<Coord, double> unseenAreaMap;
 
@@ -53,7 +53,7 @@ class Planner {
    public:
 	std::shared_ptr<RrtNode> root;
 	std::shared_ptr<RrtNode> endNode;
-	std::vector<std::shared_ptr<Rect>> *obstacleRects;
+	std::shared_ptr<std::vector<std::shared_ptr<Rect>>> obstacleRects;
 	std::deque<Coord> bestPath;
 	bool usePseudoRandom;
 	std::string name = "unset";
@@ -61,7 +61,7 @@ class Planner {
 	const double distanceK = 1.0;
 	double unseenAreaK = 100.0;
 
-	Planner(std::vector<std::vector<bool>> *obstacleHash, std::vector<std::shared_ptr<Rect>> *obstacleRects, int width, int height,
+	Planner(std::shared_ptr<std::vector<std::vector<bool>>> obstacleHash, std::shared_ptr<std::vector<std::shared_ptr<Rect>>> obstacleRects, int width, int height,
 	        bool usePseudoRandom);
 	virtual ~Planner();
 	virtual void moveStart(double dx, double dy);

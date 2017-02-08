@@ -38,8 +38,8 @@ void drawWaldos(vector<unique_ptr<Waldo>>& waldos) {
 	}
 }
 
-void display(const shared_ptr<RrtNode> root, const shared_ptr<RrtNode>& endNode, deque<Coord>& bestPath, vector<shared_ptr<Rect>>* obstacleRects,
-             vector<unique_ptr<Waldo>>& waldos, bool shouldDrawTree) {
+void display(const shared_ptr<RrtNode> root, const shared_ptr<RrtNode>& endNode, deque<Coord>& bestPath,
+             shared_ptr<vector<shared_ptr<Rect>>> obstacleRects, vector<unique_ptr<Waldo>>& waldos, bool shouldDrawTree) {
 	// drawPoint(root->coord, 10, HSL(25, 1.0, 0.5));
 	drawSolidCircle(root->coord, VIEW_RADIUS, HSL(25, 1.0, 0.5), 0.2);
 	drawHollowCircle(root->coord, VIEW_RADIUS, HSL(25, 1.0, 0.5));
@@ -93,23 +93,21 @@ int main(int argc, char* argv[]) {
 
 	auto window = initWindow(isFullscreen, monitorNum, width, height);
 
-	vector<shared_ptr<Rect>> obstacleRects;
-	generateObstacleRects(width, height, numObstacles, obstacleRects, OBSTACLE_PADDING);
+	auto obstacleRects = generateObstacleRects(width, height, numObstacles, OBSTACLE_PADDING);
 
-	vector<vector<bool>> obstacleHash(height, vector<bool>(width, false));
-	generateObstacleHash(obstacleRects, obstacleHash);
+	auto obstacleHash = generateObstacleHash(width, height, obstacleRects);
 
 	vector<unique_ptr<Waldo>> waldos;
 
 	for (int w = 0; w < numWaldos; w++) {
-		waldos.push_back(make_unique<Waldo>(&obstacleHash, &obstacleRects, width, height, waldoHistorySize));
+		waldos.push_back(make_unique<Waldo>(obstacleHash, obstacleRects, width, height, waldoHistorySize));
 	}
 
 	SamplingPlanner* planner;
 	if (useFmt) {
-		planner = new OnlineFmtStar(&obstacleHash, &obstacleRects, 6, width, height, !useHalton, nullptr, pruneRadius);
+		planner = new OnlineFmtStar(obstacleHash, obstacleRects, 6, width, height, !useHalton, nullptr, pruneRadius);
 	} else {
-		planner = new OnlineRrtStar(&obstacleHash, &obstacleRects, 6, width, height, !useHalton, nullptr, pruneRadius);
+		planner = new OnlineRrtStar(obstacleHash, obstacleRects, 6, width, height, !useHalton, nullptr, pruneRadius);
 	}
 	// AStar* planner = new AStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom);
 	// PrmStar* planner = new PrmStar(&obstacleHash, &obstacleRects, width, height, usePseudoRandom, GraphType::Grid);
@@ -133,7 +131,7 @@ int main(int argc, char* argv[]) {
 	auto moveInterval = 1.0 / 30.0;
 	auto score = 0.0;
 
-	auto remainderCallback = [&obstacleHash, &planner, &waldos, &replanInterval, &moveInterval, &trialLength, &startTime, &lastReplan, &lastMove,
+	auto remainderCallback = [obstacleHash, &planner, &waldos, &replanInterval, &moveInterval, &trialLength, &startTime, &lastReplan, &lastMove,
 	                          width, height, voteCellSize, &score, window, &lastPrint]() {
 		auto currentTime = glfwGetTime();
 
@@ -151,7 +149,7 @@ int main(int argc, char* argv[]) {
 				waldo->distanceToUav = euclideanDistance(planner->root->coord, waldo->coord());
 
 				if (waldo->importance > 0 && waldo->distanceToUav < VIEW_RADIUS) {
-					if (!lineIntersectsObstacles(waldo->coord(), planner->root->coord, &obstacleHash, width, height)) {
+					if (!lineIntersectsObstacles(waldo->coord(), planner->root->coord, obstacleHash, width, height)) {
 						score += waldo->importance;
 						vector<Coord> predictedCoords{
 						    // waldo->predictFutureFromRandWalk(60),

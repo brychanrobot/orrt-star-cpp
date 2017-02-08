@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
 	options.parse(argc, argv);
 
 	for (int mapNum = 0; mapNum < numMaps; mapNum++) {
-		vector<shared_ptr<Rect>> obstacleRects;
+		shared_ptr<vector<shared_ptr<Rect>>> obstacleRects;
 		// generateObstacleRects(width, height, 10, obstacleRects, OBSTACLE_PADDING);
 		readMap(string_format("data/map%d.json", mapNum), width, height, obstacleRects);
 
