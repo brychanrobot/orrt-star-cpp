@@ -27,6 +27,11 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *o
 
 	this->usePseudoRandom = usePseudoRandom;
 
+	this->obstacleArea = 0.0;
+	for (auto obstacle : *(this->obstacleRects)) {
+		obstacleArea += obstacle->width() * obstacle->height();
+	}
+
 	auto startPoint = this->randomOpenAreaPoint();
 	Coord endPoint;
 
@@ -40,22 +45,7 @@ Planner::Planner(vector<vector<bool>> *obstacleHash, vector<shared_ptr<Rect>> *o
 	loadMap(make_shared<Rect>(Coord(-1, -1), Coord(width + 1, height + 1)), this->obstacleRects, this->segments, this->endpoints);
 }
 
-Planner::~Planner() {
-	/*printf("starting planner desturctor\n");
-
-	// delete this->obstacleHash;
-	for (auto obstacle : *(this->obstacleRects)) {
-	    delete obstacle;
-	}
-	// delete this->obstacleRects;
-	printf("deleted obstacle stuff\n");
-	*/
-	// delete this->obstacleHash;
-	// delete this->root;
-	// delete this->endNode;
-
-	// printf("destructed planner\n");
-}
+Planner::~Planner() {}
 
 bool Planner::lineIntersectsObstacle(Coord p1, Coord p2) { return lineIntersectsObstacles(p1, p2, this->obstacleHash, this->width, this->height); }
 
@@ -140,14 +130,12 @@ double Planner::getUnseenArea(Coord point) {
 	auto value = this->unseenAreaMap[point];
 
 	if (value == 0.0) {
-		value = (this->mapArea - this->obstacleArea - this->getViewArea(point)) / (this->mapArea + this->obstacleArea);
+		value = (this->mapArea - this->obstacleArea - this->getViewArea(point)) / (this->mapArea - this->obstacleArea);
 		this->unseenAreaMap[point] = value;
 	}
 
 	return value;
 }
-
-bool printOne = true;
 
 double Planner::getEdgeUnseenArea(Coord start, Coord end, double dist) {
 	auto a1 = this->getUnseenArea(start);
@@ -155,18 +143,7 @@ double Planner::getEdgeUnseenArea(Coord start, Coord end, double dist) {
 
 	auto unseenArea = ((a1 + a2) / 2.0) * dist;
 
-	if (unseenArea > 1.0 && printOne) {
-		auto polygon = this->calculateVisibilityPolygon(start);
-		for (auto p : polygon) {
-			printf("[%.0f, %.0f], ", p.x, p.y);
-		}
-		printf("\n");
-		printOne = false;
-		this->badCenter = start;
-		this->badPolygon = polygon;
-	}
-
-	return clamp(unseenArea, 0, 1.0);
+	return unseenArea;
 }
 
 double Planner::getCost(shared_ptr<RrtNode> start, shared_ptr<RrtNode> end) { return this->getCost(start->coord, end->coord); }

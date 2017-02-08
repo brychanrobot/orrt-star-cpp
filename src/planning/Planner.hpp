@@ -58,9 +58,6 @@ class Planner {
 	bool usePseudoRandom;
 	std::string name = "unset";
 
-	std::vector<Coord> badPolygon;
-	Coord badCenter;
-
 	const double distanceK = 1.0;
 	double unseenAreaK = 100.0;
 

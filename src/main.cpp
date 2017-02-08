@@ -121,10 +121,6 @@ int main(int argc, char* argv[]) {
 		center.y = clamp(center.y, 3, 697);
 		auto polygon = planner->calculateVisibilityPolygon(center);
 		drawPolygon(center, polygon, HSL(320, 1.0, 0.5), 0.2);*/
-		if (planner->badPolygon.size() > 0) {
-			drawPoint(planner->badCenter, 20, HSL(320, 1.0, 0.5));
-			drawPolygon(planner->badCenter, planner->badPolygon, HSL(320, 1.0, 0.5), 0.2);
-		}
 
 		display(planner->root, planner->endNode, planner->bestPath, planner->obstacleRects, waldos, shouldDrawTree);
 	};
